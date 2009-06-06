@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       Lynx 2.8.7
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=lynx
+pkgver=2.8.7
+pkgrel=1
+pkgdesc="The Lynx web browser"
+arch=('i686')
+url="http://lynx.isc.org"
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}

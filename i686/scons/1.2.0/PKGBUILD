@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       SCons 1.2.0
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=scons
+pkgver=1.2.0
+pkgrel=1
+pkgdesc="The SCons build system"
+arch=('i686')
+url="http://scons.org"
+license=('GPL')
+groups=()
+depends=('python')
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}

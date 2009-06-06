@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       Nethack 3.4.3
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=nethack
+pkgver=3.4.3
+pkgrel=1
+pkgdesc="Nethack: a text-based RPG"
+arch=('i686')
+url="http://nethack.org"
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}

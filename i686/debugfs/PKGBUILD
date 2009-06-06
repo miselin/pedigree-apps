@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       Debugfs
+# Is a:       Port
+# Maintainer: James Molloy
+
+pkgname=debugfs
+pkgver=unknown
+pkgrel=1
+pkgdesc="Debugfs"
+arch=('i686')
+url=""
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}
