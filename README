@@ -1,0 +1,31 @@
+PEDIGREE-APPS README
+====================
+
+NOTE: Preliminary documentation, some features may not yet exist.
+
+The purpose for the Pedigree-Apps subproject is mainly to provide a central
+location for all files and folders relating to installable applications.
+
+A cron job runs on this repository nightly, running any PKGBUILDs it finds
+to add to the pedigree-project.org Pacman mirror.
+
+If working on Pedigree, you can use this set of directories to populate your
+images/<target arch>-elf directory with the set of applications you require
+for your testing.
+
+When creating a package, your directory structure should reflect the following
+outline (using lynx as an example):
+
+- i686
+  - lynx
+    - 2.8.7
+      - PKGBUILD
+      - root
+        - applications
+          - lynx
+        - config
+          - lynx
+            - lynx.cfg
+            - lynx.lss
+
+The "root" directory is effectively the same as "/" when running Pedigree.
