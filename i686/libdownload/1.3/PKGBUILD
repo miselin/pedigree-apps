@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       bsdtar
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=bsdtar
+pkgver=2.7.0
+pkgrel=1
+pkgdesc="BSD tar utility"
+arch=('i686')
+url=""
+license=('New BSD License')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}
