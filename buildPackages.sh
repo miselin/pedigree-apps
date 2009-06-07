@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Runs through each subdirectory, finding PKGBUILDs and building the packages.
 #
 # PKGBUILDs are looked for in ARCH/APP/PKGBUILD and ARCH/APP/VER/PKGBUILD
@@ -9,6 +9,7 @@ dopkg()
 {
 	# Enter the application directory
 	currDir=`pwd`
+	echo $1
 	cd $1
 	
 	# Obtain the variables and find our temporary directory for the .tar.gz
@@ -22,7 +23,7 @@ dopkg()
 	rm -rf $workdir
 	
 	# Create the package itself
-	makepkg
+	makepkg --nodeps
 	
 	# Remove the .tar.gz we created
 	rm $source
@@ -30,11 +31,9 @@ dopkg()
 	# Remove makepkg's temporary directories
 	rm -rf pkg src
 	
-	# And do something with the created package...
-	# I'm not sure exactly at the moment how to make
-	# the actual repo for pacman to download *from*...
-	mkdir -p /pedigree-apps/package-repo
-	mv *.pkg.tar.gz /pedigree-apps/package-repo
+	# Move to the new package directory ready for adding to the repo later
+	mkdir -p /pedigree-apps/package-repo/new-packages
+	mv *.pkg.tar.gz /pedigree-apps/package-repo/new-packages/
 	
 	# Return to the original directory
 	cd $currDir
@@ -66,4 +65,6 @@ done
 
 # Complete, add packages to the Pacman db now and we're done
 cd /pedigree-apps/package-repo
+mv ./new-packages/* ./
+rm -rf new-packages
 repo-add ./pedigree-main.db.tar.gz *.pkg.tar.gz
