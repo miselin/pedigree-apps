@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       Python 2.6.2
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=python
+pkgver=2.6.2
+pkgrel=1
+pkgdesc="The Python script interpreter"
+arch=('i686')
+url="http://python.org"
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}
