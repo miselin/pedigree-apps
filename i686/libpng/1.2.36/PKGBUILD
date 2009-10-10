@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       libpng
+# Is a:       Port
+# Maintainer: James Molloy
+
+pkgname=libpng
+pkgver=1.2.36
+pkgrel=1
+pkgdesc="libpng"
+arch=('i686')
+url=""
+license=('http://www.libpng.org/pub/png/src/libpng-LICENSE.txt')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}
