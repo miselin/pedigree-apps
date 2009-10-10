@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       Pedigree TUI
+# Is a:       Native Application
+# Maintainer: James Molloy
+
+pkgname=pedigree-tui
+pkgver=0.1
+pkgrel=1
+pkgdesc="Pedigree TUI"
+arch=('i686')
+url="http://pedigree-project.org"
+license=('New BSD')
+groups=()
+depends=('')
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}
