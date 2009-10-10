@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       libz
+# Is a:       Port
+# Maintainer: James Molloy
+
+pkgname=libz
+pkgver=1.2.3
+pkgrel=1
+pkgdesc="libz"
+arch=('i686')
+url=""
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}
