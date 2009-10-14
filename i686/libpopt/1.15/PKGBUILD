@@ -1,18 +1,18 @@
 # Pedigree PKGBUILD Script
 #
-# What:       slang
+# What:       popt
 # Is a:       Port
 # Maintainer: Matthew Iselin
 
-pkgname=slang
-pkgver=2.2.1
+pkgname=popt
+pkgver=1.15
 pkgrel=1
-pkgdesc="S-Lang Library"
+pkgdesc="popt library runtime"
 arch=('i686')
-url="http://www.s-lang.org/"
-license=('GPL')
+url=""
+license=('X11')
 groups=()
-depends=()
+depends=('gettext')
 makedepends=()
 provides=()
 conflicts=()
