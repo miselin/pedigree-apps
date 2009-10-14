@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       newt
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=newt
+pkgver=0.52.10
+pkgrel=1
+pkgdesc="newt window library"
+arch=('i686')
+url=""
+license=('LGPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}

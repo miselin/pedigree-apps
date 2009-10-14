@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       Gettext
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=gettext
+pkgver=0.17
+pkgrel=1
+pkgdesc="GNU Gettext"
+arch=('i686')
+url="http://www.gnu.org/software/gettext/"
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}
