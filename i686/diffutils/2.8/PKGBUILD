@@ -1,0 +1,29 @@
+# Pedigree PKGBUILD Script
+#
+# What:       diffutils
+# Is a:       Port
+# Maintainer: Matthew Iselin
+
+pkgname=diffutils
+pkgver=2.8
+pkgrel=1
+pkgdesc="GNU diffutils"
+arch=('i686')
+url=""
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+install=
+source=($pkgname-$pkgver.tar.gz)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cp -R ./* $pkgdir/
+}

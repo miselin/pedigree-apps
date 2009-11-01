@@ -32,8 +32,8 @@ dopkg()
 	rm -rf pkg src
 	
 	# Move to the new package directory ready for adding to the repo later
-	mkdir -p /pedigree-apps/package-repo/new-packages
-	mv *.pkg.tar.gz /pedigree-apps/package-repo/new-packages/
+	mkdir -p /pedigree-apps/new-packages
+	mv *.pkg.tar.gz /pedigree-apps/new-packages/
 	
 	# Return to the original directory
 	cd $currDir
@@ -64,7 +64,7 @@ do
 done
 
 # Complete, add packages to the Pacman db now and we're done
-cd /pedigree-apps/package-repo
+cd /pedigree-apps
 mv ./new-packages/* ./
 rm -rf new-packages
 repo-add ./pedigree-main.db.tar.gz *.pkg.tar.gz
