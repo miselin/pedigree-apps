@@ -1,8 +1,8 @@
 #!/bin/bash
 
-package=bash
-version=4.1
-url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
+package=curl
+version=7.21.1
+url="http://curl.haxx.se/download/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
 
@@ -68,7 +68,7 @@ echo "    -> Configuring..."
 
 ../configure --host=i686-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --prefix=/support/$package --without-bash-malloc \
+             --prefix=/support/$package --libdir=/libraries --includedir=/include \
              2>&1 > /dev/null
 
 echo "    -> Building..."
@@ -83,7 +83,7 @@ echo "Package $package ($version) has been built"
 
 cd $oldwd
 
-rm -rf $BUILD_BASE/build-$package-$version
+rm -rf build-$package-$version
 
 trap - INT TERM EXIT
 
