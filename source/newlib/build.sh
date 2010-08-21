@@ -27,10 +27,10 @@ trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
 echo "    -> Grabbing source..."
 
 if [ ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
-    wget $url -nv -o $DOWNLOAD_TEMP/$package-$version.tar.gz
-else
-    cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
+    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz
 fi
+
+cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
 
 tar -xzf $package-$version.tar.gz --strip 1
 rm $package-$version.tar.gz
