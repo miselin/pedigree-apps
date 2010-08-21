@@ -71,9 +71,9 @@ set -e
 
 echo "    -> Configuring..."
 
-../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
+../configure --host=$ARCH_TARGET-pedigree --target=$ARCH_TARGET-pedigree \
              --sysconfdir=/config/$package --prefix=/support/$package \
-             --libdir=/libraries --includedir=/include \
+             --libdir=/libraries --includedir=/include --bindir=/applications \
              2>&1 > /dev/null
 
 echo "    -> Building..."
