@@ -84,7 +84,7 @@ make $* 2>&1 > /dev/null
 
 echo "    -> Installing..."
 
-make DESTDIR="$OUTPUT_BASE/$package/$version/" 2>&1 > /dev/null
+make DESTDIR="$OUTPUT_BASE/$package/$version/" install 2>&1 > /dev/null
 
 echo "Package $package ($version) has been built"
 
