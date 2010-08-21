@@ -43,7 +43,7 @@ echo "    -> Configuring..."
 
 ../configure --host=i686-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --prefix=/support/$package \
+             --prefix=/support/$package --without-bash-malloc \
              2>&1 > /dev/null
 
 echo "    -> Building..."
