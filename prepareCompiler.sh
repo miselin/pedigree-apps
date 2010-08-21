@@ -45,6 +45,11 @@ if [ ! -e "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/crti.o" ]; then
     ln -s "$GIVEN_PEDIGREE_PATH/build/libm.so" "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/libm.so"
 fi
 
+if [ ! -e "$GIVEN_CROSS_PATH/$DESIRED_TARGET/include" ]; then
+    echo "    - POSIX headers"
+    ln -s "$GIVEN_PEDIGREE_PATH/src/subsys/posix/include" "$GIVEN_CROSS_PATH/$DESIRED_TARGET/include"
+fi
+
 # libpedigree*
 if [ ! -e "$GIVEN_CROSS_PATH/lib/libpedigree.a" ]; then
     echo "    - libpedigree.a"
