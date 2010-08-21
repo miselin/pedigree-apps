@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIRS=$(find . --maxdepth 1 -type d -name "*")
+DIRS=$(find . -maxdepth 1 -type d -name "*")
 if [ -z $DIRS ]; then
     for f in ./packages/*; do
         echo
