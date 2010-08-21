@@ -5,6 +5,7 @@ CROSS_BASE="/home/matthewi/pedigree-compiler"
 BUILD_BASE="/home/matthewi/pedigree-apps/source/builds"
 OUTPUT_BASE="/home/matthewi/pedigree-apps/newpacks/$ARCH_TARGET"
 SOURCE_BASE="/home/matthewi/pedigree-apps/source"
+DOWNLOAD_TEMP="/home/matthewi/pedigree-apps/downloads"
 
 CC="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-gcc"
 CXX="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-g++"
