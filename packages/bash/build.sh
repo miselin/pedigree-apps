@@ -6,7 +6,12 @@ url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
 
-source ../../environment.sh
+if [ -z $ENVPATH ]; then
+    echo "ENVPATH not set, fixing" 1>&2
+    ENVPATH=../..
+fi
+
+source $ENVPATH/environment.sh
 
 export CFLAGS
 export CXXFLAGS
