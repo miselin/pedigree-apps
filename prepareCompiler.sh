@@ -19,8 +19,6 @@ GIVEN_CROSS_PATH=`echo "$1" | sed -e 's,\(.\)/$,\1,'`
 GIVEN_PEDIGREE_PATH=`echo "$2" | sed -e 's,\(.\)/$,\1,'`
 DESIRED_TARGET=$3
 
-echo $GIVEN_CROSS_PATH
-
 echo "Creating links..."
 
 # CRT0/CRTi/CRTn
