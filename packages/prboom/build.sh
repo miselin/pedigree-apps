@@ -1,8 +1,9 @@
 #!/bin/bash
 
-package=newlib
-version=1.18.0
-url="ftp://sources.redhat.com/pub/$package/$package-$version.tar.gz"
+# TransACT mirror, stupid SourceForge won't work with wget.
+package=prboom
+version=2.5.0
+url="http://transact.dl.sourceforge.net/project/$package/$package%20stable/$version/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
 
@@ -11,7 +12,10 @@ source ../../environment.sh
 export CFLAGS
 export CXXFLAGS
 export LDFLAGS
+LIBS="-lpedigree -lstdc++ $LIBS"
 export LIBS
+
+export CPP
 
 oldwd=$PWD
 
@@ -66,9 +70,10 @@ set -e
 
 echo "    -> Configuring..."
 
-../configure --host=i686-pedigree --bindir=/applications \
+../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
+             --disable-gl --with-waddir=/support/$package/wads \
              2>&1 > /dev/null
 
 echo "    -> Building..."
@@ -83,7 +88,7 @@ echo "Package $package ($version) has been built"
 
 cd $oldwd
 
-rm -rf build-$package-$version
+rm -rf $BUILD_BASE/build-$package-$version
 
 trap - INT TERM EXIT
 

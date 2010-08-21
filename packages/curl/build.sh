@@ -66,7 +66,7 @@ set -e
 
 echo "    -> Configuring..."
 
-../configure --host=i686-pedigree --bindir=/applications \
+../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
              2>&1 > /dev/null
@@ -83,7 +83,7 @@ echo "Package $package ($version) has been built"
 
 cd $oldwd
 
-rm -rf build-$package-$version
+rm -rf $BUILD_BASE/build-$package-$version
 
 trap - INT TERM EXIT
 

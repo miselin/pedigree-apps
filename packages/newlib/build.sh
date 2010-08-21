@@ -1,8 +1,8 @@
 #!/bin/bash
 
-package=bash
-version=4.1
-url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
+package=newlib
+version=1.18.0
+url="ftp://sources.redhat.com/pub/$package/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
 
@@ -66,9 +66,9 @@ set -e
 
 echo "    -> Configuring..."
 
-../configure --host=i686-pedigree --bindir=/applications \
+../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --prefix=/support/$package --without-bash-malloc \
+             --prefix=/support/$package --libdir=/libraries --includedir=/include \
              2>&1 > /dev/null
 
 echo "    -> Building..."

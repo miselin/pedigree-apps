@@ -1,0 +1,41 @@
+? newlib-pedigree.patch
+Index: newlib/configure.host
+===================================================================
+RCS file: /cvs/src/src/newlib/configure.host,v
+retrieving revision 1.114
+diff -n -r1.114 configure.host
+a447 7
+  x86_64-pedigree-*)
+	unix_dir=unix
+	posix_dir=posix
+	newlib_cflags="${newlib_cflags} -DHAVE_OPENDIR"
+	newlib_cflags="${newlib_cflags} -fPIC -D_I386MACH_NEED_SOTYPE_FUNCTION"
+	;;
+
+Index: newlib/libc/locale/lctype.c
+===================================================================
+RCS file: /cvs/src/src/newlib/libc/locale/lctype.c,v
+retrieving revision 1.1
+diff -n -r1.1 lctype.c
+a48 4
+#ifndef ENCODING_LEN
+#define ENCODING_LEN 31
+#endif
+
+Index: newlib/libc/locale/lctype.h
+===================================================================
+RCS file: /cvs/src/src/newlib/libc/locale/lctype.h,v
+retrieving revision 1.1
+diff -n -r1.1 lctype.h
+d35 1
+a35 1
+	char	*mb_cur_max;
+Index: newlib/libc/locale/nl_langinfo.c
+===================================================================
+RCS file: /cvs/src/src/newlib/libc/locale/nl_langinfo.c,v
+retrieving revision 1.12
+diff -n -r1.12 nl_langinfo.c
+a414 1
+#ifdef __HAVE_LOCALE_INFO__
+a417 1
+#endif

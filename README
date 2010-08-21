@@ -13,19 +13,50 @@ If working on Pedigree, you can use this set of directories to populate your
 images/<target arch>-elf directory with the set of applications you require
 for your testing.
 
+The layout of this repository is as follows:
+
++ packages
+  - Actual package build scripts and patches. cd to a directory in here and run
+    the relevant build.sh to build the package.
++ newpacks
+  - Output from builds will go here, under an architecture-specific directory.
++ downloads
+  - Download cache - delete a file if it exists here to force a reload on next
+    build.
++ environment.sh
+  - Environment configuration - compilers, paths, and flags. Modify but never
+  - commit back to the repository.
+
 When creating a package, your directory structure should reflect the following
 outline (using lynx as an example):
 
-- i686
+- packages
   - lynx
-    - 2.8.7
-      - PKGBUILD
-      - root
-        - applications
-          - lynx
-        - config
-          - lynx
-            - lynx.cfg
-            - lynx.lss
+    - build.sh
+    - patches
+      - generic_patch1.diff
+      - 2.8.7
+        - version_specific_patch.diff
 
-The "root" directory is effectively the same as "/" when running Pedigree.
+The build.sh script should be based off the template script (build_template.sh).
+When setting up your build.sh script, you should define the "package", "version"
+and "url" variables to sensible values for the package. The URL must be valid,
+as the script will download the source package for compiling.
+
+You should also modify the configure script lines to add/remove features for
+your package, or replace the autoconf-specific call if your package doesn't use
+autoconf.
+
+The make and make install lines should be left as they are unless you
+specifically need to build a given target. If your Makefile's install target
+uses variable other than "DESTDIR" to specify the root for installing files to,
+you should change the name of the variable to whatever your Makefile uses. If it
+doesn't provide such a mechanism by default, you may need to provide a patch.
+
+Patches can be in the main "patches" directory, where they will be applied to
+all versions of the source code, or in a version subdirectory of the patches
+directory. These are applied automatically with -p1 - keep that in mind when
+generating diff files. All files in these directories use .diff extensions.
+
+You should NEVER have source code in this repository. Every package should be
+downloaded at runtime.
