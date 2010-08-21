@@ -2,6 +2,7 @@
 
 package=bash
 version=4.1
+url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
 
@@ -15,22 +16,46 @@ export LIBS
 oldwd=$PWD
 
 mkdir -p $BUILD_BASE
-cd $BUILD_BASE
+mkdir -p $DOWNLOAD_TEMP
+
+rm -rf $BUILD_BASE/build-$package-$version
+mkdir -p $BUILD_BASE/build-$package-$version
+cd $BUILD_BASE/build-$package-$version
+
+trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
+
+echo "    -> Grabbing source..."
+
+if [ ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
+    wget $url -nv -o $DOWNLOAD_TEMP/$package-$version.tar.gz
+else
+    cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
+fi
+
+tar -xzf $package-$version.tar.gz --strip 1
+rm $package-$version.tar.gz
 
 echo "    -> Patching where necessary"
 
-rm -rf $BUILD_BASE/build-$package-$version
-
-# trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
-
-cp -r $SOURCE_BASE/$package/$version ./build-$package-$version
-
+patches=
 if [ -e $SOURCE_BASE/$package/patches/*.diff ]; then
     for f in $SOURCE_BASE/$package/patches/*.diff; do
         echo "       (applying $f)"
         patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
     done
-else
+    
+    patches="#"
+fi
+if [ -e $SOURCE_BASE/$package/patches/$version/*.diff ]; then
+    for f in $SOURCE_BASE/$package/patches/$version/*.diff; do
+        echo "       (applying $version/$f)"
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
+    done
+    
+    patches="#"
+fi
+
+if [ -N $patches ]; then
     echo "       (no patches needed, hooray!)"
 fi
 
