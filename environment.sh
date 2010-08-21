@@ -15,7 +15,7 @@ AS="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-as"
 LD="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ld"
 LIBS="-lm"
 
-CFLAGS="-I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -O3 -D__PEDIGREE__"
+CFLAGS="-I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -O3 -D__PEDIGREE__"
 CXXFLAGS=$CFLAGS
 
 LDFLAGS="-L$CROSS_BASE/lib"

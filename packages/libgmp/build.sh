@@ -1,7 +1,7 @@
 #!/bin/bash
 
-package=binutils
-version=2.19
+package=gmp
+version=5.0.1
 url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."

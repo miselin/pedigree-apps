@@ -1,8 +1,8 @@
 #!/bin/bash
 
-package=binutils
-version=2.19
-url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
+package=mpfr
+version=3.0.0
+url="http://www.mpfr.org/mpfr-current/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
 
