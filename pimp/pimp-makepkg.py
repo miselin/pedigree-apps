@@ -72,7 +72,7 @@ if not os.path.exists(repoBase):
     os.makedirs(repoBase)
 
 # TODO: Error handling
-packageOutput = repoBase + "/" + packageName + "-" + packageVersion + ".tar.gz"
+packageOutput = repoBase + "/" + packageName + "-" + packageVersion + ".pimp"
 tar = tarfile.open(packageOutput, "w:gz")
 
 def filterfunc(x):
