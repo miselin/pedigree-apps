@@ -29,10 +29,11 @@ optParser.add_option("--path", dest="packagePath", help="""
     should be an exact layout of the filesystem as it would be in a Pedigree
     system - eg, binaries should be in PackagePath/applications, libraries in
     PackagePath/libraries, etc.""".replace("    ", "").strip())
-optParser.add_option("--config", dest="configFile", help="""
-    The --config argument is used to specify an alternative configuration file
-    to source for parameters such as the package repository's base. By default
-    the base will be PathOfScript/package_repo""".replace("    ", "").strip())
+optParser.add_option("--repo", dest="repoBase", help="""
+    Path to the directory containing the local package repository. This will be
+    where the new package will be created in. The package database should be in
+    this directory (but use pimp-regpkg to register this package in the
+    database.""".replace("    ", "").strip())
 optParser.add_option("--name", dest="packageName", help="""
     The name of the package being created (necessary).""".replace("    ", "").strip())
 optParser.add_option("--ver", dest="packageVersion", help="""
@@ -41,8 +42,8 @@ optParser.add_option("--ver", dest="packageVersion", help="""
 (options, args) = optParser.parse_args()
 
 repoBase = "./package_repo"
-if options.configFile <> None:
-    print "TODO: config file"
+if options.repoBase <> None:
+    repoBase = options.repoBase
 
 if options.packagePath == None:
     print "You must specify a path to the package via the --path option."
@@ -81,10 +82,6 @@ for f in fileList:
     tar.add(f, arcname = os.path.basename(f))
 tar.close()
 
-# Hash the output
-# TODO: add the new package to the database and all that
-with open(packageOutput, 'r+') as f:
-    m = hashlib.sha1()
-    m.update(f.read())
-    print "MD5: " + m.hexdigest()
+print "Package '" + packageName + "-" + packageVersion + "' has now been created."
+print "Run pimp-regpkg to register it in your package repository's database."
 
