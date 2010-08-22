@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
     PIMP: Package Installation & Management for Pedigree
 
@@ -23,7 +24,8 @@ from optparse import OptionParser
 import tarfile
 import hashlib
 
-optParser = OptionParser()
+optParser = OptionParser(usage="%prog --path PACKAGE_PATH --name NAME --ver VERSION [--repo REPO_PATH]",
+                         version="pimp-makepkg 0.1")
 optParser.add_option("--path", dest="packagePath", help="""
     The PackagePath is the path to the files to be inserted into a package. This
     should be an exact layout of the filesystem as it would be in a Pedigree
