@@ -84,7 +84,10 @@ echo "    -> Installing..."
 
 make DESTDIR="$OUTPUT_BASE/$package/$version/" install 2>&1 > /dev/null
 
-echo "Package $package ($version) has been built"
+echo "Package $package ($version) has been built, now registering in the package manager"
+
+$PACKMAN_PATH makepkg --path $OUTPUT_BASE/$package/$version --repo $PACKMAN_REPO --name $package --ver $version
+$PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version
 
 cd $oldwd
 

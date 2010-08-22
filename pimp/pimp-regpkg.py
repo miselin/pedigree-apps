@@ -48,7 +48,7 @@ def main(arglist):
 
     repoBase = options.repoBase
     if not (repoBase[-1] == "/" or repoBase[-1] == "\\"):
-        repoBase[-1] += "/"
+        repoBase += "/"
 
     if options.packageName == None:
         print "You must specify a name for the package via the --name option."

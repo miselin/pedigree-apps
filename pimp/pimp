@@ -42,20 +42,3 @@ mod = sys.modules[runscript]
 
 mod.main(args[2:])
 
-'''
-optParser = OptionParser(usage="%prog <operation> <op_args>",
-                         version="pimp-regpkg 0.1")
-optParser.add_option("--repo", dest="repoBase", help="""
-    Path to the directory containing the local package repository. This will be
-    where the new package will be created in. The package database should be in
-    this directory (but use pimp-regpkg to register this package in the
-    database.""".replace("    ", "").strip())
-optParser.add_option("--deps", dest="depsList", help="""
-    Space-separated list of packages the package being registered depends on.
-    These packages do not need to exist in the repository yet.""".replace("    ", "").strip())
-optParser.add_option("--name", dest="packageName", help="""
-    The name of the package being registered.""".replace("    ", "").strip())
-optParser.add_option("--ver", dest="packageVersion", help="""
-    The version of the package being registered.""".replace("    ", "").strip())
-'''
-
