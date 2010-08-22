@@ -19,71 +19,75 @@
     pimp-makepkg: create a package
 '''
 
-import os
+import os, sys
 from optparse import OptionParser
 import tarfile
 import hashlib
 
-optParser = OptionParser(usage="%prog --path PACKAGE_PATH --name NAME --ver VERSION [--repo REPO_PATH]",
-                         version="pimp-makepkg 0.1")
-optParser.add_option("--path", dest="packagePath", help="""
-    The PackagePath is the path to the files to be inserted into a package. This
-    should be an exact layout of the filesystem as it would be in a Pedigree
-    system - eg, binaries should be in PackagePath/applications, libraries in
-    PackagePath/libraries, etc.""".replace("    ", "").strip())
-optParser.add_option("--repo", dest="repoBase", help="""
-    Path to the directory containing the local package repository. This will be
-    where the new package will be created in. The package database should be in
-    this directory (but use pimp-regpkg to register this package in the
-    database.""".replace("    ", "").strip())
-optParser.add_option("--name", dest="packageName", help="""
-    The name of the package being created (necessary).""".replace("    ", "").strip())
-optParser.add_option("--ver", dest="packageVersion", help="""
-    The version of the package being created (necessary).""".replace("    ", "").strip())
+def main(arglist):
+    optParser = OptionParser(usage="%prog --path PACKAGE_PATH --name NAME --ver VERSION [--repo REPO_PATH]",
+                             version="pimp-makepkg 0.1")
+    optParser.add_option("--path", dest="packagePath", help="""
+        The PackagePath is the path to the files to be inserted into a package. This
+        should be an exact layout of the filesystem as it would be in a Pedigree
+        system - eg, binaries should be in PackagePath/applications, libraries in
+        PackagePath/libraries, etc.""".replace("    ", "").strip())
+    optParser.add_option("--repo", dest="repoBase", help="""
+        Path to the directory containing the local package repository. This will be
+        where the new package will be created in. The package database should be in
+        this directory (but use pimp-regpkg to register this package in the
+        database.""".replace("    ", "").strip())
+    optParser.add_option("--name", dest="packageName", help="""
+        The name of the package being created (necessary).""".replace("    ", "").strip())
+    optParser.add_option("--ver", dest="packageVersion", help="""
+        The version of the package being created (necessary).""".replace("    ", "").strip())
 
-(options, args) = optParser.parse_args()
+    (options, args) = optParser.parse_args(arglist)
 
-repoBase = "./package_repo"
-if options.repoBase <> None:
-    repoBase = options.repoBase
+    repoBase = "./package_repo"
+    if options.repoBase <> None:
+        repoBase = options.repoBase
 
-if options.packagePath == None:
-    print "You must specify a path to the package via the --path option."
-    exit()
-elif options.packageName == None:
-    print "You must specify a name for the package via the --name option."
-    exit()
-elif options.packageVersion == None:
-    print "You must specify a version for the package via the --ver option."
-    exit()
+    if options.packagePath == None:
+        print "You must specify a path to the package via the --path option."
+        exit()
+    elif options.packageName == None:
+        print "You must specify a name for the package via the --name option."
+        exit()
+    elif options.packageVersion == None:
+        print "You must specify a version for the package via the --ver option."
+        exit()
 
-packagePath = options.packagePath
-packageName = options.packageName
-packageVersion = options.packageVersion
+    packagePath = options.packagePath
+    packageName = options.packageName
+    packageVersion = options.packageVersion
 
-if packagePath[-1] == "/":
-    packagePath = packagePath[0:-1]
+    if packagePath[-1] == "/":
+        packagePath = packagePath[0:-1]
 
-fileList = map(lambda x: packagePath + "/" + x, os.listdir(packagePath))
+    fileList = map(lambda x: packagePath + "/" + x, os.listdir(packagePath))
 
-if len(fileList) == 0:
-    print "The given package path has no files or directories in it."
-    exit()
+    if len(fileList) == 0:
+        print "The given package path has no files or directories in it."
+        exit()
 
-if not os.path.exists(repoBase):
-    os.makedirs(repoBase)
+    if not os.path.exists(repoBase):
+        os.makedirs(repoBase)
 
-# TODO: Error handling
-packageOutput = repoBase + "/" + packageName + "-" + packageVersion + ".pimp"
-tar = tarfile.open(packageOutput, "w:gz")
+    # TODO: Error handling
+    packageOutput = repoBase + "/" + packageName + "-" + packageVersion + ".pimp"
+    tar = tarfile.open(packageOutput, "w:gz")
 
-def filterfunc(x):
-    x.name = os.path.basename(x.name)
+    def filterfunc(x):
+        x.name = os.path.basename(x.name)
 
-for f in fileList:
-    tar.add(f, arcname = os.path.basename(f))
-tar.close()
+    for f in fileList:
+        tar.add(f, arcname = os.path.basename(f))
+    tar.close()
 
-print "Package '" + packageName + "-" + packageVersion + "' has now been created."
-print "Run pimp-regpkg to register it in your package repository's database."
+    print "Package '" + packageName + "-" + packageVersion + "' has now been created."
+    print "Run pimp-regpkg to register it in your package repository's database."
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
 
