@@ -65,3 +65,11 @@ generating diff files. All files in these directories use .diff extensions.
 
 You should NEVER have source code in this repository. Every package should be
 downloaded at runtime.
+
+PIMP: Package Installation & Management for Pedigree
+====================
+
+PIMP is the brand new, hand written and targeted package manager for Pedigree.
+
+It's a WIP.
+
