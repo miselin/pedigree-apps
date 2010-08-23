@@ -1,13 +1,13 @@
 diff -rupN gcc-4.3.2-orig/config.sub gcc-4.3.2/config.sub
 --- gcc-4.3.2-orig/config.sub	2008-01-23 12:37:40.000000000 +1000
 +++ gcc-4.3.2/config.sub	2009-03-12 15:16:17.000000000 +1000
-@@ -1409,6 +1409,9 @@ case $os in
- 	-dicos*)
- 		os=-dicos
+@@ -1450,6 +1450,9 @@ case $os in
  		;;
-+  -pedigree*)
-+    os=-pedigree
-+    ;;
+         -nacl*)
+ 	        ;;
++	-pedigree*)
++		os=-pedigree
++		;;
  	-none)
  		;;
  	*)

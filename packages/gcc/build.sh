@@ -1,7 +1,7 @@
 #!/bin/bash
 
 package=gcc
-version=4.4.1
+version=4.5.1
 url="http://ftp.gnu.org/gnu/$package/$package-$version/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
@@ -28,7 +28,7 @@ rm -rf $BUILD_BASE/build-$package-$version
 mkdir -p $BUILD_BASE/build-$package-$version
 cd $BUILD_BASE/build-$package-$version
 
-trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
+# trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
 
 echo "    -> Grabbing source..."
 
@@ -49,7 +49,7 @@ if [ -e $SOURCE_BASE/$package/patches/*.diff ]; then
         echo "       (applying $f)"
         patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
     done
-    
+
     patches="#"
 fi
 if [ -e $SOURCE_BASE/$package/patches/$version/*.diff ]; then
@@ -57,13 +57,15 @@ if [ -e $SOURCE_BASE/$package/patches/$version/*.diff ]; then
         echo "       (applying $version:$f)"
         patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
     done
-    
+
     patches="#"
 fi
 
 if [ -N $patches ]; then
     echo "       (no patches needed, hooray!)"
 fi
+
+exit
 
 mkdir -p $BUILD_BASE/build-$package-$version/build
 cd $BUILD_BASE/build-$package-$version/build
