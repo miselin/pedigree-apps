@@ -72,11 +72,13 @@ set -e
 
 echo "    -> Configuring..."
 
+echo $ARCH_TARGET-pedigree
+
 ../configure --host=$ARCH_TARGET-pedigree --target=$ARCH_TARGET-pedigree \
              --bindir=/applications --sysconfdir=/config/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
-             --with-newlib --disable-multilib --enable-languages=c,c++ \
-             2>&1 > /dev/null
+             --with-newlib --enable-languages=c,c++ \
+             --disable-libstdcxx-pch 2>&1 > /dev/null
 
 echo "    -> Building..."
 
