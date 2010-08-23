@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    PIMP: Package Installation & Management for Pedigree
+    PUP: Pedigree UPdater
 
     Copyright (c) 2010 Matthew Iselin
 
@@ -28,7 +28,7 @@ if len(args) < 2:
     print "Usage: pimp <operation> <operation_args>"
     exit()
 
-potential_ops = ["makepkg", "regpkg"]
+potential_ops = ["makepkg", "regpkg", "sync"]
 if not args[1] in potential_ops:
     print "Operation '" + args[1] + "' not supported."
     print "Supported operations: " + ', '.join(potential_ops)
@@ -36,7 +36,7 @@ if not args[1] in potential_ops:
 
 script_path = os.path.dirname(args[0])
 
-runscript = "pimp-" + args[1]
+runscript = "pup-" + args[1]
 __import__(runscript)
 mod = sys.modules[runscript]
 

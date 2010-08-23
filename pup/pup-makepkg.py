@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    PIMP: Package Installation & Management for Pedigree
+    PUP: Pedigree UPdater
 
     Copyright (c) 2010 Matthew Iselin
 
@@ -75,7 +75,7 @@ def main(arglist):
         os.makedirs(repoBase)
 
     # TODO: Error handling
-    packageOutput = repoBase + "/" + packageName + "-" + packageVersion + ".pimp"
+    packageOutput = repoBase + "/" + packageName + "-" + packageVersion + ".pup"
     tar = tarfile.open(packageOutput, "w:gz")
 
     def filterfunc(x):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    PIMP: Package Installation & Management for Pedigree
+    PUP: Pedigree UPdater
 
     Copyright (c) 2010 Matthew Iselin
 
@@ -65,7 +65,7 @@ def main(arglist):
         deps = filter(lambda x: len(x) > 0, options.depsList.split(" "))
 
     # Hash the package
-    packagePath = repoBase + packageName + "-" + packageVersion + ".pimp"
+    packagePath = repoBase + packageName + "-" + packageVersion + ".pup"
     if not os.path.exists(packagePath):
         print "Can't find the pimp for this package!"
         exit()
@@ -75,8 +75,8 @@ def main(arglist):
         fileHash = hashlib.sha1(f.read()).hexdigest()
 
     # Install into the database
-    alreadyExisted = os.path.exists(repoBase + "packages.pimpdb")
-    db = sqlite3.connect(repoBase + "packages.pimpdb")
+    alreadyExisted = os.path.exists(repoBase + "packages.pupdb")
+    db = sqlite3.connect(repoBase + "packages.pupdb")
 
     if not alreadyExisted:
         db.execute("""create table packages (
