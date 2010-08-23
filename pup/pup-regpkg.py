@@ -16,7 +16,7 @@
     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-    pimp-regpkg: register a package within a given repository
+    pip-regpkg: register a package within a given repository
 '''
 
 import os, sys
