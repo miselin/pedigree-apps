@@ -1,0 +1,13 @@
+--- dosbox-0.74/configure-old	2010-08-23 22:27:38.240829327 +1000
++++ dosbox-0.74/configure	2010-08-23 22:25:09.299579793 +1000
+@@ -4889,8 +4889,8 @@ rm -f core conftest.err conftest.$ac_obj
+ 
+   rm -f conf.sdltest
+ 
+-LIBS="$LIBS $SDL_LIBS"
+-CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
++LIBS="$LIBS" # $SDL_LIBS"
++CPPFLAGS="$CPPFLAGS" # $SDL_CFLAGS"
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking SDL version only being 1.2.X" >&5
+ $as_echo_n "checking SDL version only being 1.2.X... " >&6; }

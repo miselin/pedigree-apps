@@ -1,0 +1,11 @@
+--- dosbox-0.74-old/include/setup.h	2010-05-12 19:57:31.000000000 +1000
++++ dosbox-0.74/include/setup.h	2010-08-23 22:28:28.330346695 +1000
+@@ -42,4 +42,8 @@
+ #include <string>
+ #endif
+
++#ifndef CH_CSTDIO
++#define CH_CSTDIO
++#include <cstdio>
++#endif
+ 
