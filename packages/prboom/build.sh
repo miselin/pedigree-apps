@@ -17,7 +17,7 @@ source $ENVPATH/environment.sh
 export CFLAGS
 export CXXFLAGS
 export LDFLAGS
-LIBS="-lpedigree -lstdc++ $LIBS"
+LIBS="-lpedigree -lstdc++ -lpthread $LIBS"
 export LIBS
 
 export CPP

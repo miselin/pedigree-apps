@@ -14,9 +14,11 @@ fi
 source $ENVPATH/environment.sh
 
 export CFLAGS
+CFLAGS=`echo $CFLAGS | sed s/-O3/-O1/`
 export CXXFLAGS
+CXXFLAGS=`echo $CXXFLAGS | sed s/-O3/-O1/`
 export LDFLAGS
-LIBS="-lSDL -lpedigree -lstdc++ $LIBS"
+LIBS="-lSDL -lpedigree -lstdc++ -lpthread $LIBS"
 export LIBS
 
 oldwd=$PWD
@@ -77,7 +79,8 @@ echo "    -> Configuring..."
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --disable-alsatest --disable-sdltest \
-             --disable-dynamic-core --disable-dynrec --disable-opengl \
+             --disable-dynamic-core --disable-dynrec --disable-opengl --disable-fpu-x86 \
+             --disable-fpu \
              2>&1 > /dev/null
 
 echo "    -> Building..."
