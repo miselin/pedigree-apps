@@ -1,3 +1,4 @@
 package_repo
 local_repo
+install_root
 *.pyc
