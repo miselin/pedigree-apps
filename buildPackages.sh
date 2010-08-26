@@ -5,7 +5,7 @@ BASEDIR=$PWD
 cd packages
 
 # Put any dependent libraries before the applications that need them
-DIRS="libgmp libmpfr curl newlib bash nasm gnumake binutils gcc prboom"
+DIRS="libgmp libmpfr curl newlib bash nasm gnumake binutils gcc dosbox prboom"
 
 for f in $DIRS; do
     echo
