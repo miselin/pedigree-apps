@@ -79,6 +79,7 @@ echo "    -> Configuring..."
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
              --disable-gl --with-waddir=/support/$package/wads \
+             --disable-i386-asm \
              2>&1 > /dev/null
 
 echo "    -> Building..."
