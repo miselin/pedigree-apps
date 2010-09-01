@@ -1,0 +1,23 @@
+--- a/configure-old	2010-09-01 11:20:50.000000000 +1000
++++ b/configure	2010-09-01 11:16:20.000000000 +1000
+@@ -2206,6 +2206,11 @@ else
+     llvm_cv_no_link_all_option="-Wl,--no-whole-archive"
+     llvm_cv_os_type="Haiku"
+     llvm_cv_platform_type="Unix" ;;
++  *-*-pedigree*)
++    llvm_cv_link_all_option="-Wl,--whole-archive"
++    llvm_cv_no_link_all_option="-Wl,--no-whole-archive"
++    llvm_cv_os_type="Pedigree"
++    llvm_cv_platform_type="Unix" ;;
+   *-unknown-eabi*)
+     llvm_cv_link_all_option="-Wl,--whole-archive"
+     llvm_cv_no_link_all_option="-Wl,--no-whole-archive"
+@@ -2264,6 +2269,8 @@ else
+     llvm_cv_target_os_type="MingW" ;;
+   *-*-haiku*)
+     llvm_cv_target_os_type="Haiku" ;;
++  *-*-pedigree*)
++    llvm_cv_target_os_type="Pedigree" ;;
+   *-unknown-eabi*)
+     llvm_cv_target_os_type="Freestanding" ;;
+   *)
