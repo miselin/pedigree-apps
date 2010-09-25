@@ -1,0 +1,16 @@
+--- lua-5.1.4/src/Makefile	2008-01-20 05:37:58.000000000 +1000
++++ lua-5.1.4-new/src/Makefile	2010-09-25 21:05:32.896024371 +1000
+@@ -7,10 +7,10 @@
+ # Your platform. See PLATS for possible values.
+ PLAT= none
+ 
+-CC= gcc
++CC= $(ARCH_TARGET)-gcc
+ CFLAGS= -O2 -Wall $(MYCFLAGS)
+-AR= ar rcu
+-RANLIB= ranlib
++AR= $(ARCH_TARGET)-ar rcu
++RANLIB= $(ARCH_TARGET)-ranlib
+ RM= rm -f
+ LIBS= -lm $(MYLIBS)
+ 
