@@ -74,15 +74,15 @@ echo "    -> Configuring..."
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --prefix=/support/$package \
              --libdir=/libraries --includedir=/include \
-             2>&1 > /dev/null
+             > /dev/null 2>&1
 
 echo "    -> Building..."
 
-make $* 2>&1 > /dev/null
+make $* > /dev/null 2>&1
 
 echo "    -> Installing..."
 
-make DESTDIR="$OUTPUT_BASE/$package/$version/" install 2>&1 > /dev/null
+make DESTDIR="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
 
 echo "Package $package ($version) has been built, now registering in the package manager"
 
