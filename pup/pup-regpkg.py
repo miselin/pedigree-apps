@@ -26,11 +26,11 @@ import sqlite3
 
 def main(arglist):
     optParser = OptionParser(usage="%prog --repo REPO_PATH --name NAME --ver VERSION [--deps LIST_OF_DEPS]",
-                             version="pimp-regpkg 0.1")
+                             version="pup-regpkg 0.1")
     optParser.add_option("--repo", dest="repoBase", help="""
         Path to the directory containing the local package repository. This will be
         where the new package will be created in. The package database should be in
-        this directory (but use pimp-regpkg to register this package in the
+        this directory (but use pup-regpkg to register this package in the
         database.""".replace("    ", "").strip())
     optParser.add_option("--deps", dest="depsList", help="""
         Space-separated list of packages the package being registered depends on.
@@ -67,7 +67,7 @@ def main(arglist):
     # Hash the package
     packagePath = repoBase + packageName + "-" + packageVersion + ".pup"
     if not os.path.exists(packagePath):
-        print "Can't find the pimp for this package!"
+        print "Can't find the pup for this package!"
         exit()
 
     fileHash = 0

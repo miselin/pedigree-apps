@@ -26,7 +26,7 @@ import hashlib
 
 def main(arglist):
     optParser = OptionParser(usage="%prog --path PACKAGE_PATH --name NAME --ver VERSION [--repo REPO_PATH]",
-                             version="pimp-makepkg 0.1")
+                             version="pup-makepkg 0.1")
     optParser.add_option("--path", dest="packagePath", help="""
         The PackagePath is the path to the files to be inserted into a package. This
         should be an exact layout of the filesystem as it would be in a Pedigree
@@ -35,7 +35,7 @@ def main(arglist):
     optParser.add_option("--repo", dest="repoBase", help="""
         Path to the directory containing the local package repository. This will be
         where the new package will be created in. The package database should be in
-        this directory (but use pimp-regpkg to register this package in the
+        this directory (but use pup-regpkg to register this package in the
         database.""".replace("    ", "").strip())
     optParser.add_option("--name", dest="packageName", help="""
         The name of the package being created (necessary).""".replace("    ", "").strip())
@@ -86,7 +86,7 @@ def main(arglist):
     tar.close()
 
     print "Package '" + packageName + "-" + packageVersion + "' has now been created."
-    print "Run pimp-regpkg to register it in your package repository's database."
+    print "Run pup-regpkg to register it in your package repository's database."
 
 if __name__ == '__main__':
     main(sys.argv[1:])
