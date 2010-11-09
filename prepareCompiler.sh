@@ -40,7 +40,7 @@ if [ ! -e "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/libc.so" ]; then
     echo "    - libc.so"
     ln -s "$GIVEN_PEDIGREE_PATH/build/libc.so" "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/libc.so"
 fi
-if [ ! -e "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/crti.o" ]; then
+if [ ! -e "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/libm.so" ]; then
     echo "    - libm.so"
     ln -s "$GIVEN_PEDIGREE_PATH/build/libm.so" "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/libm.so"
 fi
