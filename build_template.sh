@@ -42,18 +42,22 @@ rm $package-$version.tar.gz
 echo "    -> Patching where necessary"
 
 patches=
-if [ -e $SOURCE_BASE/$package/patches/*.diff ]; then
-    for f in $SOURCE_BASE/$package/patches/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches -maxdepth 1 -name "*.diff"`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done
     
     patches="#"
 fi
-if [ -e $SOURCE_BASE/$package/patches/$version/*.diff ]; then
-    for f in $SOURCE_BASE/$package/patches/$version/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches/$version -maxdepth 1 -name "*.diff"`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $version/$f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done
     
     patches="#"
@@ -73,15 +77,15 @@ echo "    -> Configuring..."
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
-             2>&1 > /dev/null
+             > /dev/null 2>&1
 
 echo "    -> Building..."
 
-make $* 2>&1 > /dev/null
+make $* > /dev/null 2>&1
 
 echo "    -> Installing..."
 
-make DESTDIR="$OUTPUT_BASE/$package/$version/" install 2>&1 > /dev/null
+make DESTDIR="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
 
 echo "Package $package ($version) has been built, now registering in the package manager"
 
