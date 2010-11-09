@@ -1,7 +1,7 @@
 #!/bin/bash
 
 package=coreutils
-version=8.5
+version=8.6
 url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
@@ -64,24 +64,26 @@ if [ -N $patches ]; then
     echo "       (no patches needed, hooray!)"
 fi
 
-cd $BUILD_BASE/build-$package-$version
+mkdir -p $BUILD_BASE/build-$package-$version/build
+cd $BUILD_BASE/build-$package-$version/build
 
 set -e
 
 echo "    -> Configuring..."
 
-./configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
+../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --prefix=/support/$package # \
-#             2>&1 > /dev/null
+             --libdir=/libraries --includedir=/include --enable-no-install-program=stdbuf \
+             --prefix=/support/$package --disable-threads \
+             > /dev/null 2>&1
 
 echo "    -> Building..."
 
-make $*
+make $* > /dev/null 2>&1
 
 echo "    -> Installing..."
 
-make DESTDIR="$OUTPUT_BASE/$package/$version/" install
+make DESTDIR="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
 
 echo "Package $package ($version) has been built, now registering in the package manager"
 
