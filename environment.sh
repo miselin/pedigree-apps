@@ -15,6 +15,8 @@ CXX="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-gcc"
 CPP="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-cpp"
 AS="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-as"
 LD="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ld"
+AR="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ar"
+RANLIB="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ranlib"
 LIBS="-lm"
 
 CFLAGS="-I$CROSS_BASE/include/c++ -I$CROSS_BASE/include/c++/i686-pedigree"

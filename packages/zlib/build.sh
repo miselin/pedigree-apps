@@ -68,17 +68,18 @@ set -e
 
 echo "    -> Configuring..."
 
-CC=$CC LD=%LD ./configure --static --prefix=/support/$package \
+CC=$CC LD=$LD AR=$AR RANLIB=$RANLIB \
+             ./configure --static --prefix=/support/$package \
              --libdir=/libraries --includedir=/include \
-             2>&1 > /dev/null
+             > /dev/null 2>&1
 
 echo "    -> Building..."
 
-make $* 2>&1 > /dev/null
+make $* > /dev/null 2>&1
 
 echo "    -> Installing..."
 
-make DESTDIR="$OUTPUT_BASE/$package/$version" install -i -k 2>&1 > /dev/null
+make DESTDIR="$OUTPUT_BASE/$package/$version" install -i -k > /dev/null 2>&1
 
 echo "Package $package ($version) has been built, now registering in the package manager"
 
