@@ -5,7 +5,8 @@ BASEDIR=$PWD
 cd packages
 
 # Put any dependent libraries before the applications that need them
-DIRS="libgmp libmpfr libmpc zlib curl coreutils bsdtar newlib bash nasm gnumake binutils gcc dosbox prboom"
+# TODO: sort.
+DIRS="libgmp libmpfr libmpc zlib curl coreutils diffutils bsdtar newlib bash m4 nasm gnumake binutils gcc dosbox prboom"
 
 for f in $DIRS; do
     echo
