@@ -50,7 +50,7 @@ if [ ! -e "$GIVEN_CROSS_PATH/$DESIRED_TARGET/include" ]; then
     ln -s "$GIVEN_PEDIGREE_PATH/src/subsys/posix/include" "$GIVEN_CROSS_PATH/$DESIRED_TARGET/include"
 fi
 
-# libpedigree*
+# libpedigree* and pthreads
 if [ ! -e "$GIVEN_CROSS_PATH/lib/libpedigree.a" ]; then
     echo "    - libpedigree.a"
     ln -s "$GIVEN_PEDIGREE_PATH/build/libpedigree.a" "$GIVEN_CROSS_PATH/lib/libpedigree.a"
@@ -62,6 +62,10 @@ fi
 if [ ! -e "$GIVEN_CROSS_PATH/include/pedigree-native" ]; then
     echo "    - libpedigree include files"
     ln -s "$GIVEN_PEDIGREE_PATH/src/subsys/native/include" "$GIVEN_CROSS_PATH/include/pedigree-native"
+fi
+if [ ! -e "$GIVEN_CROSS_PATH/lib/libpthread.a" ]; then
+    echo "    - libpthread.a"
+    ln -s "$GIVEN_PEDIGREE_PATH/build/libpthread.a" "$GIVEN_CROSS_PATH/lib/libpthread.a"
 fi
 
 # SDL
