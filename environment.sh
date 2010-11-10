@@ -20,7 +20,7 @@ RANLIB="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ranlib"
 LIBS="-lm"
 
 CFLAGS="-I$CROSS_BASE/include/c++ -I$CROSS_BASE/include/c++/i686-pedigree"
-CFLAGS="$CFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL"
+CFLAGS="$CFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -I$CROSS_BASE/include/ncurses"
 CFLAGS="$CFLAGS -O3 -D__PEDIGREE__"
 CXXFLAGS=$CFLAGS
 
