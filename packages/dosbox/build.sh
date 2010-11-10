@@ -46,7 +46,7 @@ rm $package-$version.tar.gz
 echo "    -> Patching where necessary"
 
 patches=
-patchfiles=`find $SOURCE_BASE/$package/patches -maxdepth 1 -name "*.diff"`
+patchfiles=`find $SOURCE_BASE/$package/patches -maxdepth 1 -name "*.diff" 2>/dev/null`
 numpatches=`echo $patchfiles | wc -l`
 if [ ! -z "$patchfiles" ]; then
     for f in $patchfiles; do
@@ -56,8 +56,10 @@ if [ ! -z "$patchfiles" ]; then
     
     patches="#"
 fi
-if [ -e $SOURCE_BASE/$package/patches/$version/*.diff ]; then
-    for f in $SOURCE_BASE/$package/patches/$version/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches/$version -maxdepth 1 -name "*.diff" 2>/dev/null`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $version/$f)"
         patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done

@@ -36,7 +36,7 @@ trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
 echo "    -> Grabbing source..."
 
 if [ ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
-    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz 2>&1 > /dev/null
+    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz > /dev/null 2>&1
 fi
 
 cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
@@ -47,16 +47,20 @@ rm $package-$version.tar.gz
 echo "    -> Patching where necessary"
 
 patches=
-if [ -e $SOURCE_BASE/$package/patches/*.diff ]; then
-    for f in $SOURCE_BASE/$package/patches/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches -maxdepth 1 -name "*.diff" 2>/dev/null`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $f)"
         patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done
     
     patches="#"
 fi
-if [ -e $SOURCE_BASE/$package/patches/$version/*.diff ]; then
-    for f in $SOURCE_BASE/$package/patches/$version/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches/$version -maxdepth 1 -name "*.diff" 2>/dev/null`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $version/$f)"
         patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done

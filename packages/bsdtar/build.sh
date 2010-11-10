@@ -14,6 +14,10 @@ fi
 
 source $ENVPATH/environment.sh
 
+export CFLAGS
+export LDFLAGS
+export LIBS
+
 oldwd=$PWD
 
 mkdir -p $BUILD_BASE
@@ -39,20 +43,22 @@ rm $package-$version.tar.gz
 echo "    -> Patching where necessary"
 
 patches=
-patch_exists=$(ls $SOURCE_BASE/$package/patches/*.diff 2>/dev/null | wc -w)
-if [ ! $patch_exists == 0 ]; then
-    for f in $SOURCE_BASE/$package/patches/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches -maxdepth 1 -name "*.diff" 2>/dev/null`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done
     
     patches="#"
 fi
-patch_sub_exists=$(ls $SOURCE_BASE/$package/patches/$version/*.diff 2>/dev/null | wc -w)
-if [ ! $patch_sub_exists == 0 ]; then
-    for f in $SOURCE_BASE/$package/patches/$version/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches/$version -maxdepth 1 -name "*.diff" 2>/dev/null`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $version/$f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done
     
     patches="#"
@@ -69,10 +75,10 @@ set -e
 
 echo "    -> Configuring..."
 
-CFLAGS=$CFLAGS ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
+../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --includedir=/include --libdir=/libraries \
-             > /dev/null 2>&1
+             --without-xml2 > /dev/null 2>&1
 
 echo "    -> Building..."
 
