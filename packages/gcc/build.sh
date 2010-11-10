@@ -82,7 +82,7 @@ echo $ARCH_TARGET-pedigree
              --bindir=/applications --sysconfdir=/config/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
              --with-newlib --enable-languages=c,c++ \
-             --disable-libstdcxx-pch  > /dev/null 2>&1
+             --disable-libstdcxx-pch > /dev/null 2>&1
 
 echo "    -> Building..."
 
