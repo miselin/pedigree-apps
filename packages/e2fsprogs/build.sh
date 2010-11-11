@@ -1,8 +1,8 @@
 #!/bin/bash
 
-package=coreutils
-version=8.6
-url="http://ftp.gnu.org/gnu/$package/$package-$version.tar.gz"
+package=e2fsprogs
+version=1.41.12
+url="http://prdownloads.sourceforge.net/$package/$package-$version.tar.gz"
 
 echo "Building $package ($version)..."
 
@@ -15,10 +15,7 @@ source $ENVPATH/environment.sh
 
 export CFLAGS
 export CXXFLAGS
-export CPPFLAGS
 export LDFLAGS
-LIBS="$LIBS -lpthread"
-export LIBS
 
 oldwd=$PWD
 
@@ -77,12 +74,10 @@ set -e
 
 echo "    -> Configuring..."
 
-#### TODO: port openssl for crypt() so su actually builds! ####
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --libdir=/libraries --includedir=/include --enable-no-install-program=stdbuf \
-             --prefix=/support/$package --disable-threads \
-             > /dev/null 2>&1
+             --prefix=/support/$package --libdir=/libraries --includedir=/include \
+             --sbindir=/applications > /dev/null 2>&1
 
 echo "    -> Building..."
 
@@ -99,7 +94,7 @@ $PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version
 
 cd $oldwd
 
-rm -rf $BUILD_BASE/build-$package-$version
+rm -rf build-$package-$version
 
 trap - INT TERM EXIT
 
