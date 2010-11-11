@@ -6,7 +6,7 @@ cd packages
 
 # Put any dependent libraries before the applications that need them
 # TODO: sort.
-DIRS="libgmp libmpfr libmpc zlib curl coreutils diffutils bsdtar newlib bash m4 nasm gnumake binutils gcc dosbox prboom"
+DIRS="zlib libiconv gettext libgmp libmpfr libmpc ncurses curl coreutils diffutils grep inetutils bsdtar newlib bash m4 sed gzip nano nasm gnumake binutils gcc dosbox prboom wget"
 
 for f in $DIRS; do
     echo
