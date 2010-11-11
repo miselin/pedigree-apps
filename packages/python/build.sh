@@ -28,12 +28,12 @@ rm -rf $BUILD_BASE/build-$package-$version
 mkdir -p $BUILD_BASE/build-$package-$version
 cd $BUILD_BASE/build-$package-$version
 
-# trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
+trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
 
 echo "    -> Grabbing source..."
 
 if [ ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
-    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz
+    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz > /dev/null 2>&1
 fi
 
 cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
@@ -44,20 +44,22 @@ rm $package-$version.tar.gz
 echo "    -> Patching where necessary"
 
 patches=
-patch_exists=$(ls $SOURCE_BASE/$package/patches/*.diff 2>/dev/null | wc -w)
-if [ ! $patch_exists == 0 ]; then
-    for f in $SOURCE_BASE/$package/patches/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches -maxdepth 1 -name "*.diff" 2>/dev/null`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done
     
     patches="#"
 fi
-patch_sub_exists=$(ls $SOURCE_BASE/$package/patches/$version/*.diff 2>/dev/null | wc -w)
-if [ ! $patch_sub_exists == 0 ]; then
-    for f in $SOURCE_BASE/$package/patches/$version/*.diff; do
+patchfiles=`find $SOURCE_BASE/$package/patches/$version -maxdepth 1 -name "*.diff" 2>/dev/null`
+numpatches=`echo $patchfiles | wc -l`
+if [ ! -z "$patchfiles" ]; then
+    for f in $patchfiles; do
         echo "       (applying $version/$f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
     done
     
     patches="#"
@@ -74,23 +76,23 @@ set -e
 
 echo "    -> Configuring (BOOTSTRAP)..."
 
-../configure # > /dev/null 2>&1
+../configure > /dev/null 2>&1
 
 echo "    -> Building (BOOTSTRAP)..."
 
-make python Parser/pgen $* # > /dev/null 2>&1
+make python Parser/pgen $* > /dev/null 2>&1
 
 echo "    -> Bootstrap $urlpackage $version built."
 
 mv python hostpython
 mv Parser/pgen Parser/hostpgen
 
-make distclean
+make distclean > /dev/null 2>&1
 
 echo "    -> Re-creating configure script with Pedigree patches..."
 
 cd ..
-autoreconf
+autoreconf > /dev/null 2>&1
 cd build
 
 echo "    -> Configuring..."
@@ -100,31 +102,32 @@ echo "    -> Configuring..."
             --bindir=/applications \
             --includedir=/include/python/$shortversion \
             --libdir=/libraries/python/$shortversion \
-            --without-pydebug # \
-#            > /dev/null 2>&1
+            --without-pydebug \
+            > /dev/null 2>&1
 
 echo "    -> Building (PGEN)..."
 
-make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen Parser/pgen $* # > /dev/null 2>&1
+make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen Parser/pgen $* > /dev/null 2>&1
 
 echo "    -> Building (PYTHON INTERPRETER)..."
 
-make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen python $* # > /dev/null 2>&1
+make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen python $* > /dev/null 2>&1
 
-# TODO: finish me!
+echo "    -> Building modules..."
 
-exit 1
+make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython \
+     HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen \
+     BLDSHARED="$ARCH_TARGET-pedigree-gcc -nostdlib -shared -Wl,-shared" \
+     CROSS_COMPILING=yes MACHDEP=pedigree $* > /dev/null 2>&1
 
 echo "    -> Installing..."
 
-out="$OUTPUT_BASE/$package/$version"
-
-make INSTALL_TOP="$out/" \
-     INSTALL_BIN="$out/applications" \
-     INSTALL_LIB="$out/libraries" \
-     INSTALL_LMOD="$out/support/lua/share/5.1" \
-     INSTALL_CMOD="$out/libraries/lua/5.1" \
-     install # > /dev/null 2>&1
+make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython \
+     HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen \
+     BLDSHARED="$ARCH_TARGET-pedigree-gcc -nostdlib -shared -Wl,-shared" \
+     CROSS_COMPILING=yes MACHDEP=pedigree \
+     DESTDIR=$OUTPUT_BASE/$package/$version install $* \
+     > /dev/null 2>&1
 
 echo "Package $package ($version) has been built, now registering in the package manager"
 
