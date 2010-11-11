@@ -1,0 +1,140 @@
+--- ../Python-2.6.6-old/configure.in	2010-05-25 12:27:03.000000000 +1000
++++ ./configure.in	2010-11-11 18:53:41.974483033 +1000
+@@ -12,6 +12,10 @@ AC_INIT(python, PYTHON_VERSION, http://w
+ AC_CONFIG_SRCDIR([Include/object.h])
+ AC_CONFIG_HEADER(pyconfig.h)
+ 
++# Find compiler, but respect --host
++AC_CHECK_TOOLS(CC, gcc cc)
++AC_CHECK_TOOLS(CXX, g++ c++)
++
+ dnl This is for stuff that absolutely must end up in pyconfig.h.
+ dnl Please use pyport.h instead, if possible.
+ AH_TOP([
+@@ -244,15 +248,30 @@ AC_SUBST(FRAMEWORKUNIXTOOLSPREFIX)
+ # Set name for machine-dependent library files
+ AC_SUBST(MACHDEP)
+ AC_MSG_CHECKING(MACHDEP)
+-if test -z "$MACHDEP"
+-then
+-	ac_sys_system=`uname -s`
+-	if test "$ac_sys_system" = "AIX" -o "$ac_sys_system" = "Monterey64" \
+-	-o "$ac_sys_system" = "UnixWare" -o "$ac_sys_system" = "OpenUNIX"; then
+-		ac_sys_release=`uname -v`
++if test -z "$MACHDEP"; then
++	if test "$cross_compiling" = "no"; then
++		ac_sys_system=`uname -s`
++		if test "$ac_sys_system" = "AIX" -o "$ac_sys_system" = "Monterey64" \
++		-o "$ac_sys_system" = "UnixWare" -o "$ac_sys_system" = "OpenUNIX"; then
++			ac_sys_release=`uname -v`
++		else
++			ac_sys_release=`uname -r`
++		fi
+ 	else
+-		ac_sys_release=`uname -r`
++		m=`$CC -dumpmachine`
++		changequote(<<, >>)
++		ac_sys_system=`expr "$m" : "[^-]*-\([^-]*\)"`
++		changequote([, ])
++		
++		case $ac_sys_system in
++			cygwin*) ac_sys_system=`echo $ac_sys_system | sed s/cygwin/CYGWIN/g `;;
++			darwin*) ac_sys_system=`echo $ac_sys_system | sed s/darwin/Darwin/g `;;
++			freebsd*) ac_sys_system=`echo $ac_sys_system | sed s/freebsd/FreeBSD/g `;;
++			linux*) ac_sys_system=`echo $ac_sys_system | sed s/linux/Linux/g `;;
++			pedigree*) ac_sys_system=`echo $ac_sys_system | sed s/pedigree/Pedigree/g `;;
++		esac
+ 	fi
++	
+ 	ac_md_system=`echo $ac_sys_system |
+ 			   tr -d '[/ ]' | tr '[[A-Z]]' '[[a-z]]'`
+ 	ac_md_release=`echo $ac_sys_release |
+@@ -524,8 +543,8 @@ preset_cxx="$CXX"
+ if test -z "$CXX"
+ then
+         case "$CC" in
+-        gcc)    AC_PATH_PROG(CXX, [g++], [g++], [notfound]) ;;
+-        cc)     AC_PATH_PROG(CXX, [c++], [c++], [notfound]) ;;
++        gcc)    AC_PATH_TOOL(CXX, [g++], [notfound]) ;;
++        cc)     AC_PATH_TOOL(CXX, [c++], [notfound]) ;;
+         esac
+ 	if test "$CXX" = "notfound"
+ 	then
+@@ -534,7 +553,7 @@ then
+ fi
+ if test -z "$CXX"
+ then
+-	AC_CHECK_PROGS(CXX, $CCC c++ g++ gcc CC cxx cc++ cl, notfound)
++	AC_CHECK_TOOLS(CXX, $CCC c++ g++ gcc CC cxx cc++ cl, notfound)
+ 	if test "$CXX" = "notfound"
+ 	then
+ 		CXX=""
+@@ -585,9 +604,11 @@ if test -d casesensitivetestdir
+ then
+     AC_MSG_RESULT(yes)
+     BUILDEXEEXT=.exe
++    case_sensitive=no
+ else
+ 	AC_MSG_RESULT(no)
+ 	BUILDEXEEXT=$EXEEXT
++    case_sensitive=yes
+ fi
+ rmdir CaseSensitiveTestDir
+ 
+@@ -796,9 +817,8 @@ fi
+ 
+ AC_MSG_RESULT($LDLIBRARY)
+ 
+-AC_PROG_RANLIB
+-AC_SUBST(AR)
+-AC_CHECK_PROGS(AR, ar aal, ar)
++AC_CHECK_TOOL(RANLIB, ranlib)
++AC_CHECK_TOOLS(AR, ar aal, ar)
+ 
+ AC_SUBST(SVNVERSION)
+ AC_CHECK_PROG(SVNVERSION, svnversion, found, not-found)
+@@ -879,7 +899,7 @@ then
+ 		# debug builds.
+ 		OPT="-g -Wall $STRICT_PROTO"
+ 	    else
+-		OPT="-g $WRAP -O3 -Wall $STRICT_PROTO"
++		OPT="$WRAP -O3 -Wall $STRICT_PROTO"
+ 	    fi
+ 	    ;;
+ 	*)
+@@ -925,7 +945,7 @@ yes)
+      AC_TRY_RUN([int main() { return 0; }],
+      ac_cv_no_strict_aliasing_ok=yes,
+      ac_cv_no_strict_aliasing_ok=no,
+-     ac_cv_no_strict_aliasing_ok=no)
++     ac_cv_no_strict_aliasing_ok=yes)
+      CC="$ac_save_cc"
+     AC_MSG_RESULT($ac_cv_no_strict_aliasing_ok)
+     if test $ac_cv_no_strict_aliasing_ok = yes
+@@ -3860,7 +3880,7 @@ else
+   AC_MSG_RESULT(no)
+ fi
+ 
+-AC_MSG_CHECKING(for %zd printf() format support)
++AC_CACHE_CHECK([for %zd printf() format support], [py_cv_has_zd_printf], [dnl
+ AC_TRY_RUN([#include <stdio.h>
+ #include <stddef.h>
+ #include <string.h>
+@@ -3894,10 +3914,13 @@ int main()
+ 	return 1;
+ 
+     return 0;
+-}],
+-[AC_MSG_RESULT(yes)
+- AC_DEFINE(PY_FORMAT_SIZE_T, "z", [Define to printf format modifier for Py_ssize_t])],
+- AC_MSG_RESULT(no))
++}], [py_cv_has_zd_printf="yes"],
++    [py_cv_has_zd_printf="no"],
++    [py_cv_has_zd_printf="cross -- assuming yes"]
++)])
++if test "$py_cv_has_zd_printf" != "no" ; then
++    AC_DEFINE(PY_FORMAT_SIZE_T, "z", [Define to printf format modifier for Py_ssize_t])
++fi
+ 
+ AC_CHECK_TYPE(socklen_t,,
+   AC_DEFINE(socklen_t,int,
