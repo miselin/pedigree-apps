@@ -1,0 +1,10 @@
+--- lynx-2.8.7rel.2-old/WWW/Library/Implementation/www_tcp.h	2009-03-18 10:33:22.000000000 +1000
++++ build-lynx-2.8.7rel.2/WWW/Library/Implementation/www_tcp.h	2010-11-15 08:59:38.000000000 +1000
+@@ -752,6 +752,7 @@ typedef unsigned short mode_t;
+ #if defined(VMS) && !defined(TCPIP_SERVICES)
+ #define socklen_t unsigned
+ #else
++#define _SOCKLEN_T
+ #define socklen_t int		/* used for default LY_SOCKLEN definition */
+ #endif
+ 
