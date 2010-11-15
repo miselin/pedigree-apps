@@ -80,11 +80,18 @@ echo "    -> Configuring (BOOTSTRAP)..."
 
 echo "    -> Building (BOOTSTRAP)..."
 
-make python Parser/pgen $* > /dev/null 2>&1
+is_darwin=`uname -s | grep -i darwin`
+pyext=""
+if [ -z $is_darwin ]; then
+    make python Parser/pgen $* > /dev/null 2>&1
+else
+    make python.exe Parser/pgen > /dev/null 2>&1
+    pyext=".exe"
+fi
 
 echo "    -> Bootstrap $urlpackage $version built."
 
-mv python hostpython
+mv python$pyext hostpython
 mv Parser/pgen Parser/hostpgen
 
 make distclean > /dev/null 2>&1
@@ -96,6 +103,9 @@ autoreconf > /dev/null 2>&1
 cd build
 
 echo "    -> Configuring..."
+
+# Platform-specific modules/definitions (none for Pedigree)
+mkdir -p $BUILD_BASE/build-$package-$version/Lib/plat-pedigree
 
 ../configure --host=$ARCH_TARGET-pedigree \
             --prefix=/support/$package/$shortversion \
@@ -111,7 +121,7 @@ make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython HOSTPGEN=$B
 
 echo "    -> Building (PYTHON INTERPRETER)..."
 
-make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen python $* > /dev/null 2>&1
+make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython HOSTPGEN=$BUILD_BASE/build-$package-$version/build/Parser/hostpgen python$pyext $* > /dev/null 2>&1
 
 echo "    -> Building modules..."
 
