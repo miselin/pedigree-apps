@@ -80,7 +80,9 @@ echo "    -> Configuring (BOOTSTRAP)..."
 
 echo "    -> Building (BOOTSTRAP)..."
 
+set +e
 is_darwin=`uname -s | grep -i darwin`
+set -e
 pyext=""
 if [ -z $is_darwin ]; then
     make python Parser/pgen $* > /dev/null 2>&1
