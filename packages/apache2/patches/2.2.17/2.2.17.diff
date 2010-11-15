@@ -34,7 +34,7 @@ diff -rupN httpd-2.2.17-old/config.layout httpd-2.2.17/config.layout
 diff -rupN httpd-2.2.17-old/pedigree.cache httpd-2.2.17/pedigree.cache
 --- httpd-2.2.17-old/pedigree.cache	1970-01-01 10:00:00.000000000 +1000
 +++ httpd-2.2.17/pedigree.cache	2010-11-15 17:01:26.713019654 +1000
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,28 @@
 +# Pedigree autoconf cache file for Apache2
 +
 +# No /dev/zero
@@ -58,3 +58,41 @@ diff -rupN httpd-2.2.17-old/pedigree.cache httpd-2.2.17/pedigree.cache
 +# Fix pointer sizes
 +ap_cv_void_ptr_lt_long=no
 +
++# Fix struct iovec cross-compile
++ac_cv_sizeof_struct_iovec=8
++
++# Fix struct rlimit
++ac_cv_struct_rlimit=yes
+diff -rupN httpd-2.2.17-old/srclib/pcre/Makefile.in httpd-2.2.17/srclib/pcre/Makefile.in
+--- httpd-2.2.17-old/srclib/pcre/Makefile.in	2005-02-11 22:00:41.000000000 +1000
++++ httpd-2.2.17/srclib/pcre/Makefile.in	2010-11-15 17:41:30.601949110 +1000
+@@ -14,7 +14,10 @@ $(LTLIBRARY_OBJECTS) dftables.lo: config
+ dftables: dftables.lo
+ 	$(LINK) $(EXTRA_LDFLAGS) dftables.lo $(EXTRA_LIBS)
+ 
+-$(srcdir)/chartables.c: dftables
+-	./dftables $@
++hostdftables:
++	gcc -o $@ $(EXTRA_INCLUDES) $(EXTRA_LDFLAGS) $(EXTRA_LIBS) $(srcdir)/dftables.c
++
++$(srcdir)/chartables.c: hostdftables
++	./hostdftables $@
+ 
+ pcre.lo: $(srcdir)/chartables.c
+diff -rupN httpd-2.2.17-old/server/Makefile.in httpd-2.2.17/server/Makefile.in
+--- httpd-2.2.17-old/server/Makefile.in	2006-03-10 07:29:55.000000000 +1000
++++ httpd-2.2.17/server/Makefile.in	2010-11-15 18:05:29.251953882 +1000
+@@ -25,8 +25,11 @@ gen_test_char_OBJECTS = gen_test_char.lo
+ gen_test_char: $(gen_test_char_OBJECTS)
+ 	$(LINK) $(EXTRA_LDFLAGS) $(gen_test_char_OBJECTS) $(EXTRA_LIBS)
+ 
+-test_char.h: gen_test_char
+-	./gen_test_char > test_char.h
++host_gen_test_char:
++	gcc -o $@ $(EXTRA_INCLUDES) $(EXTRA_LDFLAGS) $(EXTRA_LIBS) $(srcdir)/gen_test_char.c $(srcdir)/util_debug.c
++
++test_char.h: host_gen_test_char
++	./host_gen_test_char > test_char.h
+ 
+ util.lo: test_char.h
+

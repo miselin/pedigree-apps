@@ -17,6 +17,7 @@ source $ENVPATH/environment.sh
 export CFLAGS
 export CXXFLAGS
 export LDFLAGS
+LIBS="$LIBS -lpthread"
 export LIBS
 
 oldwd=$PWD
@@ -76,11 +77,9 @@ set -e
 
 echo "    -> Configuring..."
 
-../configure --host=$ARCH_TARGET-pedigree --with-layout=Pedigree \
-             --cache-file=$BUILD_BASE/build-$package-$version/pedigree.cache # \
+../configure --host=$ARCH_TARGET-pedigree --enable-layout=Pedigree \
+             --cache-file=$BUILD_BASE/build-$package-$version/pedigree.cache \
              > /dev/null 2>&1
-
-exit 2
 
 echo "    -> Building..."
 
