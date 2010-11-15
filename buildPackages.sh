@@ -14,7 +14,7 @@ for f in $DIRS; do
     echo
     echo "---------- Building in directory $f ----------"
     echo
-    ENVPATH=$BASEDIR $f/build.sh
+    ENVPATH=$BASEDIR $f/build.sh $*
 
     out="Failed."
     [[ $? ]] && out="Success."
