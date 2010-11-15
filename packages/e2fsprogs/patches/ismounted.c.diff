@@ -1,0 +1,11 @@
+--- new/lib/ext2fs/ismounted-old.c	2010-11-15 11:36:22.000000000 +1000
++++ old/lib/ext2fs/ismounted.c	2010-11-15 11:34:40.000000000 +1000
+@@ -34,6 +34,8 @@
+ #include "ext2_fs.h"
+ #include "ext2fs.h"
+ 
++#define statfs statvfs
++
+ #ifdef HAVE_MNTENT_H
+ /*
+  * Helper function which checks a file in /etc/mtab format to see if a
