@@ -25,15 +25,15 @@ cp $BASE/applications/libtool $CROSS_BASE/bin/libtool
 cp $BASE/applications/libtoolize $CROSS_BASE/bin/libtoolize
 
 # Rename all paths in the newly copied libtool
-sed -i '' 's|/applications|'$BASE'/applications|g' $CROSS_BASE/bin/libtool
-sed -i '' 's|/support|'$BASE'/support|g' $CROSS_BASE/bin/libtool
-sed -i '' 's|/include|'$BASE'/include|g' $CROSS_BASE/bin/libtool
-sed -i '' 's|/libraries|'$BASE'/libraries|g' $CROSS_BASE/bin/libtool
+sed -i -e 's|/applications|'$BASE'/applications|g' $CROSS_BASE/bin/libtool
+sed -i -e 's|/support|'$BASE'/support|g' $CROSS_BASE/bin/libtool
+sed -i -e 's|/include|'$BASE'/include|g' $CROSS_BASE/bin/libtool
+sed -i -e 's|/libraries|'$BASE'/libraries|g' $CROSS_BASE/bin/libtool
 
-sed -i '' 's|/applications|'$BASE'/applications|g' $CROSS_BASE/bin/libtoolize
-sed -i '' 's|/support|'$BASE'/support|g' $CROSS_BASE/bin/libtoolize
-sed -i '' 's|/include|'$BASE'/include|g' $CROSS_BASE/bin/libtoolize
-sed -i '' 's|/libraries|'$BASE'/libraries|g' $CROSS_BASE/bin/libtoolize
+sed -i 's|/applications|'$BASE'/applications|g' $CROSS_BASE/bin/libtoolize
+sed -i -e 's|/support|'$BASE'/support|g' $CROSS_BASE/bin/libtoolize
+sed -i -e 's|/include|'$BASE'/include|g' $CROSS_BASE/bin/libtoolize
+sed -i -e 's|/libraries|'$BASE'/libraries|g' $CROSS_BASE/bin/libtoolize
 
 ln -s $BASE/include/ltdl.h $CROSS_BASE/include/ltdl.h
 ln -s $BASE/include/libltdl $CROSS_BASE/include/libltdl
