@@ -73,20 +73,36 @@ cd $BUILD_BASE/build-$package-$version/build
 
 set -e
 
+echo "    -> Adjusting build to use Pedigree libtool..."
+
+cd ..
+
+# This is (hopefully) the Pedigree libtoolize in $PATH - it adds all our libtool
+# files to the tree automatically.
+libtoolize -i -f --ltdl > /dev/null 2>&1
+
+# Re-create aclocal.m4, referencing *our* libtool rather than the sytem
+# libtool.
+aclocal -I ./libltdl -I ./libltdl/m4 > /dev/null 2>&1
+
+# Re-create the configure script now.
+autoconf -I ./libltdl > /dev/null 2>&1
+cd build
+
 echo "    -> Configuring..."
 
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --prefix=/support/$package \
-             --libdir=/libraries --includedir=/include \
+             --libdir=/libraries --includedir=/include # \
              > /dev/null 2>&1
 
 echo "    -> Building..."
 
-make $* > /dev/null 2>&1
+make $* #> /dev/null 2>&1
 
 echo "    -> Installing..."
 
-make DESTDIR="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
+make DESTDIR="$OUTPUT_BASE/$package/$version/" install # > /dev/null 2>&1
 
 echo "Package $package ($version) has been built, now registering in the package manager"
 
