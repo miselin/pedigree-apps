@@ -18,6 +18,7 @@ BASE=$OUTPUT_BASE/$package/$version
 [[ -e $CROSS_BASE/include/ltdl.h ]] && rm $CROSS_BASE/include/ltdl.h
 [[ -e $CROSS_BASE/include/libltdl ]] && rm -r $CROSS_BASE/include/libltdl
 [[ -e $CROSS_BASE/lib/libltdl.a ]] && rm $CROSS_BASE/lib/libltdl.a
+[[ -e $CROSS_BASE/lib/libltdl.so ]] && rm $CROSS_BASE/lib/libltdl.so
 [[ -e $CROSS_BASE/lib/libltdl.la ]] && rm $CROSS_BASE/lib/libltdl.la
 
 cp $BASE/applications/libtool $CROSS_BASE/bin/libtool
@@ -38,4 +39,5 @@ ln -s $BASE/include/ltdl.h $CROSS_BASE/include/ltdl.h
 ln -s $BASE/include/libltdl $CROSS_BASE/include/libltdl
 
 ln -s $BASE/libraries/libltdl.a $CROSS_BASE/lib/libltdl.a
+ln -s $BASE/libraries/libltdl.so $CROSS_BASE/lib/libltdl.so
 ln -s $BASE/libraries/libltdl.la $CROSS_BASE/lib/libltdl.la

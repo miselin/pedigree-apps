@@ -31,5 +31,5 @@ CPPFLAGS="$CPPFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BA
 LDFLAGS="-L$CROSS_BASE/lib"
 
 if [ -d "$CROSS_BASE/bin" ] && [[ ":$PATH:" != *":$CROSS_BASE/bin:"* ]]; then
-    PATH="$PATH:$CROSS_BASE/bin"
+    PATH="$CROSS_BASE/bin:$PATH"
 fi
