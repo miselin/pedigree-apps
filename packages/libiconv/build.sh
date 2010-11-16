@@ -26,7 +26,7 @@ rm -rf $BUILD_BASE/build-$package-$version
 mkdir -p $BUILD_BASE/build-$package-$version
 cd $BUILD_BASE/build-$package-$version
 
-trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
+# trap "rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit" INT TERM EXIT
 
 echo "    -> Grabbing source..."
 
@@ -72,16 +72,33 @@ cd $BUILD_BASE/build-$package-$version/build
 
 set -e
 
+echo "    -> Re-generating build system after patches..."
+
+cd ..
+aclocal -I m4 -I srcm4 > /dev/null 2>&1
+autoconf > /dev/null 2>&1
+
+cd preload
+aclocal -I ../m4 -I ../srcm4 > /dev/null 2>&1
+autoconf > /dev/null 2>&1
+
+cd ../libcharset
+cp ../m4/libtool.m4 ./m4/libtool.m4
+aclocal -I ../m4 -I ../srcm4
+autoconf # > /dev/null 2>&1
+
+cd ../build
+
 echo "    -> Configuring..."
 
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --prefix=/support/$package --libdir=/libraries --includedir=/include \
+             --prefix=/support/$package --libdir=/libraries --includedir=/include # \
              > /dev/null 2>&1
 
 echo "    -> Building..."
 
-make $* > /dev/null 2>&1
+make $* # > /dev/null 2>&1
 
 echo "    -> Installing..."
 
@@ -94,7 +111,7 @@ $PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version
 
 cd $oldwd
 
-rm -rf build-$package-$version
+rm -rf $BUILD_BASE/build-$package-$version
 
 trap - INT TERM EXIT
 
