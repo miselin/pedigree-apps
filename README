@@ -32,21 +32,26 @@ outline (using lynx as an example):
 
 - packages
   - lynx
+    - package-info.sh
+    - pre-build.sh
+    - configure.sh
     - build.sh
+    - install.sh
+    - setupLinks.sh
     - patches
       - generic_patch1.diff
       - 2.8.7
         - version_specific_patch.diff
 
-The build.sh script should be based off the template script (build_template.sh).
-When setting up your build.sh script, you should define the "package", "version"
-and "url" variables to sensible values for the package. The URL must be valid,
-as the script will download the source package for compiling.
+All listed shell scripts are optional. A full template for a package and its
+scripts can be found in the 'package-template' directory - you should copy this
+directory into the 'pacakges' with the name of your package at the beginning
+of every new port.
 
 If a package provides header files and/or libraries that will be used by a
 later build (for example, libgmp providing headers and libraries for GCC), there
-should be a setupLinks.sh script in the same directory as build.sh. See the
-setupLinks_template.sh file for a template.
+should be a setupLinks.sh script in the same directory as build.sh. Otherwise,
+this file should be removed from the template for your package.
 
 You should also modify the configure script lines to add/remove features for
 your package, or replace the autoconf-specific call if your package doesn't use
@@ -66,10 +71,17 @@ generating diff files. All files in these directories use .diff extensions.
 You should NEVER have source code in this repository. Every package should be
 downloaded at runtime.
 
-PIMP: Package Installation & Management for Pedigree
+SUPPORT
 ====================
 
-PIMP is the brand new, hand written and targeted package manager for Pedigree.
+For support with the pedigree-apps repository either add a tracker item at
+http://www.pedigree-project.org/projects/pedigree-apps or alternatively find
+one of the developers in #pedigree on irc.freenode.net.
 
-It's a WIP.
+PUP: Package Updater for Pedigree
+====================
+
+PUP is the brand new, hand written and targeted package manager for Pedigree.
+
+It's a WIP - more about it once it's ready to go!
 
