@@ -3,7 +3,7 @@
 source ./package-info.sh
 
 source "$1/environment.sh"
-(uname -s | grep Darwin > /dev/null 2>&1 ) && echo "Cross-compiling Apache is not yet possible on Darwin hosts. Skipping build."; exit 2
+(uname -s | grep Darwin > /dev/null 2>&1 ) && echo "Cross-compiling Apache is not yet possible on Darwin hosts. Skipping build." && exit 2
 
 export CFLAGS
 export CXXFLAGS
