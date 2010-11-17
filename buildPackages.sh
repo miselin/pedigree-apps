@@ -2,30 +2,45 @@
 
 BASEDIR=$PWD
 
-cd packages
+# Please try and keep $DIRS sorted and categorised where possible.
+
+# libtool gets its own category, as it needs to be run early
+DIRS="$DIRS libtool"
 
 # Put any dependent libraries before the applications that need them
-# TODO: sort.
-DIRS="zlib libiconv gettext libgmp libmpfr libmpc ncurses curl coreutils diffutils grep inetutils bsdtar e2fsprogs newlib bash m4 sed gzip nano nasm gnumake python lynx lua binutils gcc dosbox prboom wget"
+DIRS="zlib libiconv gettext libgmp libmpfr libmpc ncurses curl expat pth"
+
+# Cross-compilers for special libraries
+DIRS="$DIRS binutils gcc"
+
+# Utilities
+DIRS="$DIRS bsdtar coreutils diffutils e2fsprogs grep gnumake gzip inetutils"
+DIRS="$DIRS m4 nano sed wget"
+
+# Games
+DIRS="$DIRS dosbox prboom"
+
+# Programming languages (non-GCC)
+DIRS="$DIRS lua nasm python"
+
+# Other applications
+DIRS="$DIRS apache2 bash lynx"
+
+# Apache modules
+DIRS="$DIRS "
 
 echo > $BASEDIR/status.log
 
 for f in $DIRS; do
     echo
-    echo "---------- Building in directory $f ----------"
+    echo "---------- Building '$f' ----------"
     echo
-    ENVPATH=$BASEDIR $f/build.sh $*
+    $BASEDIR/build.sh $f $*
 
-    out="Failed."
-    [[ $? ]] && out="Success."
-    
-    # Packages that provide headers or libraries that other packages need are
-    # required to provide a "setupLinks.sh" script that automatically creates
-    # links in the cross-compiler for the package (as packages may have different
-    # layouts)
-    if [ -e $f/setupLinks.sh ]; then    
-        echo "    -> Linking to cross-compiler, future packages depend on '$f'"
-        ENVPATH=$BASEDIR ./$f/setupLinks.sh
+    if [ $? == 0 ]; then
+        out="Success."
+    else
+        out="Failed."
     fi
 
     echo

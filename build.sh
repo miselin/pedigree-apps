@@ -87,6 +87,11 @@ for f in $scripts; do
     let "phaseNumber += 1"
 done
 
+echo
+echo "Package $package ($version) has been built, now registering in the package manager"
+
+$PACKMAN_PATH makepkg --path $OUTPUT_BASE/$package/$version --repo $PACKMAN_REPO --name $package --ver $version
+$PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version
 
 cd $oldwd
 
