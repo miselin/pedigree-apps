@@ -18,5 +18,5 @@ ln -s $BASE/libraries/libgmp.so $CROSS_BASE/lib/libgmp.so
 
 # TODO: Find out why libgmp isn't using the --includedir directive!
 echo "        * gmp.h"
-ln -s $BASE/support/gmp/include/gmp.h $CROSS_BASE/include/gmp.h
+ln -s $BASE/support/libgmp/include/gmp.h $CROSS_BASE/include/gmp.h
 
