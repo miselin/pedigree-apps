@@ -16,6 +16,6 @@ cd "$2"
 
 CC=$CC LD=$LD AR=$AR LDSHARED="$CC -shared -Wl,-shared -Wl,-soname,libz.so.1,--version-script,zlib.map" RANLIB=$RANLIB \
              ./configure --prefix=/support/$package \
-             --libdir=/libraries --includedir=/include # \
+             --libdir=/libraries --includedir=/include \
              > /dev/null 2>&1
 

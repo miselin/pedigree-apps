@@ -1,14 +1,8 @@
 #!/bin/bash
 
-package=mpc
-version=0.8.2
+source ./package-info.sh
 
-if [ -z $ENVPATH ]; then
-    echo "ENVPATH not set, fixing" 1>&2
-    ENVPATH=../..
-fi
-
-source $ENVPATH/environment.sh
+source "$1/environment.sh"
 
 BASE=$OUTPUT_BASE/$package/$version
 
