@@ -1,0 +1,27 @@
+diff -rupN a/pedigree.cache b/pedigree.cache
+--- a/pedigree.cache	1970-01-01 10:00:00.000000000 +1000
++++ b/pedigree.cache	2010-11-15 17:01:26.713019654 +1000
+@@ -0,0 +1,22 @@
++# Pedigree autoconf cache file for mtools
++
++# setpgrp takes no arguments
++ac_cv_func_setpgrp_void=yes
++
++# Fix cross-compile type size detection
++ac_cv_sizeof_long_long=8
++ac_cv_sizeof_off_t=4
++ac_cv_sizeof_pid_t=4
++ac_cv_sizeof_short=2
++ac_cv_sizeof_size_t=4
++ac_cv_sizeof_ssize_t=4
++ac_cv_sizeof_voidp=4
++
++# Fix pointer sizes
++ap_cv_void_ptr_lt_long=no
++
++# Fix struct iovec cross-compile
++ac_cv_sizeof_struct_iovec=8
++
++# Fix struct rlimit
++ac_cv_struct_rlimit=yes
+

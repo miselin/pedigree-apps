@@ -24,7 +24,7 @@ DIRS="$DIRS dosbox prboom"
 DIRS="$DIRS lua nasm python"
 
 # Other applications
-DIRS="$DIRS apache2 bash lynx"
+DIRS="$DIRS apache2 bash lynx mtools"
 
 # Apache modules
 DIRS="$DIRS "
