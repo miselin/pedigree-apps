@@ -21,28 +21,46 @@
 
 import os, sys, urllib, sqlite3
 
+import pup_common
+
 def main(arglist):
 
-    localPath="./local_repo"
-    remotePath="http://theiselins.net/pup"
+    remotePath, localPath, ignore = pup_common.getConfig(arglist)
     
-    if remotePath[-1] == "/":
-        remotePath = remotePath[0:-1]
     if localPath[-1] == "/":
         localPath = localPath[0:-1]
 
     if not os.path.exists(localPath):
         os.makedirs(localPath)
     
-    o = urllib.FancyURLopener()
-    o.retrieve(remotePath + "/packages.pupdb", localPath + "/packages_new.pupdb")
+    localFile = localPath + "/packages_new.pupdb"
+
+    # TODO: merge multiple databases (and store the server on which each package can be found?)
+    success = False
+    for server in remotePath:
+        remoteUrl = "%s/packages.pupdb" % (server)
+    
+        print "    -> syncing with %s" % (remoteUrl),
+        try:
+            o = urllib.FancyURLopener()
+            o.retrieve(remoteUrl, localFile)
+            success = True
+            print "(OK)"
+            break
+        except:
+            print "(failed)"
+            continue
+    
+    if not success:
+        print "Error: couldn't download package information from any server."
+        exit(1)
     
     # If the database isn't a valid sqlite database, this will fail
-    s = sqlite3.connect(localPath + "/packages_new.pupdb")
+    s = sqlite3.connect(localFile)
     e = s.execute("select * from packages")
     s.close()
     
-    os.rename(localPath + "/packages_new.pupdb", localPath + "/packages.pupdb")
+    os.rename(localFile, localPath + "/packages.pupdb")
     
     print "Synchronisation complete."
 

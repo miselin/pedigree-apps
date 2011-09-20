@@ -19,20 +19,13 @@
     pup-install.py: install a package
 '''
 
-import os, sys, urllib, sqlite3, tarfile
+import os, sys, urllib, sqlite3, tarfile, ConfigParser
+
+import pup_common
 
 def main(arglist):
 
-    localPath="./local_repo"
-    installRoot="./install_root"
-    remotePath="http://theiselins.net/pup"
-    
-    if localPath[-1] == "/":
-        localPath = localPath[0:-1]
-    if installRoot[-1] == "/":
-        installRoot = installRoot[0:-1]
-    if remotePath[-1] == "/":
-        remotePath = remotePath[0:-1]
+    remotePath, localPath, installRoot = pup_common.getConfig(arglist[1:])
 
     if not os.path.exists(localPath):
         os.makedirs(localPath)
@@ -42,6 +35,11 @@ def main(arglist):
     s = sqlite3.connect(localPath + "/packages.pupdb")
     e = s.execute("select * from packages where name=? order by ver desc limit 1", ([arglist[0]]))
     data = e.fetchone()
+    if data is None:
+        s.close()
+        
+        print "The package '%s' is not available. You may need to run `pup sync' to update the list of available packages." % (arglist[0])
+        exit(1)
     s.close()
     
     # Package name
@@ -51,15 +49,29 @@ def main(arglist):
     print "Preparing to install %s" % (packageName)
     
     if not os.path.exists(localFile):
-    
+
         print "    -> Downloading..."
-    
-        remoteUrl = "%s/%s.pup" % (remotePath, packageName)
+
+        for server in remotePath:
+            remoteUrl = "%s/%s.pup" % (server, packageName)
         
-        o = urllib.FancyURLopener()
-        o.retrieve(remoteUrl, localFile)
+            print "      + trying %s" % (remoteUrl),
+            try:
+                o = urllib.FancyURLopener()
+                o.retrieve(remoteUrl, localFile)
+                print "(OK)"
+                break
+            except:
+                print "(failed)"
+                continue
+        
+        if not os.path.exists(localFile):
+            print "Error: couldn't download the package from any server. Check your internet connection and try again."
+            exit(1)
     
     print "    -> Installing..."
+    
+    # TODO: track installed packages in a local database
     
     t = tarfile.open(localFile)
     t.extractall(installRoot)

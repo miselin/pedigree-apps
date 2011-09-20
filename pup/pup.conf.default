@@ -1,0 +1,8 @@
+[paths]
+installroot=/
+localdb=/support/pup/db
+
+[remotes]
+server=http://pup.pedigree-project.org/pup
+server=http://www.theiselins.net/pup
+
