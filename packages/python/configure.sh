@@ -7,7 +7,7 @@ source "$1/environment.sh"
 export CFLAGS
 export CXXFLAGS
 export LDFLAGS
-LIBS="$LIBS -lpthread"
+# LIBS="$LIBS -lpthread"
 export LIBS
 
 set -e
@@ -21,7 +21,7 @@ mkdir -p $BUILD_BASE/build-$package-$version/Lib/plat-pedigree
             --prefix=/support/$package/$shortversion \
             --bindir=/applications \
             --includedir=/include/python/$shortversion \
-            --libdir=/libraries/python/$shortversion \
-            --without-pydebug \
+            --libdir=/support/$package/$shortversion/lib \
+            --without-pydebug # \
             > /dev/null 2>&1
 
