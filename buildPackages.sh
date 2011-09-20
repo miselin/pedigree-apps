@@ -8,7 +8,8 @@ BASEDIR=$PWD
 DIRS="$DIRS libtool"
 
 # Put any dependent libraries before the applications that need them
-DIRS="zlib libiconv gettext libgmp libmpfr libmpc ncurses curl expat pth"
+DIRS="$DIRS zlib libiconv gettext libgmp libmpfr libmpc ncurses curl expat pth"
+DIRS="$DIRS libpng libfreetype"
 
 # Cross-compilers for special libraries
 DIRS="$DIRS binutils gcc"
@@ -28,6 +29,9 @@ DIRS="$DIRS apache2 bash lynx mtools"
 
 # Apache modules
 DIRS="$DIRS "
+
+# Pedigree-specific stuff
+DIRS="$DIRS pedigree-base"
 
 echo > $BASEDIR/status.log
 
