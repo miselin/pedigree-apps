@@ -1,0 +1,11 @@
+--- a/build/libtool.m4	2011-09-20 18:57:35.939706838 +1000
++++ b/build/libtool.m4	2010-01-21 17:59:41.000000000 +1000
+@@ -94,7 +89,7 @@ _LT_SET_OPTIONS([$0], [$1])
+ LIBTOOL_DEPS="$ltmain"
+ 
+ # Always use our own libtool.
+-LIBTOOL='$(SHELL) $(top_builddir)/libtool'
++LIBTOOL='$(SHELL) $(apr_builddir)/libtool'
+ AC_SUBST(LIBTOOL)dnl
+ 
+ _LT_SETUP
