@@ -22,6 +22,6 @@ mkdir -p $BUILD_BASE/build-$package-$version/Lib/plat-pedigree
             --bindir=/applications \
             --includedir=/include/python/$shortversion \
             --libdir=/support/$package/$shortversion/lib \
-            --without-pydebug # \
+            --without-pydebug \
             > /dev/null 2>&1
 
