@@ -1,6 +1,7 @@
 # Environment definitions - modify to suit your own environment
 
 ARCH_TARGET="i686"
+PEDIGREE_BASE=""
 APPS_BASE=""
 CROSS_BASE=""
 OUTPUT_BASE="$APPS_BASE/newpacks/$ARCH_TARGET"
