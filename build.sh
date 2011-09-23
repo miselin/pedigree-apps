@@ -28,13 +28,21 @@ echo "Building $package ($version)..."
 mkdir -p $BUILD_BASE
 mkdir -p $DOWNLOAD_TEMP
 
+# Handle the case where there's a special method for obtaining source.
+# This script should obtain the source and tarball it, placing it into the path
+# specified in $1 with the format $package-$version.tar.gz
+if [ -e ./special.sh ]; then
+    echo "    -> Running special method for obtaining source..."
+    ./special.sh $DOWNLOAD_TEMP $ENVPATH
+fi
+
 rm -rf $BUILD_BASE/build-$package-$version
 mkdir -p $BUILD_BASE/build-$package-$version
 cd $BUILD_BASE/build-$package-$version
 
-echo "    -> Grabbing source..."
+echo "    -> Grabbing/extracting source..."
 
-if [ ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
+if [ ! -e ./special.sh -a ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
     wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz > /dev/null 2>&1
 fi
 
