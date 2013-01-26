@@ -1,11 +1,12 @@
 # Environment definitions - modify to suit your own environment
 
 ARCH_TARGET="i686"
-APPS_BASE="/home/matthewi/pedigree-apps"
-CROSS_BASE="/home/matthewi/pedigree-compiler"
+PEDIGREE_BASE="/home/pedigree/pcmattman/pedigree"
+APPS_BASE="/home/pedigree/pcmattman/pedigree-apps"
+CROSS_BASE="/home/pedigree/pcmattman/pedigree/pedigree-compiler"
 OUTPUT_BASE="$APPS_BASE/newpacks/$ARCH_TARGET"
 SOURCE_BASE="$APPS_BASE/packages"
-DOWNLOAD_TEMP="/$APPS_BASE/downloads"
+DOWNLOAD_TEMP="$APPS_BASE/downloads"
 BUILD_BASE="$SOURCE_BASE/builds"
 PACKMAN_PATH="$APPS_BASE/pup/pup"
 PACKMAN_REPO="$APPS_BASE/pup/package_repo"
@@ -31,5 +32,5 @@ CPPFLAGS="$CPPFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BA
 LDFLAGS="-L$CROSS_BASE/lib"
 
 if [ -d "$CROSS_BASE/bin" ] && [[ ":$PATH:" != *":$CROSS_BASE/bin:"* ]]; then
-    PATH="$PATH:$CROSS_BASE/bin"
+    PATH="$CROSS_BASE/bin:$PATH"
 fi
