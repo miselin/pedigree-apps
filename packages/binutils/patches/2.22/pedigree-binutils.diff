@@ -53,9 +53,9 @@ diff -rupN binutils-2.19-orig/ld/Makefile.in binutils-2.19/ld/Makefile.in
 +	${GENSCRIPTS} pedigree_i386 "$(tdir_pedigree_i386)"
 +epedigree_x86_64.c: $(srcdir)/emulparams/pedigree_x86_64.sh $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 +	${GENSCRIPTS} pedigree_x86_64 "$(tdir_pedigree_x86_64)"
- eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
+ eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
    $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
- 	${GENSCRIPTS} elf_x86_64 "$(tdir_elf_x86_64)"
+        ${GENSCRIPTS} elf_i386_be "$(tdir_elf_i386_be)"
 diff -rupN binutils-2.19-orig/ld/configure.tgt binutils-2.19/ld/configure.tgt
 --- binutils-2.19-orig/ld/configure.tgt	2008-08-09 15:35:14.000000000 +1000
 +++ binutils-2.19/ld/configure.tgt	2009-03-12 14:40:37.383278700 +1000
