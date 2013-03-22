@@ -8,8 +8,8 @@
 +  version_type=linux
 +  need_lib_prefix=yes
 +  need_version=no
-+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
-+  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='$libname${shared_ext}'
++  soname_spec='${libname}${shared_ext}'
 +  finish_cmds=''
 +  shlibpath_var=LD_LIBRARY_PATH
 +  shlibpath_overrides_runpath=no
