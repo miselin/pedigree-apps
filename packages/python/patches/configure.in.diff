@@ -111,6 +111,15 @@
       CC="$ac_save_cc"
      AC_MSG_RESULT($ac_cv_no_strict_aliasing_ok)
      if test $ac_cv_no_strict_aliasing_ok = yes
+@@ -1960,6 +1960,8 @@ then
+ 		# to 2048 kilobytes so that the stack doesn't overflow
+ 		# when running test_compile.py.
+ 		LINKFORSHARED='-Wl,-E -N 2048K';;
++	Pedigree*)
++		LINKFORSHARED="-Wl,-export-dynamic";;
+ 	esac
+ fi
+ AC_MSG_RESULT($LINKFORSHARED)
 @@ -3860,7 +3880,7 @@ else
    AC_MSG_RESULT(no)
  fi
