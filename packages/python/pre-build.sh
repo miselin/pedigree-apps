@@ -15,7 +15,7 @@ is_darwin=`uname -s | grep -i darwin`
 set -e
 pyext=""
 if [ -z $is_darwin ]; then
-    make python Parser/pgen $* > /dev/null 2>&1
+    make python Parser/pgen > /dev/null 2>&1
 else
     make python.exe Parser/pgen > /dev/null 2>&1
     pyext=".exe"

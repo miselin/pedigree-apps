@@ -111,6 +111,14 @@
       CC="$ac_save_cc"
      AC_MSG_RESULT($ac_cv_no_strict_aliasing_ok)
      if test $ac_cv_no_strict_aliasing_ok = yes
+@@ -1902,6 +1922,7 @@ then
+       *) CCSHARED="";;
+       esac;;
+  atheos*) CCSHARED="-fPIC";;
++    Pedigree*) CCSHARED="-fPIC";;
+  esac
+ fi
+ AC_MSG_RESULT($CCSHARED)
 @@ -1960,6 +1960,8 @@ then
  		# to 2048 kilobytes so that the stack doesn't overflow
  		# when running test_compile.py.

@@ -23,7 +23,7 @@
          ext_filename = os.path.join(
              self.build_lib,
              self.get_ext_filename(self.get_ext_fullname(ext.name)))
-@@ -348,16 +357,21 @@ class PyBuildExt(build_ext):
+@@ -348,16 +357,31 @@ class PyBuildExt(build_ext):
              self.failed.append(ext.name)
  
      def get_platform(self):
@@ -41,16 +41,26 @@
 +        return p
  
      def detect_modules(self):
++        xcompile_override = False
++
          # Ensure that /usr/local is always used
 -        add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
 -        add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
 +        if os.environ.get('CROSS_COMPILING') != 'yes':
 +            add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
 +            add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
++        else:
++            sysinclude = os.environ.get('XCOMPILE_SYSINCLUDE')
++            if sysinclude:
++                add_dir_to_list(self.compiler.include_dirs, sysinclude)
++
++            # Override bitness (for where we target 32-bit but are running 64-bit python)
++            if os.environ.get('ARCH_BITS') == '32':
++                xcompile_override = True
  
          # Add paths specified in the environment variables LDFLAGS and
          # CPPFLAGS for header and library files.
-@@ -407,11 +421,15 @@ class PyBuildExt(build_ext):
+@@ -407,11 +431,18 @@ class PyBuildExt(build_ext):
          # lib_dirs and inc_dirs are used to search for files;
          # if a file is found in one of those directories, it can
          # be assumed that no additional -I,-L directives are needed.
@@ -67,10 +77,22 @@
 +                '/lib', '/usr/lib',
 +                ]
 +            inc_dirs = self.compiler.include_dirs + ['/usr/include']
-+        
++        else:
++            lib_dirs = self.compiler.library_dirs
++            inc_dirs = self.compiler.include_dirs
++
          exts = []
          missing = []
  
+@@ -594,7 +625,7 @@ class PyBuildExt(build_ext):
+         exts.append( Extension('audioop', ['audioop.c']) )
+ 
+         # Disabled on 64-bit platforms
+-        if sys.maxint != 9223372036854775807L:
++        if sys.maxint != 9223372036854775807L or xcompile_override:
+             # Operations on images
+             exts.append( Extension('imageop', ['imageop.c']) )
+         else:
 @@ -845,6 +863,9 @@ class PyBuildExt(build_ext):
              db_inc_paths.append('/usr/local/include/db3%d' % x)
              db_inc_paths.append('/pkg/db-3.%d/include' % x)
@@ -100,3 +122,27 @@
  
          if sys.platform == 'darwin':
              if is_macosx_sdk_path(f):
+@@ -1345,7 +1384,7 @@ class PyBuildExt(build_ext):
+                 missing.append('_codecs_%s' % loc)
+ 
+         # Dynamic loading module
+-        if sys.maxint == 0x7fffffff:
++        if sys.maxint == 0x7fffffff or xcompile_override:
+             # This requires sizeof(int) == sizeof(long) == sizeof(char*)
+             dl_inc = find_file('dlfcn.h', [], inc_dirs)
+             if (dl_inc is not None) and (platform not in ['atheos']):
+@@ -1825,6 +1864,14 @@ class PyBuildExt(build_ext):
+                 mkpath(ffi_builddir)
+                 config_args = []
+ 
++                if os.environ.get('CROSS_COMPILING') == 'yes':
++                    arch = os.environ.get("ARCH_TARGET")
++                    targ = os.environ.get("MACHDEP")
++
++                    host = "%s-%s" % (arch, targ)
++                    if host:
++                        config_args += ['--host %s' % (host,)]
++
+                 # Pass empty CFLAGS because we'll just append the resulting
+                 # CFLAGS to Python's; -g or -O2 is to be avoided.
+                 cmd = "cd %s && env CFLAGS='' '%s/configure' %s" \
