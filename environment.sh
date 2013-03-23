@@ -20,14 +20,14 @@ AR="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ar"
 RANLIB="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ranlib"
 LIBS="-lm"
 
-CFLAGS="-I$CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2 -I$CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2/$ARCH_TARGET-pedigree"
-CFLAGS="$CFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -I$CROSS_BASE/include/ncurses"
-CFLAGS="$CFLAGS -O3 -D__PEDIGREE__"
+ARCH_BITS="32"
+
+CFLAGS="-O3 -D__PEDIGREE__"
 CXXFLAGS=$CFLAGS
 
 # Include directories for the preprocessor
-CPPFLAGS="-I$CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2 -I$CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2/$ARCH_TARGET-pedigree"
-CPPFLAGS="$CPPFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL"
+CPPFLAGS="-isystem $CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2 -isystem $CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2/$ARCH_TARGET-pedigree"
+CPPFLAGS="$CPPFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -I$CROSS_BASE/include/ncurses"
 
 LDFLAGS="-L$CROSS_BASE/lib"
 
