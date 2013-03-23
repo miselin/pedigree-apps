@@ -1,9 +1,9 @@
 # Environment definitions - modify to suit your own environment
 
 ARCH_TARGET="i686"
-PEDIGREE_BASE="/home/pedigree/pcmattman/pedigree"
-APPS_BASE="/home/pedigree/pcmattman/pedigree-apps"
-CROSS_BASE="/home/pedigree/pcmattman/pedigree/pedigree-compiler"
+PEDIGREE_BASE="/osdev/pedigree"
+APPS_BASE="/osdev/pedigree-apps"
+CROSS_BASE="/osdev/pedigree/pedigree-compiler"
 OUTPUT_BASE="$APPS_BASE/newpacks/$ARCH_TARGET"
 SOURCE_BASE="$APPS_BASE/packages"
 DOWNLOAD_TEMP="$APPS_BASE/downloads"
