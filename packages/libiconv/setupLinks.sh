@@ -15,7 +15,8 @@ BASE=$OUTPUT_BASE/$package/$version
 [[ -e $CROSS_BASE/include/libcharset.h ]] && rm $CROSS_BASE/include/libcharset.h
 [[ -e $CROSS_BASE/include/localcharset.h ]] && rm $CROSS_BASE/include/localcharset.h
 
-ln -s $BASE/libraries/libiconv.a $CROSS_BASE/lib/libiconv.a
+# libconv.a may not actually exist.
+[[ -e $BASE/libraries/libiconv.a ]] && ln -s $BASE/libraries/libiconv.a $CROSS_BASE/lib/libiconv.a
 ln -s $BASE/libraries/libcharset.a $CROSS_BASE/lib/libcharset.a
 ln -s $BASE/libraries/libiconv.so $CROSS_BASE/lib/libiconv.so
 ln -s $BASE/libraries/libcharset.so $CROSS_BASE/lib/libcharset.so

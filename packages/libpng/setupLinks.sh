@@ -16,7 +16,7 @@ BASE=$OUTPUT_BASE/$package/$version
 echo "        * libpng.a"
 ln -s $BASE/libraries/libpng15.a $CROSS_BASE/lib/libpng.a
 echo "        * libpng.so"
-ln -s $BASE/libraries/libpng15.so.15.4.0 $CROSS_BASE/lib/libpng.so
+ln -s $BASE/libraries/libpng15.so $CROSS_BASE/lib/libpng.so
 
 echo "        * png.h"
 ln -s $BASE/include/png.h $CROSS_BASE/include/png.h
