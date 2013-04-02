@@ -12,6 +12,7 @@ BASE=$OUTPUT_BASE/$package/$version
 [[ -e $CROSS_BASE/include/png.h ]] && rm $CROSS_BASE/include/png.h
 [[ -e $CROSS_BASE/include/pngconf.h ]] && rm $CROSS_BASE/include/pngconf.h
 [[ -e $CROSS_BASE/include/pnglibconf.h ]] && rm $CROSS_BASE/include/pnglibconf.h
+[[ -e $CROSS_BASE/include/libpng15 ]] && rm $CROSS_BASE/include/libpng15
 
 echo "        * libpng.a"
 ln -s $BASE/libraries/libpng15.a $CROSS_BASE/lib/libpng.a
