@@ -8,6 +8,7 @@ CFLAGS=`echo $CFLAGS | sed s/-O3/-O1/`
 export CFLAGS
 CXXFLAGS=`echo $CXXFLAGS | sed s/-O3/-O1/`
 export CXXFLAGS
+export CPPFLAGS
 export LDFLAGS
 LIBS="-lSDL -lpedigree -lstdc++ -lpthread $LIBS"
 export LIBS

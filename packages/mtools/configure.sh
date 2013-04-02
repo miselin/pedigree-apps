@@ -8,6 +8,7 @@ export CC
 export LD
 export CFLAGS
 export CXXFLAGS
+export CPPFLAGS
 export LDFLAGS
 LIBS="$LIBS -liconv -lpthread"
 export LIBS

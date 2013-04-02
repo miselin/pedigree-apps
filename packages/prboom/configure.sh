@@ -6,6 +6,7 @@ source "$1/environment.sh"
 
 export CFLAGS
 export CXXFLAGS
+export CPPFLAGS
 export LDFLAGS
 LIBS="-lSDL -lpedigree -lstdc++ -lpthread $LIBS"
 export LIBS

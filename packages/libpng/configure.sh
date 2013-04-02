@@ -6,6 +6,7 @@ source "$1/environment.sh"
 
 export CFLAGS
 export LDFLAGS
+export CPPFLAGS
 
 set -e
 
