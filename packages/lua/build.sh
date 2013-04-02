@@ -6,5 +6,5 @@ set -e
 
 cd "$2"
 
-ARCH_TARGET="$ARCH_TARGET-pedigree" make posix $* > /dev/null 2>&1
+ARCH_TARGET="$ARCH_TARGET-pedigree" make posix > /dev/null 2>&1
 

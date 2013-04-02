@@ -8,7 +8,9 @@ set -e
 
 cd "$2"
 
-make INSTALL_TOP="$out/" \
+out="$OUTPUT_BASE/$package/$version"
+
+make INSTALL_TOP="$out" \
      INSTALL_BIN="$out/applications" \
      INSTALL_LIB="$out/libraries" \
      INSTALL_LMOD="$out/support/lua/share/5.1" \
