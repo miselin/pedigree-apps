@@ -6,10 +6,10 @@
  
 +if os.environ.get('CROSS_COMPILING') == 'yes':
 +    sysconfig.get_config_vars()
-+    sysconfig._config_vars.update(os.environ)
++    sysconfig._CONFIG_VARS.update(os.environ)
 +else:
 +    sysconfig.get_config_vars()
-+    sysconfig._config_vars['srcdir'] = os.environ['srcdir']
++    sysconfig._CONFIG_VARS['srcdir'] = os.environ['srcdir']
 +
  def add_dir_to_list(dirlist, dir):
      """Add the directory 'dir' to the list 'dirlist' (at the front) if
@@ -23,7 +23,7 @@
          ext_filename = os.path.join(
              self.build_lib,
              self.get_ext_filename(self.get_ext_fullname(ext.name)))
-@@ -348,16 +357,31 @@ class PyBuildExt(build_ext):
+@@ -339,11 +339,15 @@ class PyBuildExt(build_ext):
              self.failed.append(ext.name)
  
      def get_platform(self):
@@ -32,7 +32,7 @@
 +        p = sys.platform
 +        if os.environ.get('CROSS_COMPILING') == 'yes':
 +            p = os.environ.get('MACHDEP').lower()
-+        
++
          for platform in ['cygwin', 'beos', 'darwin', 'atheos', 'osf1']:
 -            if sys.platform.startswith(platform):
 +            if p.startswith(platform):
@@ -40,15 +40,22 @@
 -        return sys.platform
 +        return p
  
+     def add_multiarch_paths(self):
+         # Debian/Ubuntu multiarch support.
+@@ -368,10 +368,21 @@ class PyBuildExt(build_ext):
+             os.unlink(tmpfile)
+ 
      def detect_modules(self):
 +        xcompile_override = False
 +
          # Ensure that /usr/local is always used
 -        add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
 -        add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
+-        self.add_multiarch_paths()
 +        if os.environ.get('CROSS_COMPILING') != 'yes':
 +            add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
 +            add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
++            self.add_multiarch_paths()
 +        else:
 +            sysinclude = os.environ.get('XCOMPILE_SYSINCLUDE')
 +            if sysinclude:
