@@ -22,7 +22,7 @@ DIRS="$DIRS m4 nano sed wget"
 DIRS="$DIRS dosbox prboom"
 
 # Programming languages (non-GCC)
-DIRS="$DIRS lua nasm python"
+DIRS="$DIRS lua nasm python26 python27"
 
 # Other applications
 DIRS="$DIRS apache2 bash lynx mtools"
