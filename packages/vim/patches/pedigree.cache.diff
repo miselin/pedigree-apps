@@ -1,0 +1,21 @@
+diff -rupN old/pedigree.cache new/pedigree.cache
+--- old/src/auto/config.cache 1970-01-01 10:00:00.000000000 +1000
++++ new/src/auto/config.cache 2010-11-15 17:01:26.713019654 +1000
+@@ -0,0 +1,17 @@
++# Pedigree autoconf cache file for VIM
++
++# toupper is okay
++vim_cv_toupper_broken=no
++
++# terminfo stuff
++vim_cv_terminfo=yes
++vim_cv_tty_group=world
++
++# we don't implement getcwd as a system() call (wtf)
++vim_cv_getcwd_broken=no
++
++# I think?
++vim_cv_stat_ignores_slash=yes
++
++# newlib should handle this
++vim_cv_memmove_handles_overlap=yes
