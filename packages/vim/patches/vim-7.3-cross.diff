@@ -9,3 +9,10 @@
  
  dnl Check for memmove() before bcopy(), makes memmove() be used when both are
  dnl present, fixes problem with incompatibility between Solaris 2.4 and 2.5.
+--- vim73/src/fileio.c.orig 2010-08-13 08:15:17.000000000 -0600
++++ vim73/src/fileio.c  2010-08-16 17:04:34.000000000 -0600
+@@ -23,3 +23,3 @@
+ 
+-#if defined(__TANDEM) || defined(__MINT__)
++#if defined(__TANDEM) || defined(__MINT__) || defined(__PEDIGREE__)
+ # include <limits.h>       /* for SSIZE_MAX */
