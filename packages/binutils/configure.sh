@@ -4,6 +4,9 @@ source ./package-info.sh
 
 source "$1/environment.sh"
 
+CFLAGS="$CFLAGS $CPPFLAGS"
+CXXFLAGS="$CXXFLAGS $CPPFLAGS"
+
 export CFLAGS
 export CXXFLAGS
 export LDFLAGS
