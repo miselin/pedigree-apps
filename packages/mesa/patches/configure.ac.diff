@@ -1,0 +1,13 @@
+--- Mesa-9.1.1/configure.ac.old	2013-04-09 22:35:18.000000000 -0500
++++ Mesa-9.1.1/configure.ac	2013-04-09 22:47:29.000000000 -0500
+@@ -182,8 +182,8 @@ if test "x$GCC" = xyes; then
+     # generating a loadable driver module that has undefined symbols.
+     save_CFLAGS="$CFLAGS"
+     AC_MSG_CHECKING([whether $CC supports -Werror=missing-prototypes])
+-    CFLAGS="$CFLAGS -Werror=implicit-function-declaration"
+-    CFLAGS="$CFLAGS -Werror=missing-prototypes"
++    # CFLAGS="$CFLAGS -Werror=implicit-function-declaration"
++    # CFLAGS="$CFLAGS -Werror=missing-prototypes"
+     AC_LINK_IFELSE([AC_LANG_PROGRAM()],
+ 		   AC_MSG_RESULT([yes]),
+ 		   [CFLAGS="$save_CFLAGS -Wmissing-prototypes";

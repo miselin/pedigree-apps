@@ -1,0 +1,11 @@
+--- Mesa-9.1.1/configure.old	2013-04-09 22:29:24.000000000 -0500
++++ Mesa-9.1.1/configure	2013-04-09 22:30:13.000000000 -0500
+@@ -19036,7 +19036,7 @@ if test "x$GCC" = xyes; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports -Werror=missing-prototypes" >&5
+ $as_echo_n "checking whether $CC supports -Werror=missing-prototypes... " >&6; }
+     CFLAGS="$CFLAGS -Werror=implicit-function-declaration"
+-    CFLAGS="$CFLAGS -Werror=missing-prototypes"
++    # CFLAGS="$CFLAGS -Werror=missing-prototypes"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ 
