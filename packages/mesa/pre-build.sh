@@ -15,5 +15,5 @@ libtoolize -i -f --ltdl > /dev/null 2>&1
 # aclocal -I ./libltdl -I ./libltdl/m4 > /dev/null 2>&1
 
 # Re-create the configure script now.
-# autoconf -I ./libltdl > /dev/null 2>&1
+autoreconf -I ./libltdl > /dev/null 2>&1
 
