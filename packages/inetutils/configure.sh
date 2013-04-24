@@ -22,6 +22,6 @@ mkdir -p build && cd build
              --disable-ifconfig --disable-logger --disable-rcp --disable-rlogin \
              --disable-rsh --disable-rexec \
              --disable-uucp \
-             --disable-telnet --disable-servers \
+             --disable-servers \
              > /dev/null 2>&1
 
