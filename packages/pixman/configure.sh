@@ -17,6 +17,6 @@ set -e
 cd "$2"
 
 ./configure --host=$ARCH_TARGET-pedigree --prefix=/support/$package \
-            --libdir=/libraries --includedir=/include \
+            --libdir=/libraries --includedir=/include --disable-gtk \
             > /dev/null 2>&1
 
