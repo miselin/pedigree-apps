@@ -19,6 +19,26 @@ GIVEN_CROSS_PATH=`echo "$1" | sed -e 's,\(.\)/$,\1,'`
 GIVEN_PEDIGREE_PATH=`echo "$2" | sed -e 's,\(.\)/$,\1,'`
 DESIRED_TARGET=$3
 
+echo "Switching to ccache..."
+
+set -e
+
+line=""
+if [ -e $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-gcc ]; then
+    line=$(head -n1 $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-gcc)
+    if [ "$line" != "#!/bin/bash" ]; then
+        mv $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-gcc $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-gcc-real
+        mv $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-g++ $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-g++-real
+    fi
+fi
+
+echo -e "#!/bin/bash\nccache \$0-real \"\$@\"" | tee $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-gcc > $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-g++
+
+chmod +x $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-gcc
+chmod +x $GIVEN_CROSS_PATH/bin/$DESIRED_TARGET-g++
+
+set +e
+
 echo "Creating links..."
 
 set -e
