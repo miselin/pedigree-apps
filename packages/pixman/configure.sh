@@ -6,6 +6,7 @@ source "$1/environment.sh"
 
 export CFLAGS
 export CXXFLAGS
+CPPFLAGS="$CPPFLAGS -DPIXMAN_NO_TLS "
 export CPPFLAGS
 export LDFLAGS
 LIBS="$LIBS -lz"
