@@ -19,5 +19,5 @@ cd "$2"
             --libdir=/libraries --includedir=/include \
             --disable-xcb --disable-xlib --without-x \
             --disable-ps --disable-pdf --disable-gobject \
-            --disable-full-testing --disable-static > /dev/null 2>&1
+            --disable-full-testing --disable-static --enable-shared > /dev/null 2>&1
 
