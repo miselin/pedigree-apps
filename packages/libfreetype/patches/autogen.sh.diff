@@ -1,0 +1,16 @@
+diff -rup freetype-2.4.6-clean/autogen.sh freetype-2.4.6/autogen.sh
+--- freetype-2.4.6-clean/autogen.sh	2013-05-05 15:11:09.762310985 +1000
++++ freetype-2.4.6/autogen.sh	2013-05-05 15:17:51.955531742 +1000
+@@ -152,8 +152,9 @@ echo "generating \`configure.ac'"
+ sed -e "s;@VERSION@;$freetype_major$freetype_minor$freetype_patch;" \
+   < configure.raw > configure.ac
+ 
+-run aclocal -I . --force
+-run $LIBTOOLIZE --force --copy --install
++echo $LIBTOOLIZE
++run $LIBTOOLIZE --force --copy --install --ltdl
++run aclocal -I . -I ./libltdl -I ./libltdl/m4 --force
+ run autoconf --force
+ 
+ chmod +x mkinstalldirs
+Only in freetype-2.4.6: .autogen.sh.swp
