@@ -62,7 +62,7 @@ diff -rupN gcc-4.3.2-orig/gcc/config/pedigree.h gcc-4.3.2/gcc/config/pedigree.h
 diff -rupN gcc-4.3.2-orig/gcc/config.gcc gcc-4.3.2/gcc/config.gcc
 --- gcc-4.3.2-orig/gcc/config.gcc	2008-06-10 02:32:15.000000000 +1000
 +++ gcc-4.3.2/gcc/config.gcc	2009-03-12 16:51:59.000000000 +1000
-@@ -584,6 +584,12 @@ case ${target} in
+@@ -584,6 +584,13 @@ case ${target} in
      *) echo 'Unknown thread configuration for VxWorks'; exit 1 ;;
    esac
    ;;
@@ -71,6 +71,7 @@ diff -rupN gcc-4.3.2-orig/gcc/config.gcc gcc-4.3.2/gcc/config.gcc
 +  gas=yes
 +  gnu_ld=yes
 +  default_use_cxa_atexit=yes
++  native_system_header_dir=/include
 +  ;;
  *-*-elf)
    # Assume that newlib is being used and so __cxa_atexit is provided.
