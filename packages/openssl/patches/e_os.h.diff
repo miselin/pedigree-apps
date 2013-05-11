@@ -1,0 +1,11 @@
+--- a/e_os.h.old	2013-05-11 21:19:34.414121074 +1000
++++ b/e_os.h	2013-05-11 21:19:43.437850774 +1000
+@@ -622,7 +622,7 @@ static unsigned int _strlen31(const char
+  * versions.
+  */
+ #  if !defined(OPENSSL_USE_IPV6)
+-#    if defined(AF_INET6) && !defined(OPENSSL_SYS_BEOS_BONE) && !defined(NETWARE_CLIB)
++#    if defined(AF_INET6) && !defined(OPENSSL_SYS_BEOS_BONE) && !defined(NETWARE_CLIB) && !defined(__PEDIGREE__)
+ #      define OPENSSL_USE_IPV6 1
+ #    else
+ #      define OPENSSL_USE_IPV6 0
