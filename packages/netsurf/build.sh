@@ -28,5 +28,5 @@ sed -i.bak "s/^.*pkg_config_package.*sdl.*CFLAGS.*$//g" src/libnsfb*/Makefile
 
 # prepareCompiler hooks in ccache to all compiling, don't double up.
 CC=$CC CXX=$CXX AR=$AR RANLIB=$RANLIB CCACHE="" \
-make BUILD=debug TARGET=framebuffer HOST=pedigree VQ= Q= PKG_CONFIG="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-pkg-config" NSFB_SDL_AVAILABLE="yes" NSFB_LINUX_AVAILABLE="no" NETSURF_USE_BMP="YES" NETSURF_USE_JPEG="NO" NETSURF_USE_MNG="NO" NETSURF_USE_LIBICONV_PLUG="NO" DESTDIR="$OUTPUT_BASE/$package/$version/" install
+make TARGET=framebuffer HOST=pedigree VQ= Q= PKG_CONFIG="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-pkg-config" NSFB_SDL_AVAILABLE="yes" NSFB_LINUX_AVAILABLE="no" NETSURF_USE_BMP="NO" NETSURF_USE_JPEG="NO" NETSURF_USE_MNG="NO" NETSURF_USE_GIF="NO" NETSURF_USE_LIBICONV_PLUG="NO" DESTDIR="$OUTPUT_BASE/$package/$version/" install
 
