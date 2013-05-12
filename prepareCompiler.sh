@@ -95,6 +95,10 @@ if [ ! -e "$GIVEN_CROSS_PATH/lib/libSDL.a" ]; then
     echo "    - libSDL.a"
     ln -s "$GIVEN_PEDIGREE_PATH/build/libSDL.a" "$GIVEN_CROSS_PATH/lib/libSDL.a"
 fi
+if [ ! -e "$GIVEN_CROSS_PATH/lib/libSDL.so" ]; then
+    echo "    - libSDL.so"
+    ln -s "$GIVEN_PEDIGREE_PATH/build/libSDL.so" "$GIVEN_CROSS_PATH/lib/libSDL.so"
+fi
 if [ ! -e "$GIVEN_CROSS_PATH/include/SDL" ]; then
     echo "    - SDL include files"
     ln -s "$GIVEN_PEDIGREE_PATH/src/lgpl/SDL-1.2.14/include" "$GIVEN_CROSS_PATH/include/SDL"
