@@ -6,5 +6,5 @@ set -e
 
 cd "$2/build"
 
-make PROGRAMS="dbclient" $3 # > /dev/null 2>&1
+make PROGRAMS="dbclient" $3 > /dev/null 2>&1
 
