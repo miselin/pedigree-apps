@@ -3,10 +3,10 @@
 ARCH_TARGET="i686"
 PEDIGREE_BASE=""
 APPS_BASE=""
-CROSS_BASE=""
+CROSS_BASE="$PEDIGREE_BASE/pedigree-compiler"
 OUTPUT_BASE="$APPS_BASE/newpacks/$ARCH_TARGET"
 SOURCE_BASE="$APPS_BASE/packages"
-DOWNLOAD_TEMP="/$APPS_BASE/downloads"
+DOWNLOAD_TEMP="$APPS_BASE/downloads"
 BUILD_BASE="$SOURCE_BASE/builds"
 PACKMAN_PATH="$APPS_BASE/pup/pup"
 PACKMAN_REPO="$APPS_BASE/pup/package_repo"
@@ -20,14 +20,14 @@ AR="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ar"
 RANLIB="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ranlib"
 LIBS="-lm"
 
-CFLAGS="-I$CROSS_BASE/include/c++ -I$CROSS_BASE/include/c++/i686-pedigree"
-CFLAGS="$CFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -I$CROSS_BASE/include/ncurses"
-CFLAGS="$CFLAGS -O3 -D__PEDIGREE__"
+ARCH_BITS="32"
+
+CFLAGS="-O3 -march=pentium4 -mtune=k8 -msse2 -D__PEDIGREE__"
 CXXFLAGS=$CFLAGS
 
 # Include directories for the preprocessor
-CPPFLAGS="-I$CROSS_BASE/include/c++ -I$CROSS_BASE/include/c++/i686-pedigree"
-CPPFLAGS="$CPPFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL"
+CPPFLAGS="-isystem $CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2 -isystem $CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2/$ARCH_TARGET-pedigree"
+CPPFLAGS="$CPPFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -I$CROSS_BASE/include/ncurses -I$CROSS_BASE/include/pixman-1"
 
 LDFLAGS="-L$CROSS_BASE/lib"
 
