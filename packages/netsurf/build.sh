@@ -26,6 +26,9 @@ sed -i.bak "s/CFLAGS \:=$/CFLAGS \?=/g" src/$package-$version/Makefile.defaults
 sed -i.bak "s/^.*pkg_config_package.*SDL.*$/NSFB_SDL_AVAILABLE \?= no/g" src/libnsfb*/Makefile
 sed -i.bak "s/^.*pkg_config_package.*sdl.*CFLAGS.*$//g" src/libnsfb*/Makefile
 
+# Change location of resources.
+sed -i.bak "s@share/netsurf/@support/netsurf@g" src/$package-$version/framebuffer/Makefile.defaults
+
 # prepareCompiler hooks in ccache to all compiling, don't double up.
 CC=$CC CXX=$CXX AR=$AR RANLIB=$RANLIB CCACHE="" \
 make TARGET=framebuffer HOST=pedigree VQ= Q= PKG_CONFIG="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-pkg-config" NSFB_SDL_AVAILABLE="yes" NSFB_LINUX_AVAILABLE="no" NETSURF_USE_BMP="YES" NETSURF_USE_JPEG="NO" NETSURF_USE_MNG="NO" NETSURF_USE_GIF="YES" NETSURF_USE_LIBICONV_PLUG="NO" DESTDIR="$OUTPUT_BASE/$package/$version/" install
