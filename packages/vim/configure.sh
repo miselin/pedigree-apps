@@ -20,5 +20,6 @@ autoconf > /dev/null 2>&1
 ./configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
             --sysconfdir=/config/$package --datarootdir=/support/$package \
             --prefix=/support/$package --libdir=/libraries --includedir=/include \
-            --with-tlib=ncurses --cache-file=auto/config.cache > /dev/null 2>&1
+            --with-tlib=ncurses --cache-file=auto/config.cache --enable-256-color \
+            > /dev/null 2>&1
 
