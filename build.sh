@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Architecture to build.
+arch=$1
+
+shift
+
 packagedir=$1
 
 shift
@@ -15,6 +20,12 @@ if [ -z $ENVPATH ]; then
     ENVPATH=$PWD
 fi
 
+if [ -L $ENVPATH/environment.sh -o ! -e $ENVPATH/environment.sh ]; then
+    echo "hi"
+    ln -s $ENVPATH/environment-$arch.sh $ENVPATH/environment.sh
+else
+    echo "environment.sh should not exist as anything other than a symlink, you should have environment-$arch.sh present instead."
+fi
 source $ENVPATH/environment.sh
 
 cd ./packages/$packagedir
@@ -103,8 +114,8 @@ done
 echo
 echo "Package $package ($version) has been built, now registering in the package manager"
 
-$PACKMAN_PATH makepkg --path $OUTPUT_BASE/$package/$version --repo $PACKMAN_REPO --name $package --ver $version
-$PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version
+$PACKMAN_PATH makepkg --path $OUTPUT_BASE/$package/$version --repo $PACKMAN_REPO --name $package --ver $version --arch $ARCH
+$PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version --arch $ARCH
 
 cd $oldwd
 

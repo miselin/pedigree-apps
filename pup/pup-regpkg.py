@@ -25,7 +25,7 @@ import hashlib
 import sqlite3
 
 def main(arglist):
-    optParser = OptionParser(usage="%prog --repo REPO_PATH --name NAME --ver VERSION [--deps LIST_OF_DEPS]",
+    optParser = OptionParser(usage="%prog --repo REPO_PATH --name NAME --ver VERSION --arch ARCH [--deps LIST_OF_DEPS]",
                              version="pup-regpkg 0.1")
     optParser.add_option("--repo", dest="repoBase", help="""
         Path to the directory containing the local package repository. This will be
@@ -39,6 +39,8 @@ def main(arglist):
         The name of the package being registered.""".replace("    ", "").strip())
     optParser.add_option("--ver", dest="packageVersion", help="""
         The version of the package being registered.""".replace("    ", "").strip())
+    optParser.add_option("--arch", dest="packageArch", help="""
+        The architecture of the package being registered.""".replace("    ", "").strip())
 
     (options, args) = optParser.parse_args(arglist)
 
@@ -56,9 +58,16 @@ def main(arglist):
     elif options.packageVersion == None:
         print "You must specify a version for the package via the --ver option."
         exit()
+    elif options.packageArch == None:
+        print "You must specify an architecture for the package via the --arch option."
+        exit()
+    elif not options.packageArch.lower() in ["i686", "amd64", "arm"]:
+        print "The architecture must be i686, amd64, or arm."
+        exit()
 
     packageName = options.packageName
     packageVersion = options.packageVersion
+    packageArch = options.packageArch.lower()
 
     deps = []
     if options.depsList <> None:
@@ -84,20 +93,21 @@ def main(arglist):
                       name text(256),
                       ver text(64),
                       deps text(4096),
-                      sha1 text(42)
+                      sha1 text(42),
+                      arch text(64)
                       )""")
 
     # Using a tuple here performs proper sanitisation of input strings to avoid SQL
     # injection attacks (which would be fairly nasty!)
-    db.execute("delete from packages where name=? and ver=?", (packageName, packageVersion))
-    db.execute("insert into packages (name, ver, deps, sha1) values (?, ?, ?, ?)", (packageName, packageVersion, " ".join(deps), fileHash))
+    db.execute("delete from packages where name=? and ver=? and arch=?", (packageName, packageVersion, packageArch))
+    db.execute("insert into packages (name, ver, deps, sha1, arch) values (?, ?, ?, ?, ?)", (packageName, packageVersion, " ".join(deps), fileHash, packageArch))
 
     # By now everything seems to have fun fine, commit the changes to the database
     db.commit()
 
     db.close()
 
-    print "Package '" + packageName + "-" + packageVersion + "' has now been registered."
+    print "Package '" + packageName + "-" + packageVersion + "' [" + packageArch + "] has now been registered."
 
 if __name__ == '__main__':
     main(sys.argv[1:])

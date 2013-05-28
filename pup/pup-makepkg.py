@@ -25,7 +25,7 @@ import tarfile
 import hashlib
 
 def main(arglist):
-    optParser = OptionParser(usage="%prog --path PACKAGE_PATH --name NAME --ver VERSION [--repo REPO_PATH]",
+    optParser = OptionParser(usage="%prog --path PACKAGE_PATH --name NAME --ver VERSION --arch ARCH [--repo REPO_PATH]",
                              version="pup-makepkg 0.1")
     optParser.add_option("--path", dest="packagePath", help="""
         The PackagePath is the path to the files to be inserted into a package. This
@@ -41,6 +41,8 @@ def main(arglist):
         The name of the package being created (necessary).""".replace("    ", "").strip())
     optParser.add_option("--ver", dest="packageVersion", help="""
         The version of the package being created (necessary).""".replace("    ", "").strip())
+    optParser.add_option("--arch", dest="packageArch", help="""
+        The architecture of the package being created (necessary).""".replace("    ", "").strip())
 
     (options, args) = optParser.parse_args(arglist)
 
@@ -57,10 +59,17 @@ def main(arglist):
     elif options.packageVersion == None:
         print "You must specify a version for the package via the --ver option."
         exit()
+    elif options.packageArch == None:
+        print "You must specify an architecture for the package via the --arch option."
+        exit()
+    elif not options.packageArch.lower() in ["i686", "amd64", "arm"]:
+        print "The architecture must be i686, amd64, or arm."
+        exit()
 
     packagePath = options.packagePath
     packageName = options.packageName
     packageVersion = options.packageVersion
+    packageArch = options.packageArch.lower()
 
     if packagePath[-1] == "/":
         packagePath = packagePath[0:-1]
@@ -75,7 +84,7 @@ def main(arglist):
         os.makedirs(repoBase)
 
     # TODO: Error handling
-    packageOutput = repoBase + "/" + packageName + "-" + packageVersion + ".pup"
+    packageOutput = '%s/%s-%s-%s.pup' % (repoBase, packageName, packageVersion, packageArch)
     tar = tarfile.open(packageOutput, "w:gz")
 
     def filterfunc(x):
@@ -85,7 +94,7 @@ def main(arglist):
         tar.add(f, arcname = os.path.basename(f))
     tar.close()
 
-    print "Package '" + packageName + "-" + packageVersion + "' has now been created."
+    print "Package '" + packageName + "-" + packageVersion + "' [" + packageArch + "] has now been created."
     print "Run pup-regpkg to register it in your package repository's database."
 
 if __name__ == '__main__':

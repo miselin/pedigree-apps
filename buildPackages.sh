@@ -2,6 +2,10 @@
 
 BASEDIR=$PWD
 
+# Pull out the architecture to build.
+ARCH=$1
+shift
+
 # Please try and keep $DIRS sorted and categorised where possible.
 
 # libtool gets its own category, as it needs to be run early
@@ -39,7 +43,7 @@ for f in $DIRS; do
     echo
     echo "---------- Building '$f' ----------"
     echo
-    $BASEDIR/build.sh $f $*
+    $BASEDIR/build.sh $ARCH $f $*
 
     if [ $? == 0 ]; then
         out="Success."
