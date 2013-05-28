@@ -74,7 +74,7 @@ def main(arglist):
         deps = filter(lambda x: len(x) > 0, options.depsList.split(" "))
 
     # Hash the package
-    packagePath = repoBase + packageName + "-" + packageVersion + ".pup"
+    packagePath = repoBase + packageName + "-" + packageVersion + "-" + packageArch + ".pup"
     if not os.path.exists(packagePath):
         print "Can't find the pup for this package!"
         exit()
