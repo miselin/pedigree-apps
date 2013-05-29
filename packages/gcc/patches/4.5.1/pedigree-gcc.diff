@@ -20,11 +20,11 @@ diff -rupN gcc-4.3.2-orig/gcc/config/pedigree.h gcc-4.3.2/gcc/config/pedigree.h
 +#undef STARTFILE_SPEC
 +#define STARTFILE_SPEC \
 +    "%{!shared: %{!pg:crt0.o%s}} \
-+    crti.o%s crtbegin.o%s"
++    crti.o%s %{!shared:crtbegin.o%s} %{shared:crtbeginS.o%s}"
 +
 +#undef ENDFILE_SPEC
 +#define ENDFILE_SPEC \
-+    "crtend.o%s crtn.o%s"
++    "%{!shared:crtend.o%s} %{shared:crtendS.o%s} crtn.o%s"
 +
 +#undef CPLUSPLUS_CPP_SPEC
 +#define CPLUSPLUS_CPP_SPEC "-D_GNU_SOURCE %(cpp)"
@@ -67,7 +67,7 @@ diff -rupN gcc-4.3.2-orig/gcc/config.gcc gcc-4.3.2/gcc/config.gcc
    esac
    ;;
 +*-*-pedigree*)
-+  extra_parts="crtbegin.o crtend.o"
++  extra_parts="crtbegin.o crtend.o crtbeginS.o crtendS.o"
 +  gas=yes
 +  gnu_ld=yes
 +  default_use_cxa_atexit=yes
@@ -125,22 +125,20 @@ diff -rupN gcc-4.5.1-orig/libtool.m4 gcc-4.5.1/libtool.m4
 diff -rupN gcc-4.4.1-orig/libgcc/config.host gcc-4.4.1/libgcc/config.host
 --- gcc-4.4.1-orig/libgcc/config.host	2009-04-17 21:58:42.000000000 +1000
 +++ gcc-4.4.1/libgcc/config.host	2009-08-17 16:51:35.312742600 +1000
-@@ -287,6 +287,12 @@ i[34567]86-*-netbsd*)
+@@ -287,6 +287,10 @@ i[34567]86-*-netbsd*)
  	;;
  x86_64-*-netbsd*)
  	;;
 +i[34567]86-*-pedigree*)
-+	extra_parts="crtbegin.o crtend.o"
 +	;;
 +x86_64-*-pedigree*)
-+	extra_parts="crtbegin.o crtend.o"
 +	;;
  i[34567]86-*-openbsd2.*|i[34567]86-*openbsd3.[0123])
  	;;
  i[34567]86-*-openbsd*)
 diff -rup gcc/configure{.old,}
---- gcc/configure.old	2013-05-28 22:06:14.604629002 +1000
-+++ gcc/configure	2013-05-28 22:06:37.668072645 +1000
+--- a/gcc/configure.old	2013-05-28 22:06:14.604629002 +1000
++++ b/gcc/configure	2013-05-28 22:06:37.668072645 +1000
 @@ -7434,7 +7434,7 @@ $as_echo "$as_me: WARNING:
  *** Info documentation will not be built." >&2;}
    BUILD_INFO=
