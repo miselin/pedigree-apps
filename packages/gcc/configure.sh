@@ -4,11 +4,12 @@ source ./package-info.sh
 
 source "$1/environment.sh"
 
+CFLAGS="$CFLAGS $CPPFLAGS"
 export CFLAGS
+CXXFLAGS="$CXXFLAGS $CPPFLAGS"
 export CXXFLAGS
 export CPPFLAGS
 export LDFLAGS
-LIBS="$LIBS -lpthread"
 export LIBS
 
 set -e
