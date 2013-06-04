@@ -82,13 +82,13 @@ diff -rupN gcc-4.3.2-orig/gcc/config.gcc gcc-4.3.2/gcc/config.gcc
  	;;
 +i[3-7]86-*-pedigree*)
 +  tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h i386/i386elf.h pedigree.h"
-+  tmake_file="i386/t-i386elf t-svr4"
-+  use_fixproto=yes
++  tmake_file="i386/t-i386elf t-svr4 t-pedigree"
++  use_fixproto=no
 +  ;;
-+x86_64-*-pedigree* | amd64-*-pedigree*)
++x86_64-*-pedigree*)
 +  tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h i386/i386elf.h pedigree.h"
-+  tmake_file="i386/t-i386elf t-svr4"
-+  use_fixproto=yes
++  tmake_file="i386/t-i386elf t-svr4 t-pedigree"
++  use_fixproto=no
 +  ;;
  i[34567]86-*-darwin*)
  	need_64bit_hwint=yes
@@ -96,14 +96,18 @@ diff -rupN gcc-4.3.2-orig/gcc/config.gcc gcc-4.3.2/gcc/config.gcc
 diff -rupN gcc-4.3.2-orig/libstdc++-v3/crossconfig.m4 gcc-4.3.2/libstdc++-v3/crossconfig.m4
 --- gcc-4.3.2-orig/libstdc++-v3/crossconfig.m4	2008-01-15 10:15:43.000000000 +1000
 +++ gcc-4.3.2/libstdc++-v3/crossconfig.m4	2009-03-21 10:46:35.000000000 +1000
-@@ -140,6 +140,11 @@ case "${host}" in
+@@ -140,6 +140,15 @@ case "${host}" in
      GCC_CHECK_TLS
      AM_ICONV
      ;;
 +  *-pedigree*)
 +    AC_CHECK_HEADERS([sys/types.h locale.h float.h])
++    GLIBCXX_CHECK_COMPILER_FEATURES
 +    GLIBCXX_CHECK_LINKER_FEATURES
 +    GLIBCXX_CHECK_COMPLEX_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    GCC_CHECK_TLS
++    AM_ICONV
 +    ;;
    *-mingw32*)
      GLIBCXX_CHECK_LINKER_FEATURES
@@ -132,7 +136,7 @@ diff -rupN gcc-4.4.1-orig/libgcc/config.host gcc-4.4.1/libgcc/config.host
 +i[34567]86-*-pedigree*)
 +	extra_parts="crtbegin.o crtend.o crtbeginS.o crtendS.o"
 +	;;
-+x86_64-*-pedigree* | amd64-*-pedigree*)
++x86_64-*-pedigree*)
 +	extra_parts="crtbegin.o crtend.o crtbeginS.o crtendS.o"
 +	;;
  i[34567]86-*-openbsd2.*|i[34567]86-*openbsd3.[0123])
