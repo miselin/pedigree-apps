@@ -82,12 +82,12 @@ diff -rupN gcc-4.3.2-orig/gcc/config.gcc gcc-4.3.2/gcc/config.gcc
  	;;
 +i[3-7]86-*-pedigree*)
 +  tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h i386/i386elf.h pedigree.h"
-+  tmake_file="i386/t-i386elf t-svr4 t-pedigree"
++  tmake_file="t-pedigree"
 +  use_fixproto=no
 +  ;;
 +x86_64-*-pedigree*)
 +  tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h i386/i386elf.h pedigree.h"
-+  tmake_file="i386/t-i386elf t-svr4 t-pedigree"
++  tmake_file="t-pedigree"
 +  use_fixproto=no
 +  ;;
  i[34567]86-*-darwin*)
