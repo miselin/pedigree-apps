@@ -1,0 +1,73 @@
+diff -rup dropbear-2013.58.old/options.h dropbear-2013.58/options.h
+--- dropbear-2013.58.old/options.h	2013-07-26 21:35:07.625842789 +1000
++++ dropbear-2013.58/options.h	2013-07-26 21:38:13.994766942 +1000
+@@ -21,10 +21,10 @@
+ 
+ /* Default hostkey paths - these can be specified on the command line */
+ #ifndef DSS_PRIV_FILENAME
+-#define DSS_PRIV_FILENAME "/etc/dropbear/dropbear_dss_host_key"
++#define DSS_PRIV_FILENAME "/config/dropbear/dropbear_dss_host_key"
+ #endif
+ #ifndef RSA_PRIV_FILENAME
+-#define RSA_PRIV_FILENAME "/etc/dropbear/dropbear_rsa_host_key"
++#define RSA_PRIV_FILENAME "/config/dropbear/dropbear_rsa_host_key"
+ #endif
+ 
+ /* Set NON_INETD_MODE if you require daemon functionality (ie Dropbear listens
+@@ -52,7 +52,7 @@ much traffic. */
+ /*#define DROPBEAR_SMALL_CODE*/
+ 
+ /* Enable X11 Forwarding - server only */
+-#define ENABLE_X11FWD
++/*#define ENABLE_X11FWD*/
+ 
+ /* Enable TCP Fowarding */
+ /* 'Local' is "-L" style (client listening port forwarded via server)
+@@ -161,7 +161,7 @@ much traffic. */
+ 
+ /* The MOTD file path */
+ #ifndef MOTD_FILENAME
+-#define MOTD_FILENAME "/etc/motd"
++#define MOTD_FILENAME "/config/motd"
+ #endif
+ 
+ /* Authentication Types - at least one required.
+@@ -241,7 +241,7 @@ much traffic. */
+ /* The default file to store the daemon's process ID, for shutdown
+    scripts etc. This can be overridden with the -P flag */
+ #ifndef DROPBEAR_PIDFILE
+-#define DROPBEAR_PIDFILE "/var/run/dropbear.pid"
++#define DROPBEAR_PIDFILE "/system/run/dropbear.pid"
+ #endif
+ 
+ /* The command to invoke for xauth when using X11 forwarding.
+@@ -259,7 +259,7 @@ much traffic. */
+ 
+ /* This is used by the scp binary when used as a client binary. If you're
+  * not using the Dropbear client, you'll need to change it */
+-#define _PATH_SSH_PROGRAM "/usr/bin/dbclient"
++#define _PATH_SSH_PROGRAM "/applications/dbclient"
+ 
+ /* Whether to log commands executed by a client. This only logs the 
+  * (single) command sent to the server, not what a user did in a 
+@@ -296,7 +296,7 @@ be overridden at runtime with -I. 0 disa
+ #define DEFAULT_IDLE_TIMEOUT 0
+ 
+ /* The default path. This will often get replaced by the shell */
+-#define DEFAULT_PATH "/usr/bin:/bin"
++#define DEFAULT_PATH "/applications"
+ 
+ /* Some other defines (that mostly should be left alone) are defined
+  * in sysoptions.h */
+diff -rup dropbear-2013.58.old/sysoptions.h dropbear-2013.58/sysoptions.h
+--- dropbear-2013.58.old/sysoptions.h	2013-07-26 21:35:07.653842928 +1000
++++ dropbear-2013.58/sysoptions.h	2013-07-26 21:38:40.314897456 +1000
+@@ -61,7 +61,7 @@
+ 
+ #define _PATH_TTY "/dev/tty"
+ 
+-#define _PATH_CP "/bin/cp"
++#define _PATH_CP "/applications/cp"
+ 
+ #define DROPBEAR_ESCAPE_CHAR '~'
+ 

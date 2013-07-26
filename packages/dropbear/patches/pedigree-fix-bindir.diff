@@ -1,0 +1,13 @@
+--- dropbear-2013.58.old/Makefile.in	2013-07-26 21:35:07.633842840 +1000
++++ dropbear-2013.58/Makefile.in	2013-07-26 21:43:54.664456230 +1000
+@@ -67,8 +67,8 @@ srcdir=@srcdir@
+ 
+ prefix=@prefix@
+ exec_prefix=${prefix}
+-bindir=${exec_prefix}/bin
+-sbindir=${exec_prefix}/sbin
++bindir=@bindir@
++sbindir=@sbindir@
+ 
+ CC=@CC@
+ AR=@AR@
