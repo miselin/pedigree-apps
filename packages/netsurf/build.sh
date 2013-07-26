@@ -29,6 +29,7 @@ sed -i.bak "s/^.*pkg_config_package.*sdl.*CFLAGS.*$//g" src/libnsfb*/Makefile
 # Change location of resources.
 sed -i.bak "s@share/netsurf/@support/netsurf@g" src/$package-$version/framebuffer/Makefile.defaults
 
+# Remove 'Accept-Encoding: gzip' from curl fetchers.
 sed -i.bak "s|^.*SETOPT[(]CURLOPT\_ENCODING.*$|// \0|g" src/netsurf-3.0/content/fetchers/curl.c
 
 sed -i.bak "s/^.*CFLAGS.*freetype-config.*$/  CFLAGS += -DFB_USE_FREETYPE/g" src/netsurf-3.0/framebuffer/Makefile.target
