@@ -31,6 +31,7 @@ source $ENVPATH/environment.sh
 cd ./packages/$packagedir
 
 bz2="no"
+xz="no"
 source ./package-info.sh
 
 trap "echo Build failed.; rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit 1" INT TERM EXIT
@@ -63,6 +64,9 @@ cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
 tarflags="-xzf"
 if [ $bz2 == "yes" ]; then
     tarflags="-xjf"
+fi
+if [ $xz == "yes" ]; then
+    tarflags="-xJf"
 fi
 tar $tarflags $package-$version.tar.gz --strip 1
 rm $package-$version.tar.gz
