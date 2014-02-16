@@ -13,7 +13,7 @@ DIRS="$DIRS libtool"
 
 # Put any dependent libraries before the applications that need them
 DIRS="$DIRS zlib libiconv gettext libgmp libmpfr libmpc ncurses curl expat pth"
-DIRS="$DIRS libpng libfreetype fontconfig"
+DIRS="$DIRS libpng libfreetype fontconfig pixman"
 
 # Cross-compilers for special libraries
 DIRS="$DIRS binutils gcc"
@@ -35,7 +35,7 @@ DIRS="$DIRS lua nasm python26 python27"
 DIRS="$DIRS cairo mesa"
 
 # Other applications
-DIRS="$DIRS apache2 bash lynx mtools netsurf vim"
+DIRS="$DIRS apache2 bash lynx mtools netsurf vim vttest"
 
 # Apache modules
 DIRS="$DIRS "
