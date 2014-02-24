@@ -8,7 +8,7 @@ export CFLAGS
 export CXXFLAGS
 export CPPFLAGS
 export LDFLAGS
-LIBS="-lSDL -lpedigree -lstdc++ -lpthread $LIBS"
+LIBS="-lSDL -lui -lz -lpedigree -lstdc++ -lpthread $LIBS"
 export LIBS
 
 set -e

@@ -6,5 +6,5 @@ set -e
 
 cd "$2"
 
-NOCONFIGURE=yes ./autogen.sh
+NOCONFIGURE=yes ./autogen.sh > /dev/null 2>&1
 

@@ -10,10 +10,10 @@ CXXFLAGS=`echo $CXXFLAGS | sed s/-O3/-O1/`
 export CXXFLAGS
 export CPPFLAGS
 export LDFLAGS
-LIBS="-lSDL -lpedigree -lstdc++ -lpthread $LIBS"
+LIBS="-lSDL -lui -lz -lpedigree -lstdc++ -lpthread $LIBS"
 export LIBS
 
-# set -e
+set -e
 
 cd "$2"
 mkdir -p build && cd build
@@ -24,3 +24,4 @@ mkdir -p build && cd build
              --disable-opengl --enable-core-inline --enable-dynamic-core \
              --enable-dynrec --enable-fpu --enable-fpu-x86 --disable-unaligned-memory \
              > /dev/null 2>&1
+

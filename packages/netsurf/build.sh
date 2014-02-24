@@ -9,7 +9,7 @@ source "$1/environment.sh"
 CPPFLAGS="-I$2/prefix-framebuffer/include -DNO_IPV6=1 $CPPFLAGS"
 export CFLAGS="$CPPFLAGS $CFLAGS"
 export CXXFLAGS="$CPPFLAGS $CXXFLAGS"
-export LDFLAGS="$LDFLAGS -L$2/prefix-framebuffer/lib -Wl,--whole-archive -lnsfb -Wl,--no-whole-archive -lcss -ldom -lhubbub -lnsbmp -lnsgif -lparserutils -lrosprite -lsvgtiny -lwapcaplet -lcurl -liconv -lssl -lfreetype -lcrypto -lSDL -lpedigree -lstdc++ -lpthread"
+export LDFLAGS="$LDFLAGS -L$2/prefix-framebuffer/lib -Wl,--whole-archive -lnsfb -Wl,--no-whole-archive -lcss -ldom -lhubbub -lnsbmp -lnsgif -lparserutils -lrosprite -lsvgtiny -lwapcaplet -lcurl -liconv -lssl -lfreetype -lcrypto -lSDL -lui -lz -lpedigree -lstdc++ -lpthread"
 export LIBS
 
 set -e
