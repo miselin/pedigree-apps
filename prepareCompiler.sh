@@ -104,6 +104,12 @@ if [ ! -e "$GIVEN_CROSS_PATH/include/SDL" ]; then
     ln -s "$GIVEN_PEDIGREE_PATH/src/lgpl/SDL-1.2.14/include" "$GIVEN_CROSS_PATH/include/SDL"
 fi
 
+# Window Management
+if [ ! -e "$GIVEN_CROSS_PATH/lib/libui.so" ]; then
+    echo "    - libui.so"
+    ln -s "$GIVEN_PEDIGREE_PATH/build/libs/libui.so" "$GIVEN_CROSS_PATH/lib/libui.so"
+fi
+
 set +e
 
 echo "Done!"
