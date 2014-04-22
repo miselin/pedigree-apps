@@ -1,0 +1,187 @@
+From a6abc6ec3cd4885a1d9633016de030a64f5b404f Mon Sep 17 00:00:00 2001
+From: Matthew Iselin <matthew@theiselins.net>
+Date: Tue, 22 Apr 2014 15:26:33 +1000
+Subject: [PATCH] Pedigree OS target
+
+---
+ config.sub                  |  3 +++
+ gcc/config.gcc              | 16 ++++++++++++++++
+ gcc/config/pedigree.h       | 42 ++++++++++++++++++++++++++++++++++++++++++
+ gcc/config/t-pedigree       |  7 +++++++
+ libgcc/config.host          |  9 +++++++++
+ libstdc++-v3/crossconfig.m4 |  5 +++++
+ libtool.m4                  |  4 +++-
+ 7 files changed, 85 insertions(+), 1 deletion(-)
+ create mode 100644 gcc/config/pedigree.h
+ create mode 100644 gcc/config/t-pedigree
+
+diff --git a/config.sub b/config.sub
+index 707e9e2..5c71437 100755
+--- a/config.sub
++++ b/config.sub
+@@ -1510,6 +1510,9 @@ case $os in
+ 		;;
+ 	-nacl*)
+ 		;;
++	-pedigree*)
++		os=-pedigree
++		;;
+ 	-none)
+ 		;;
+ 	*)
+diff --git a/gcc/config.gcc b/gcc/config.gcc
+index 92d57dd..871f92f 100644
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -807,6 +807,12 @@ case ${target} in
+     *) echo 'Unknown thread configuration for VxWorks'; exit 1 ;;
+   esac
+   ;;
++*-*-pedigree*)
++  extra_parts="crtbegin.o crtend.o crtbeginS.o crtendS.o"
++  gas=yes
++  gnu_ld=yes
++  default_use_cxa_atexit=yes
++  ;;
+ *-*-elf)
+   # Assume that newlib is being used and so __cxa_atexit is provided.
+   default_use_cxa_atexit=yes
+@@ -1215,6 +1221,16 @@ i[34567]86-*-elf*)
+ x86_64-*-elf*)
+ 	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h"
+ 	;;
++i[34567]86-*-pedigree*)
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h i386/i386elf.h pedigree.h"
++    tmake_file="i386/t-i386elf i386/t-crtstuff t-pedigree"
++    use_fixproto=yes
++    ;;
++x86_64-*-pedigree*)
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h i386/i386elf.h i386/x86-64.h pedigree.h"
++    tmake_file="i386/t-i386elf i386/t-crtstuff t-pedigree"
++    use_fixproto=yes
++    ;;
+ i[34567]86-*-rdos*)
+     tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/rdos.h"
+     ;;
+diff --git a/gcc/config/pedigree.h b/gcc/config/pedigree.h
+new file mode 100644
+index 0000000..95e66a5
+--- /dev/null
++++ b/gcc/config/pedigree.h
+@@ -0,0 +1,42 @@
++#define NO_IMPLICIT_EXTERN_C
++
++#undef STARTFILE_SPEC
++#define STARTFILE_SPEC \
++    "%{!shared: %{!pg:crt0.o%s}} \
++    crti.o%s %{!shared:crtbegin.o%s} %{shared:crtbeginS.o%s}"
++
++#undef ENDFILE_SPEC
++#define ENDFILE_SPEC \
++    "%{!shared:crtend.o%s} %{shared:crtendS.o%s} crtn.o%s"
++
++#undef CPLUSPLUS_CPP_SPEC
++#define CPLUSPLUS_CPP_SPEC "-D_GNU_SOURCE %(cpp)"
++
++#undef LIB_SPEC
++#define LIB_SPEC \
++    "%{pthread:-lpthread} \
++    -lc"
++
++#undef TARGET_OS_CPP_BUILTINS
++#define TARGET_OS_CPP_BUILTINS()                \
++    do {                                        \
++        builtin_define_std ("__pedigree__");    \
++        builtin_define_std ("pedigree");        \
++        builtin_define_std ("unix");            \
++        builtin_assert ("system=pedigree");     \
++        builtin_assert ("system=unix");         \
++    } while(0);
++
++#if defined(HAVE_LD_EH_FRAME_HDR)
++#define LINK_EH_SPEC "%{!static:--eh-frame-hdr} "
++#endif
++
++#undef LINK_SPEC
++#define LINK_SPEC "%{shared:-shared} \
++                    %{!shared: \
++                      %{!static: \
++                       %{rdynamic:-export-dynamic} \
++                       %{!dynamic-linker:-dynamic-linker /libraries/libload.so} \
++                       } \
++                     }"
++
+diff --git a/gcc/config/t-pedigree b/gcc/config/t-pedigree
+new file mode 100644
+index 0000000..af244ea
+--- /dev/null
++++ b/gcc/config/t-pedigree
+@@ -0,0 +1,7 @@
++EXTRA_MULTILIB_PARTS= crtbegin.o crtend.o crtbeginS.o crtendS.o
++
++# always build crtstuff with PIC.
++CRTSTUFF_T_CFLAGS_S = $(CRTSTUFF_T_CFLAGS) -fPIC
++
++TARGET_LIBGCC2_CFLAGS = -fPIC
++
+diff --git a/libgcc/config.host b/libgcc/config.host
+index 259c9a7..63984b4 100644
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -222,6 +222,9 @@ case ${host} in
+       ;;
+   esac
+   ;;
++*-*-pedigree*)
++  extra_parts="crtbegin.o crtend.o crtbeginS.o crtendS.o"
++  ;;
+ *-*-rtems*)
+   tmake_file="$tmake_file t-rtems"
+   extra_parts="crtbegin.o crtend.o"
+@@ -501,6 +504,12 @@ i[34567]86-*-elf*)
+ x86_64-*-elf*)
+ 	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
+ 	;;
++i[34567]86-*-pedigree*)
++	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
++x86_64-*-pedigree*)
++	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
+ i[34567]86-*-freebsd*)
+ 	tmake_file="${tmake_file} i386/t-freebsd i386/t-crtstuff"
+ 	;;
+diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
+index 943ea67..11c46b6 100644
+--- a/libstdc++-v3/crossconfig.m4
++++ b/libstdc++-v3/crossconfig.m4
+@@ -173,6 +173,11 @@ case "${host}" in
+       AC_DEFINE(HAVE_ISNANL)
+     fi
+     ;;
++  *-pedigree*)
++    AC_CHECK_HEADERS([sys/types.h locale.h float.h])
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_COMPLEX_MATH_SUPPORT
++    ;;
+   *-qnx6.1* | *-qnx6.2*)
+     SECTION_FLAGS='-ffunction-sections -fdata-sections'
+     AC_SUBST(SECTION_FLAGS) 
+diff --git a/libtool.m4 b/libtool.m4
+index 8a14e2b..e94d1a0 100644
+--- a/libtool.m4
++++ b/libtool.m4
+@@ -5371,7 +5371,9 @@ if test -n "$compiler"; then
+   _LT_LINKER_SHLIBS($1)
+   _LT_SYS_DYNAMIC_LINKER($1)
+   _LT_LINKER_HARDCODE_LIBPATH($1)
+-  LT_SYS_DLOPEN_SELF
++  if test "$cross_compiling" = no; then
++    LT_SYS_DLOPEN_SELF
++  fi
+   _LT_CMD_STRIPLIB
+ 
+   # Report which library types will actually be built
+-- 
+1.9.1.423.g4596e3a
+
