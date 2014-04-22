@@ -26,7 +26,6 @@ CFLAGS="-O3 -march=pentium4 -mtune=k8 -msse2 -D__PEDIGREE__"
 CXXFLAGS=$CFLAGS
 
 # Include directories for the preprocessor
-CPPFLAGS="-isystem $CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2 -isystem $CROSS_BASE/$ARCH_TARGET-pedigree/include/c++/4.3.2/$ARCH_TARGET-pedigree"
 CPPFLAGS="$CPPFLAGS -I$CROSS_BASE/include -I$CROSS_BASE/include/curl -I$CROSS_BASE/include/SDL -I$CROSS_BASE/include/ncurses -I$CROSS_BASE/include/pixman-1"
 
 LDFLAGS="-L$CROSS_BASE/lib"
