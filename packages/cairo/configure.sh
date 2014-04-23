@@ -15,7 +15,8 @@ set -e
 
 cd "$2"
 
-png_CFLAGS="" png_LIBS="-lpng" \
+png_REQUIRES="y" png_CFLAGS=" " png_LIBS="-lpng" \
+pixman_CFLAGS=" " pixman_LIBS="-lpixman-1" \
 ./configure --host=$ARCH_TARGET-pedigree --prefix=/support/$package \
             --libdir=/libraries --includedir=/include \
             --disable-xcb --disable-xlib --without-x \
