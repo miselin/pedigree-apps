@@ -41,8 +41,6 @@ set +e
 
 echo "Creating links..."
 
-set -e
-
 # CRT0/CRTi/CRTn
 if [ ! -e "$GIVEN_CROSS_PATH/$DESIRED_TARGET/lib/crt0.o" ]; then
     echo "    - crt0.o"
@@ -109,8 +107,6 @@ if [ ! -e "$GIVEN_CROSS_PATH/lib/libui.so" ]; then
     echo "    - libui.so"
     ln -s "$GIVEN_PEDIGREE_PATH/build/libs/libui.so" "$GIVEN_CROSS_PATH/lib/libui.so"
 fi
-
-set +e
 
 echo "Done!"
 
