@@ -7,7 +7,6 @@ source "$1/environment.sh"
 export CFLAGS
 export CXXFLAGS
 export LDFLAGS
-LIBS="$LIBS -lpthread"
 export LIBS
 
 set -e
