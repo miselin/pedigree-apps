@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # Script to prepare a cross-compiler (base path given as the first argument) to
 # build Pedigree programs without the Pedigree build system.
