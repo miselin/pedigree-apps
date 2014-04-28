@@ -6,7 +6,7 @@ set -e
 
 cd "$2"
 
-NOCONFIGURE=yes ./autogen.sh
+NOCONFIGURE=yes ./autogen.sh > /dev/null 2>&1
 
 # This is (hopefully) the Pedigree libtoolize in $PATH - it adds all our libtool
 # files to the tree automatically.
