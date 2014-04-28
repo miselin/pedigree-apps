@@ -28,6 +28,16 @@ else
 fi
 source $ENVPATH/environment.sh
 
+mkdir -p $CROSS_BASE/lib/pkgconfig
+
+# Make $CROSS_BASE look like a Pedigree layout.
+ln -sf $CROSS_BASE/lib $CROSS_BASE/libraries
+ln -sf $CROSS_BASE/bin $CROSS_BASE/applications
+
+# Override pkg-config search directory to avoid host environment leaking.
+export PKG_CONFIG_LIBDIR=$CROSS_BASE/lib/pkgconfig
+export PKG_CONFIG_SYSROOT_DIR=$CROSS_BASE
+
 cd ./packages/$packagedir
 
 bz2="no"
@@ -116,8 +126,21 @@ for f in $scripts; do
 done
 
 echo
-echo "Package $package ($version) has been built, now registering in the package manager"
+echo "Package $package ($version) has been built."
 
+# OK to ignore errors should they occur.
+set +e
+
+echo "Adding pkgconfig files (if any) to core pkgconfig directory..."
+mkdir -p $CROSS_BASE/lib/pkgconfig
+[ -e $OUTPUT_BASE/$package/$version/libraries/pkgconfig ] && cp $OUTPUT_BASE/$package/$version/libraries/pkgconfig/* $CROSS_BASE/lib/pkgconfig/
+[ -e $OUTPUT_BASE/$package/$version/lib/pkgconfig ] && cp $OUTPUT_BASE/$package/$version/lib/pkgconfig/* $CROSS_BASE/lib/pkgconfig/
+[ -e $OUTPUT_BASE/$package/$version/usr/lib/pkgconfig ] && cp $OUTPUT_BASE/$package/$version/usr/lib/pkgconfig/* $CROSS_BASE/lib/pkgconfig/
+
+# Want to break on errors again!
+set -e
+
+echo "Registering $package ($version) in the package manager..."
 $PACKMAN_PATH makepkg --path $OUTPUT_BASE/$package/$version --repo $PACKMAN_REPO --name $package --ver $version --arch $arch
 $PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version --arch $arch
 
