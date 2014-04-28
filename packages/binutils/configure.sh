@@ -16,8 +16,6 @@ set -e
 
 cd "$2"
 
-sed -i.bak -e 's/@colophon/@@colophon/' -e 's/doc@cygnus.com/doc@@cygnus.com/' bfd/doc/bfd.texinfo
-
 mkdir -p build && cd build
 
 # XXX: --disable-werror is needed because of an issue with rlimit().
