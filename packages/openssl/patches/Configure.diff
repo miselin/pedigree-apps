@@ -5,7 +5,7 @@
  "tru64-alpha-cc", "cc:-std1 -tune host -fast -readonly_strings::-pthread:::SIXTY_FOUR_BIT_LONG RC4_CHUNK:${alpha_asm}:dlfcn:alpha-osf1-shared::-msym:.so",
  
 +# Pedigree
-+"pedigree-gcc", "gcc:-O3 -Wall -DL_ENDIAN -D__PEDIGREE__ -D_BSD_SOURCE:::::BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_elf_asm}:dlfcn:linux-shared:-fPIC:-shared:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
++"pedigree-gcc", "gcc:-m64 -O3 -Wall -DL_ENDIAN -D__PEDIGREE__ -D_BSD_SOURCE:::::SIXTY_FOUR_BIT_LONG RC4_CHUNK DES_INT DES_UNROLL:${x86_64_asm}:elf:dlfcn:linux-shared:-fPIC:-m64 -shared:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::64",
 +
  ####
  #### Variety of LINUX:-)

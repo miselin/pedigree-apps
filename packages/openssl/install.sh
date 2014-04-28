@@ -18,5 +18,5 @@ cd "$OUTPUT_BASE/$package/$version"
 
 # Fix directory layout.
 mv bin applications
-mv lib libraries
+mv lib64 libraries
 
