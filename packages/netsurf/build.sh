@@ -37,5 +37,5 @@ sed -i.bak "s/^.*LDFLAGS.*freetype-config.*$/  LDFLAGS += -lfreetype/g" src/nets
 
 # prepareCompiler hooks in ccache to all compiling, don't double up.
 CC=$CC CXX=$CXX AR=$AR RANLIB=$RANLIB CCACHE="" \
-make TARGET=framebuffer HOST=pedigree VQ= Q= PKG_CONFIG="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-pkg-config" NSFB_SDL_AVAILABLE="yes" NSFB_LINUX_AVAILABLE="no" NETSURF_USE_BMP="YES" NETSURF_USE_JPEG="NO" NETSURF_USE_MNG="NO" NETSURF_USE_GIF="YES" NETSURF_FB_FONTLIB="freetype" NETSURF_USE_LIBICONV_PLUG="NO" DESTDIR="$OUTPUT_BASE/$package/$version/" install
+make TARGET=framebuffer HOST=pedigree VQ= Q= PKG_CONFIG="$CROSS_BASE/bin/$ARCH_TARGET-pedigree-pkg-config" NSFB_SDL_AVAILABLE="yes" NSFB_LINUX_AVAILABLE="no" NETSURF_USE_BMP="YES" NETSURF_USE_JPEG="NO" NETSURF_USE_MNG="NO" NETSURF_USE_GIF="YES" NETSURF_FB_FONTLIB="freetype" NETSURF_USE_LIBICONV_PLUG="NO" DESTDIR="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
 
