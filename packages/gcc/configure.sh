@@ -21,7 +21,6 @@ mkdir -p build && cd build
              --bindir=/applications --sysconfdir=/config/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
              --oldincludedir=/include --with-newlib --enable-languages=c,c++ \
-             --disable-libstdcxx-pch --enable-shared=libgcc,libstdc++ \
-             --enable-sjlj-exceptions \
-             > /dev/null 2>&1
+             --disable-libstdcxx-pch --enable-shared --disable-sjlj-exceptions \
+             --with-system-zlib > /dev/null 2>&1
 

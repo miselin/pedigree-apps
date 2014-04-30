@@ -6,18 +6,23 @@ set -e
 
 cd "$2"
 
-# We use old GCC (4.5.1), and a newer libtool/autoconf/etc
+# We use new GCC (4.8.2), but a newer libtool/autoconf/etc
 # So stop GCC's build system complaining.
 sed -i.bak '/dnl Ensure exactly this Autoconf version is used/d' ./config/override.m4
 autoconf_version=`autoconf -V | grep "autoconf" | tr ' ' '\n' | tail -1`
 sed -i.bak "s/2.64/${autoconf_version}/g" ./config/override.m4
 
+LIBTOOL=$CROSS_BASE/bin/libtool
+libtoolize -i -f --ltdl >/dev/null 2>&1
+autoreconf --force -I ./libltdl >/dev/null 2>&1
+
 # Fix libtool for libraries that need it fixed.
 wd=`pwd`
-for dir in . libstdc++-v3; do
+for dir in . zlib libbacktrace libssp libffi libstdc++-v3; do
   [ ! -d $dir ] && continue
   cd $dir
-  [ -e ./configure.ac ] && autoconf >/dev/null 2>&1
+  libtoolize -i -f --ltdl >/dev/null 2>&1
+  [ -e ./configure.ac ] && autoreconf -i --force -I ./libltdl >/dev/null 2>&1
   cd $wd
 done
 
