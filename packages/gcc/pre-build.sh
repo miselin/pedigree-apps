@@ -18,7 +18,7 @@ autoreconf --force -I ./libltdl >/dev/null 2>&1
 
 # Fix libtool for libraries that need it fixed.
 wd=`pwd`
-for dir in . zlib libbacktrace libssp libffi libstdc++-v3; do
+for dir in . libbacktrace libssp libffi libstdc++-v3; do
   [ ! -d $dir ] && continue
   cd $dir
   libtoolize -i -f --ltdl >/dev/null 2>&1
