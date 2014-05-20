@@ -41,9 +41,11 @@ DIRS="$DIRS apache2 bash lynx mtools netsurf vim vttest"
 DIRS="$DIRS "
 
 # Pedigree-specific stuff
-DIRS="$DIRS pedigree-base"
+DIRS="$DIRS pedigree-base pedigree-devel"
 
-echo > $BASEDIR/status.log
+: > $BASEDIR/status.log
+
+rm -rf $BASEDIR/packages/builds/logs
 
 for f in $DIRS; do
     echo

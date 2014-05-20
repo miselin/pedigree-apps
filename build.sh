@@ -30,6 +30,10 @@ source $ENVPATH/environment.sh
 
 mkdir -p $CROSS_BASE/lib/pkgconfig
 
+mkdir -p $BUILD_BASE
+mkdir -p $DOWNLOAD_TEMP
+mkdir -p $BUILD_BASE/logs
+
 # Make $CROSS_BASE look like a Pedigree layout.
 ln -sf $CROSS_BASE/lib $CROSS_BASE/libraries
 ln -sf $CROSS_BASE/bin $CROSS_BASE/applications
@@ -44,29 +48,31 @@ bz2="no"
 xz="no"
 source ./package-info.sh
 
-trap "echo Build failed.; rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit 1" INT TERM EXIT
+logfile=$BUILD_BASE/logs/$package-$version-`date +"%Y%m%d-%H%M"`.log
+# truncate log file.
+: > $logfile
+
+trap "echo Build failed. | tee -a $logfile; rm -rf $BUILD_BASE/build-$package-$version; cd $oldwd; exit 1" INT TERM EXIT
 
 echo "Building $package ($version)..."
-
-mkdir -p $BUILD_BASE
-mkdir -p $DOWNLOAD_TEMP
+echo "Logs are in $logfile."
 
 # Handle the case where there's a special method for obtaining source.
 # This script should obtain the source and tarball it, placing it into the path
 # specified in $1 with the format $package-$version.tar.gz
 if [ -e ./special.sh ]; then
     echo "    -> Running special method for obtaining source..."
-    ./special.sh $DOWNLOAD_TEMP $ENVPATH
+    ./special.sh $DOWNLOAD_TEMP $ENVPATH >>$logfile 2>&1
 fi
 
 rm -rf $BUILD_BASE/build-$package-$version
 mkdir -p $BUILD_BASE/build-$package-$version
 cd $BUILD_BASE/build-$package-$version
 
-echo "    -> Grabbing/extracting source..."
+echo "    -> Grabbing/extracting source..." | tee -a $logfile
 
 if [ ! -e ./special.sh -a ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
-    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz > /dev/null 2>&1
+    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz >> $logfile
 fi
 
 cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
@@ -81,15 +87,15 @@ fi
 tar $tarflags $package-$version.tar.gz --strip 1
 rm $package-$version.tar.gz
 
-echo "    -> Patching where necessary"
+echo "    -> Patching where necessary" | tee -a $logfile
 
 patches=
 patchfiles=`find $SOURCE_BASE/$package/patches -maxdepth 1 -name "*.diff" 2>/dev/null`
 numpatches=`echo $patchfiles | wc -l`
 if [ ! -z "$patchfiles" ]; then
     for f in $patchfiles; do
-        echo "       (applying $f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
+        echo "       (applying $f)" | tee -a $logfile
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f >>$logfile 2>&1
     done
     
     patches="#"
@@ -98,15 +104,15 @@ patchfiles=`find $SOURCE_BASE/$package/patches/$version -maxdepth 1 -name "*.dif
 numpatches=`echo $patchfiles | wc -l`
 if [ ! -z "$patchfiles" ]; then
     for f in $patchfiles; do
-        echo "       (applying $version/$f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
+        echo "       (applying $version/$f)" | tee -a $logfile
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f >>$logfile 2>&1
     done
     
     patches="#"
 fi
 
 if [ -N $patches ]; then
-    echo "       (no patches needed, hooray!)"
+    echo "       (no patches needed, hooray!)" | tee -a $logfile
 fi
 
 set -e
@@ -118,20 +124,20 @@ phases=( "Pre-build" "Configure" "Build" "Install" "Symlinks" )
 phaseNumber=0
 for f in $scripts; do
     if [ -e $f ]; then
-        echo "    -> "${phases[$phaseNumber]}
-        $f "$ENVPATH" "$BUILD_BASE/build-$package-$version" $*
+        echo "    -> "${phases[$phaseNumber]} | tee -a $logfile
+        $f "$ENVPATH" "$BUILD_BASE/build-$package-$version" $* >>$logfile 2>&1
     fi
     
     let "phaseNumber += 1"
 done
 
 echo
-echo "Package $package ($version) has been built."
+echo "Package $package ($version) has been built." | tee -a $logfile
 
 # OK to ignore errors should they occur.
 set +e
 
-echo "Adding pkgconfig files (if any) to core pkgconfig directory..."
+echo "Adding pkgconfig files (if any) to core pkgconfig directory..." | tee -a $logfile
 mkdir -p $CROSS_BASE/lib/pkgconfig
 [ -e $OUTPUT_BASE/$package/$version/libraries/pkgconfig ] && cp $OUTPUT_BASE/$package/$version/libraries/pkgconfig/* $CROSS_BASE/lib/pkgconfig/
 [ -e $OUTPUT_BASE/$package/$version/lib/pkgconfig ] && cp $OUTPUT_BASE/$package/$version/lib/pkgconfig/* $CROSS_BASE/lib/pkgconfig/
@@ -140,9 +146,9 @@ mkdir -p $CROSS_BASE/lib/pkgconfig
 # Want to break on errors again!
 set -e
 
-echo "Registering $package ($version) in the package manager..."
-$PACKMAN_PATH makepkg --path $OUTPUT_BASE/$package/$version --repo $PACKMAN_REPO --name $package --ver $version --arch $arch
-$PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version --arch $arch
+echo "Registering $package ($version) in the package manager..." | tee -a $logfile
+$PACKMAN_PATH makepkg --path $OUTPUT_BASE/$package/$version --repo $PACKMAN_REPO --name $package --ver $version --arch $arch  | tee -a $logfile
+$PACKMAN_PATH regpkg --repo $PACKMAN_REPO --name $package --ver $version --arch $arch | tee -a $logfile
 
 cd $oldwd
 
