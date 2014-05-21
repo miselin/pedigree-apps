@@ -22,5 +22,5 @@ mkdir -p build && cd build
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
              --oldincludedir=/include --with-newlib --enable-languages=c,c++ \
              --disable-libstdcxx-pch --enable-shared --disable-sjlj-exceptions \
-             --with-system-zlib > /dev/null 2>&1
+             --with-system-zlib
 

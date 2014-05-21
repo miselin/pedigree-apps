@@ -7,20 +7,20 @@ set -e
 cd "$2"
 set -e
 
-autoreconf > /dev/null 2>&1
+autoreconf
 
 mkdir -p build && cd build
 
-../configure > /dev/null 2>&1
+../configure
 
 set +e
 is_darwin=`uname -s | grep -i darwin`
 set -e
 pyext=""
 if [ -z $is_darwin ]; then
-    make Parser/pgen python > /dev/null 2>&1
+    make Parser/pgen python
 else
-    make Parser/pgen.exe python.exe > /dev/null 2>&1
+    make Parser/pgen.exe python.exe
     pyext=".exe"
 fi
 

@@ -8,5 +8,5 @@ set -e
 
 cd "$2"
 
-make INSTALLROOT="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
+make INSTALLROOT="$OUTPUT_BASE/$package/$version/" install
 

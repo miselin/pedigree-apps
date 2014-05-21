@@ -17,5 +17,5 @@ set -e
 cd "$2"
 
 CC="$CC $CPPFLAGS" CXX="$CXX $CPPFLAGS" \
-./Configure threads shared zlib-dynamic --prefix=/ --openssldir=/support/openssl pedigree-gcc > /dev/null 2>&1
+./Configure threads shared zlib-dynamic --prefix=/ --openssldir=/support/openssl pedigree-gcc
 

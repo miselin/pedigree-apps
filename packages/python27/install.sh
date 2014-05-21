@@ -13,6 +13,4 @@ make HOSTPYTHON=$BUILD_BASE/build-$package-$version/build/hostpython \
      BLDSHARED="$ARCH_TARGET-pedigree-gcc -shared -Wl,-shared" \
      CROSS_COMPILING=yes MACHDEP=pedigree \
      ARCH_BITS="$ARCH_BITS" ARCH_TARGET="$ARCH_TARGET" \
-     DESTDIR=$OUTPUT_BASE/$package/$version install $* \
-     > /dev/null 2>&1
-
+     DESTDIR=$OUTPUT_BASE/$package/$version install $*

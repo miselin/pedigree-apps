@@ -15,5 +15,5 @@ make INSTALL_TOP="$out" \
      INSTALL_LIB="$out/libraries" \
      INSTALL_LMOD="$out/support/lua/share/5.1" \
      INSTALL_CMOD="$out/libraries/lua/5.1" \
-     install > /dev/null 2>&1
+     install
 

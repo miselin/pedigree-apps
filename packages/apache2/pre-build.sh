@@ -8,11 +8,9 @@ cd "$2"
 
 # This is (hopefully) the Pedigree libtoolize in $PATH - it adds all our libtool
 # files to the tree automatically.
-libtoolize --copy -i -v -f > /dev/null 2>&1
+libtoolize --copy -i -v -f
 
-aclocal > /dev/null 2>&1
+aclocal
 
-autoconf > /dev/null 2>&1
-
-cd "$2"
+autoconf
 

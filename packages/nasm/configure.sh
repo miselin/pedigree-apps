@@ -16,6 +16,4 @@ cd "$2"
 
 ./configure  --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --prefix=/support/$package \
-             > /dev/null 2>&1
-
+             --prefix=/support/$package

@@ -8,24 +8,24 @@ cd "$2"
 set -e
 mkdir -p build && cd build
 
-../configure > /dev/null 2>&1
+../configure
 
 set +e
 is_darwin=`uname -s | grep -i darwin`
 set -e
 pyext=""
 if [ -z $is_darwin ]; then
-    make python Parser/pgen > /dev/null 2>&1
+    make python Parser/pgen
 else
-    make python.exe Parser/pgen > /dev/null 2>&1
+    make python.exe Parser/pgen
     pyext=".exe"
 fi
 
 mv python$pyext hostpython
 mv Parser/pgen Parser/hostpgen
 
-make distclean > /dev/null 2>&1
+make distclean
 
 cd ..
-autoreconf > /dev/null 2>&1
+autoreconf
 

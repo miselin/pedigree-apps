@@ -19,6 +19,4 @@ mkdir -p build && cd build
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
-             --disable-gl --with-waddir=/support/$package/wads --disable-i386-asm \
-             > /dev/null 2>&1
-
+             --disable-gl --with-waddir=/support/$package/wads --disable-i386-asm

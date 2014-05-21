@@ -20,6 +20,5 @@ mkdir -p build && cd build
              --sysconfdir=/config/$package --prefix=/support/$package \
              --libdir=/libraries --includedir=/include \
              --with-libtool --with-shared --with-termlib \
-             --without-cxx-binding \
-             > /dev/null 2>&1
+             --without-cxx-binding
 

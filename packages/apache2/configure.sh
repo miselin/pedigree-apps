@@ -18,6 +18,5 @@ cd "$2"
 mkdir -p build && cd build
 
 ../configure --host=$ARCH_TARGET-pedigree --enable-layout=Pedigree \
-             --cache-file=$BUILD_BASE/build-$package-$version/pedigree.cache \
-             > /dev/null 2>&1
+             --cache-file=$BUILD_BASE/build-$package-$version/pedigree.cache
 

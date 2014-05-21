@@ -13,16 +13,16 @@ autoconf_version=`autoconf -V | grep "autoconf" | tr ' ' '\n' | tail -1`
 sed -i.bak "s/2.64/${autoconf_version}/g" ./config/override.m4
 
 LIBTOOL=$CROSS_BASE/bin/libtool
-libtoolize -i -f --ltdl >/dev/null 2>&1
-autoreconf --force -I ./libltdl >/dev/null 2>&1
+libtoolize -i -f --ltdl
+autoreconf --force -I ./libltdl
 
 # Fix libtool for libraries that need it fixed.
 wd=`pwd`
 for dir in . libbacktrace libssp libffi libstdc++-v3; do
   [ ! -d $dir ] && continue
   cd $dir
-  libtoolize -i -f --ltdl >/dev/null 2>&1
-  [ -e ./configure.ac ] && autoreconf -i --force -I ./libltdl >/dev/null 2>&1
+  libtoolize -i -f --ltdl
+  [ -e ./configure.ac ] && autoreconf -i --force -I ./libltdl
   cd $wd
 done
 

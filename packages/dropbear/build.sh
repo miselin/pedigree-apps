@@ -8,5 +8,5 @@ cd "$2"
 
 cd "$2/build"
 
-make $3 > /dev/null 2>&1
+make $3
 

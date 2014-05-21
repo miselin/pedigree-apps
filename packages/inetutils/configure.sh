@@ -7,7 +7,6 @@ source "$1/environment.sh"
 export CFLAGS
 export CXXFLAGS
 export LDFLAGS
-LIBS="$LIBS -lpthread"
 export LIBS
 
 set -e
@@ -22,6 +21,5 @@ mkdir -p build && cd build
              --disable-ifconfig --disable-logger --disable-rcp --disable-rlogin \
              --disable-rsh --disable-rexec \
              --disable-uucp \
-             --disable-servers \
-             > /dev/null 2>&1
+             --disable-servers
 

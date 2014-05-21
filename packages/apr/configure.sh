@@ -18,6 +18,5 @@ mkdir -p pup-build && cd pup-build
              --sysconfdir=/config/$package --prefix=/support/$package \
              --libdir=/libraries --includedir=/include --bindir=/applications \
              --cache-file=$BUILD_BASE/build-$package-$version/pedigree.cache \
-             --enable-shared \
-             > /dev/null 2>&1
+             --enable-shared
 

@@ -23,5 +23,4 @@ mkdir -p build && cd build
 ../configure --host=$ARCH_TARGET-pedigree --target=$ARCH_TARGET-pedigree \
              --sysconfdir=/config/$package --prefix=/support/$package \
              --libdir=/libraries --includedir=/include --bindir=/applications \
-             --disable-werror \
-             > /dev/null 2>&1
+             --disable-werror

@@ -23,6 +23,4 @@ mkdir -p $2/Lib/plat-pedigree
             --bindir=/applications \
             --includedir=/include/python/$shortversion \
             --libdir=/support/$package/$shortversion/lib \
-            --without-pydebug --with-threads \
-            > /dev/null 2>&1
-
+            --without-pydebug --with-threads

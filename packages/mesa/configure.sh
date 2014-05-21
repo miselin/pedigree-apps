@@ -19,5 +19,5 @@ mkdir -p build && cd build
              --libdir=/libraries --includedir=/include --disable-werror \
              --enable-osmesa --with-osmesa-bits=8 --disable-dri --disable-glx \
              --with-dri-drivers=swrast --without-gallium-drivers --disable-egl \
-             --enable-shared > /dev/null 2>&1
+             --enable-shared
 

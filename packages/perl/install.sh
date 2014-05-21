@@ -8,5 +8,5 @@ set -e
 
 cd "$2"
 
-make DESTDIR="$OUTPUT_BASE/$package/$version/" install -i -k > /dev/null 2>&1
+make DESTDIR="$OUTPUT_BASE/$package/$version/" install -i -k
 

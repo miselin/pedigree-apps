@@ -20,5 +20,5 @@ curl 'http://download.berlios.de/perlcross/perl-5.16.3-cross-0.7.4.tar.gz/from_s
 
 ./configure --host=$ARCH_TARGET-pedigree --target=$ARCH_TARGET-pedigree --prefix=/support/$package \
             --mode=cross # \
-            # > /dev/null 2>&1
+            #
 

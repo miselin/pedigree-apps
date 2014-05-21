@@ -10,7 +10,7 @@ CXXFLAGS=`echo $CXXFLAGS | sed s/-O3/-O1/`
 export CXXFLAGS
 export CPPFLAGS
 export LDFLAGS
-LIBS="-lSDL -lui -lz -lpedigree -lstdc++ -lpthread $LIBS"
+LIBS="-lSDL -lui -lz -lpedigree -lstdc++ $LIBS"
 export LIBS
 
 set -e
@@ -22,6 +22,5 @@ mkdir -p build && cd build
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --disable-alsatest --disable-sdltest \
              --disable-opengl --enable-core-inline --enable-dynamic-core \
-             --enable-dynrec --enable-fpu --enable-fpu-x86 --disable-unaligned-memory \
-             > /dev/null 2>&1
+             --enable-dynrec --enable-fpu --enable-fpu-x86 --disable-unaligned-memory
 

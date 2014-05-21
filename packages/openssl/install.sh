@@ -12,7 +12,7 @@ cd "$2"
 mkdir -p $OUTPUT_BASE/$package/$version
 rm -rf $OUTPUT_BASE/$package/$version/*
 
-make INSTALL_PREFIX="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
+make INSTALL_PREFIX="$OUTPUT_BASE/$package/$version/" install
 
 cd "$OUTPUT_BASE/$package/$version"
 

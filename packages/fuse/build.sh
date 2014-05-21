@@ -33,7 +33,7 @@ cd $BUILD_BASE/build-$package-$version
 echo "    -> Grabbing source..."
 
 if [ ! -f $DOWNLOAD_TEMP/$package-$version.tar.gz ]; then
-    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz > /dev/null 2>&1
+    wget $url -nv -O $DOWNLOAD_TEMP/$package-$version.tar.gz
 fi
 
 cp $DOWNLOAD_TEMP/$package-$version.tar.gz .
@@ -49,7 +49,7 @@ numpatches=`echo $patchfiles | wc -l`
 if [ ! -z "$patchfiles" ]; then
     for f in $patchfiles; do
         echo "       (applying $f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
     done
     
     patches="#"
@@ -59,7 +59,7 @@ numpatches=`echo $patchfiles | wc -l`
 if [ ! -z "$patchfiles" ]; then
     for f in $patchfiles; do
         echo "       (applying $version/$f)"
-        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f > /dev/null 2>&1
+        patch -p1 -d $BUILD_BASE/build-$package-$version/ < $f
     done
     
     patches="#"
@@ -78,16 +78,14 @@ echo "    -> Configuring..."
 
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --prefix=/support/$package \
-             --libdir=/libraries --includedir=/include --disable-pthread \
-              > /dev/null 2>&1
-
+             --libdir=/libraries --includedir=/include --disable-pthread
 echo "    -> Building..."
 
-make $* > /dev/null 2>&1
+make $*
 
 echo "    -> Installing..."
 
-make DESTDIR="$OUTPUT_BASE/$package/$version/" install > /dev/null 2>&1
+make DESTDIR="$OUTPUT_BASE/$package/$version/" install
 
 echo "Package $package ($version) has been built, now registering in the package manager"
 
