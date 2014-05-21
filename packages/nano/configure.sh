@@ -8,7 +8,6 @@ export CFLAGS
 export CXXFLAGS
 export CPPFLAGS
 export LDFLAGS
-LIBS="$LIBS -lpthread"
 export LIBS
 
 set -e

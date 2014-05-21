@@ -21,3 +21,4 @@ autoconf
             --sysconfdir=/config/$package --datarootdir=/support/$package \
             --prefix=/support/$package --libdir=/libraries --includedir=/include \
             --with-tlib=ncurses --cache-file=auto/config.cache --enable-256-color
+
