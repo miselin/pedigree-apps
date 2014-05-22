@@ -96,3 +96,20 @@ diff -rupN httpd-2.2.17-old/server/Makefile.in httpd-2.2.17/server/Makefile.in
  
  util.lo: test_char.h
 
+--- httpd-2.2.27.old/srclib/apr/Makefile.in  2014-05-22 16:19:13.305163313 +1000
++++ httpd-2.2.27/srclib/apr/Makefile.in      2014-05-22 16:20:52.427576020 +1000
+@@ -133,8 +133,11 @@ OBJECTS_gen_test_char = tools/gen_test_c
+ tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
+    $(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
+ 
+-include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
+-	tools/gen_test_char@EXEEXT@ > $@
++tools/host_gen_test_char@EXEEXT@:
++	gcc -o $@ $(EXTRA_INCLUDES) $(EXTRA_LDFLAGS) $(EXTRA_LIBS) tools/gen_test_char.c
++
++include/private/apr_escape_test_char.h: tools/host_gen_test_char@EXEEXT@
++	tools/host_gen_test_char@EXEEXT@ > $@
+ 
+ LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
+        @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
+
