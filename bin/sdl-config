@@ -1,0 +1,97 @@
+#!/usr/bin/env python2.7
+
+import argparse
+import os
+import re
+import sys
+import subprocess
+
+
+DEFINE_RE = re.compile(r'\#define\s+?(?P<name>.*?)\s+(?P<value>.*)')
+
+
+def main():
+    environment = os.path.join(
+        os.path.dirname(sys.argv[0]), '..', 'environment.sh')
+
+    # Grab variables from the environment.
+    env_args = ['sh', '-c', 'source %s && echo $CROSS_BASE' % (environment,)]
+    cross_base = subprocess.check_output(env_args)
+    if not cross_base or not os.path.exists(cross_base.strip()):
+        print >>sys.stderr, ("$CROSS_BASE is undefined, please check the apps "
+            "build environment")
+        exit(1)
+    cross_base = cross_base.strip()
+
+    include_dir = os.path.join(cross_base, 'include', 'SDL')
+    libs_dir = os.path.join(cross_base, 'lib')
+
+    # Parse header file, extract version
+    sdl_version_header = os.path.join(include_dir, 'SDL_version.h')
+    sdl_version_defines = {}
+    with open(sdl_version_header) as f:
+        for match in DEFINE_RE.finditer(f.read()):
+            d = match.groupdict()
+            sdl_version_defines.update(**{d['name']: d['value']})
+
+    sdl_version = '%s.%s.%s' % (
+        sdl_version_defines['SDL_MAJOR_VERSION'],
+        sdl_version_defines['SDL_MINOR_VERSION'],
+        sdl_version_defines['SDL_PATCHLEVEL'])
+
+    parser = argparse.ArgumentParser(
+        description='Pedigree drop-in replacement for sdl-config.')
+    parser.add_argument('--cflags', action='store_true',
+        help='Print the compiler flags that are necessary to compile a program '
+              'or library that uses SDL.')
+    parser.add_argument('--exec-prefix', dest='dir',
+        help='If  specified,  use  DIR instead of the installation exec prefix '
+             'that SDL was build  with  when  computing  the  output  for  the '
+             '--cflags,  --libs,  --library-libs,  and  --plugin-libs options. '
+             'This option must  be  specified  before  any  of  the  --cflags, '
+             '--libs, --library-libs, and --plugin-libs options.')
+    parser.add_argument('--libs', action='store_true',
+        help='Print the linker flags that are necessary to link a program that '
+             'uses SDL.')
+    parser.add_argument('--static-libs', action='store_true',
+        help='Print the linker flags that are necessary to statically  link  a '
+             'program that uses SDL.')
+    parser.add_argument('--library-libs', action='store_true',
+        help='Print the linker flags that are necessary to link a library that '
+             'uses SDL.   (This  excludes  any  static  objects  required  for '
+             'linking,   since   these  must  be  linked  only  by  executable '
+             'programs.)')
+    parser.add_argument('--plugin-libs', action='store_true',
+        help='Print the linker flags that are necessary to link  an  SDL-using '
+             'object  that  is to be accessed via dlopen(3).  This may include '
+             'static objects with PIC symbol information.  This option  should '
+             'not   be  used  for  ordinary  shared  libraries  or  standalone '
+             'applications.')
+    parser.add_argument('--prefix', dest='dir',
+        help='If specified, use PREFIX instead of the installation prefix that '
+             'SDL  was  built with when computing the output for the --cflags, '
+             '--libs, --library-libs, and --plugin-libs options.  This  option '
+             'is  also  used  for  the  exec  prefix  if --exec-prefix was not '
+             'specified.  This option must be  specified  before  any  of  the '
+             '--cflags, --libs, --library-libs, and --plugin-libs options.')
+    parser.add_argument('--version', action='version', version=sdl_version,
+        help='Prints  the  currently  installed  version  of  SDL  on standard '
+             'output.')
+    args = parser.parse_args()
+
+    pedigree_sdl_config = {
+        'cflags': '-isystem %s' % (include_dir,),
+        'libs': '-Wl,-rpath-link -Wl,%s -lSDL -lpthread -lui -lcairo' % (libs_dir,),
+        'static-libs': '',
+        'library-libs': '',
+        'plugin-libs': '-Wl,-export-dynamic',
+    }
+
+    for k, v in pedigree_sdl_config.iteritems():
+        if hasattr(args, k) and getattr(args, k):
+            print v,
+    print
+
+
+if __name__ == '__main__':
+    main()

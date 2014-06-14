@@ -33,3 +33,7 @@ LDFLAGS="-L$CROSS_BASE/lib -Wl,-rpath-link,$CROSS_BASE/lib"
 if [ -d "$CROSS_BASE/bin" ] && [[ ":$PATH:" != *":$CROSS_BASE/bin:"* ]]; then
     PATH="$CROSS_BASE/bin:$PATH"
 fi
+
+if [ -d "$APPS_BASE/bin" ] && [[ ":$PATH:" != *":$APPS_BASE/bin:"* ]]; then
+    PATH="$CROSS_BASE/bin:$PATH"
+fi
