@@ -10,7 +10,6 @@ CXXFLAGS=`echo $CXXFLAGS | sed s/-O3/-O1/`
 export CXXFLAGS
 export CPPFLAGS
 export LDFLAGS
-LIBS="-lSDL -lui -lz -lpedigree -lstdc++ $LIBS"
 export LIBS
 
 set -e
