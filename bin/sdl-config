@@ -56,17 +56,6 @@ def main():
     parser.add_argument('--static-libs', action='store_true',
         help='Print the linker flags that are necessary to statically  link  a '
              'program that uses SDL.')
-    parser.add_argument('--library-libs', action='store_true',
-        help='Print the linker flags that are necessary to link a library that '
-             'uses SDL.   (This  excludes  any  static  objects  required  for '
-             'linking,   since   these  must  be  linked  only  by  executable '
-             'programs.)')
-    parser.add_argument('--plugin-libs', action='store_true',
-        help='Print the linker flags that are necessary to link  an  SDL-using '
-             'object  that  is to be accessed via dlopen(3).  This may include '
-             'static objects with PIC symbol information.  This option  should '
-             'not   be  used  for  ordinary  shared  libraries  or  standalone '
-             'applications.')
     parser.add_argument('--prefix', dest='dir',
         help='If specified, use PREFIX instead of the installation prefix that '
              'SDL  was  built with when computing the output for the --cflags, '
@@ -80,11 +69,11 @@ def main():
     args = parser.parse_args()
 
     pedigree_sdl_config = {
-        'cflags': '-isystem %s' % (include_dir,),
-        'libs': '-Wl,-rpath-link -Wl,%s -lSDL -lpthread -lui -lcairo' % (libs_dir,),
-        'static-libs': '',
-        'library-libs': '',
-        'plugin-libs': '-Wl,-export-dynamic',
+        'cflags': '-D_GNU_SOURCE=1 -isystem %s' % (include_dir,),
+        'libs': '-L %s -lSDL' % (libs_dir,),
+        'static_libs': ('-L %s -lSDL  -lui -lpedigree-c -lpthread -lstdc++ '
+            '-lcairo -lpixman-1 -lfontconfig -lexpat -lfreetype -lpng -lz '
+            '-liconv' % (libs_dir,)),
     }
 
     for k, v in pedigree_sdl_config.iteritems():
