@@ -17,7 +17,7 @@ cp -R $PEDIGREE_BASE/images/base/libraries pedigree-base
 echo "        -> fonts"
 cp -R $PEDIGREE_BASE/images/base/system/fonts pedigree-base/system
 echo "        -> keymaps"
-cp -R $PEDIGREE_BASE/images/base/system/keymaps pedigree-base/keymaps
+cp -R $PEDIGREE_BASE/images/base/system/keymaps pedigree-base/
 echo "        -> config"
 cp -R $PEDIGREE_BASE/images/base/config pedigree-base/
 echo "        -> root .bashrc"
