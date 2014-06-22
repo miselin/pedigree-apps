@@ -14,6 +14,7 @@ set -e
 cd "$2"
 mkdir -p build && cd build
 
+gl_cv_func_strtod_works=yes \
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --libdir=/libraries --includedir=/include --enable-no-install-program=stdbuf \
