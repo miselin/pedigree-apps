@@ -18,5 +18,5 @@ mkdir -p build && cd build
 
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications --sbindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
-             --prefix=/support/$package --disable-lastlog
+             --prefix=/support/$package --disable-lastlog --disable-utmp --disable-wtmp
 
