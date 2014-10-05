@@ -1,0 +1,13 @@
+diff -rup grub-2.00-clean/grub-core/lib/posix_wrap/sys/types.h grub-2.00/grub-core/lib/posix_wrap/sys/types.h
+--- grub-2.00-clean/grub-core/lib/posix_wrap/sys/types.h	2012-05-29 01:52:37.000000000 +1000
++++ grub-2.00/grub-core/lib/posix_wrap/sys/types.h	2014-10-05 11:10:54.360443227 +1000
+@@ -21,7 +21,7 @@
+ 
+ #include <grub/misc.h>
+ 
+-#ifndef __APPLE__
++#if !defined(_APPLE__) && !defined(__PEDIGREE__)
+ typedef grub_size_t size_t;
+ #else
+ #include <stddef.h>
+Only in grub-2.00/grub-core/lib/posix_wrap/sys: .types.h.swp
