@@ -4,7 +4,7 @@ source ./package-info.sh
 
 source "$1/environment.sh"
 
-set +e
+set -e
 
 cd "$2"
 
@@ -12,4 +12,4 @@ cd "$2"
             --sysconfdir=/config/$package --datarootdir=/support/$package \
             --prefix=/support/$package --libdir=/libraries --includedir=/include \
             --with-randomdev="dev»/urandom" --enable-shared \
-            --disable-threads LDFLAGS="$LDFLAGS"
+            --disable-threads LDFLAGS="$LDFLAGS" CFLAGS="-fPIC" CXXFLAGS="-fPIC"
