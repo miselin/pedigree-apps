@@ -4,11 +4,7 @@ source ./package-info.sh
 
 source "$1/environment.sh"
 
-export CFLAGS
-export CXXFLAGS
-export CPPFLAGS
-export LDFLAGS
-export LIBS
+LIBS="$LIBS -lresolv"
 
 set -e
 
@@ -18,5 +14,6 @@ mkdir -p build && cd build
 ../configure --host=$ARCH_TARGET-pedigree --bindir=/applications \
              --sysconfdir=/config/$package --datarootdir=/support/$package \
              --prefix=/support/$package --libdir=/libraries --includedir=/include \
-             --disable-threads
+             --disable-threads --enable-shared CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" \
+             LIBS="$LIBS"
 
