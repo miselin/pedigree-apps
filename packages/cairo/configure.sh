@@ -4,13 +4,6 @@ source ./package-info.sh
 
 source "$1/environment.sh"
 
-export CFLAGS
-export CXXFLAGS
-CPPFLAGS="$CPPFLAGS -DCAIRO_NO_MUTEX=1"
-export CPPFLAGS
-export LDFLAGS
-export LIBS
-
 set -e
 
 cd "$2"
@@ -19,5 +12,6 @@ cd "$2"
             --libdir=/libraries --includedir=/include \
             --disable-xcb --disable-xlib --without-x \
             --disable-ps --disable-pdf --disable-gobject \
-            --disable-full-testing --disable-static --enable-shared
+            --disable-full-testing --disable-static --enable-shared \
+            CPPFLAGS="$CPPFLAGS -DCAIRO_NO_MUTEX=1" LDFLAGS="$LDFLAGS"
 
