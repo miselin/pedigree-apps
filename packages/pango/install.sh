@@ -6,7 +6,7 @@ source "$1/environment.sh"
 
 set -e
 
-cd "$2/build"
+cd "$2/build-pango"
 
 make DESTDIR="$OUTPUT_BASE/$package/$version/" install
 
