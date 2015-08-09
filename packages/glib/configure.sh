@@ -20,5 +20,3 @@ ac_cv_func_posix_getgrgid_r=no \
              --sysconfdir=/config/$package --prefix=/support/$package \
              --libdir=/libraries --includedir=/include \
              --with-sysroot=$CROSS_BASE --with-libiconv
-
-cp config.log $HOME/src/pedigree-apps/config.log
