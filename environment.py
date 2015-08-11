@@ -3,18 +3,37 @@
 import functools
 import os
 
-
-def expand(env, s):
-    result = os.path.expandvars(s)
-    for k, v in env.items():
-        var = '$%s' % k
-        result = result.replace(var, v)
-
-    return result
+from support.util import expand
 
 
-def generate_environment(target_arch):
-    env = {}
+class OverridableDict(dict):
+
+    def __init__(self, *args, **kwargs):
+        self._overrides = set()
+        self._tracking = False
+        super(OverridableDict, self).__init__(*args, **kwargs)
+
+    def __setitem__(self, key, value):
+        if self._tracking:
+            # Track overridden keys.
+            self._overrides.add(key)
+            super(OverridableDict, self).__setitem__(key, value)
+        elif key not in self._overrides:
+            super(OverridableDict, self).__setitem__(key, value)
+        else:
+            value = self.get(key, value)
+            super(OverridableDict, self).__setitem__(key, value)
+
+    def track(self, tracking=True):
+        self._tracking = tracking
+
+    def has_overrides(self):
+        return bool(self._overrides)
+
+
+def generate_environment(target_arch, env=None, recurse=True):
+    if env is None:
+        env = OverridableDict()
 
     # Simplify expansion.
     _expand = functools.partial(expand, env)
@@ -44,6 +63,9 @@ def generate_environment(target_arch):
     env['SOURCE_BASE'] = _expand('$APPS_BASE/packages')
     env['DOWNLOAD_TEMP'] = _expand('$APPS_BASE/downloads')
     env['BUILD_BASE'] = _expand('$SOURCE_BASE/builds')
+
+    # Package manager.
+    env['PACKMAN_TARGET_ARCH'] = target_arch
     env['PACKMAN_PATH'] = _expand('$APPS_BASE/pup/pup')
     env['PACKMAN_REPO'] = _expand('$APPS_BASE/pup/package_repo')
 
@@ -65,6 +87,10 @@ def generate_environment(target_arch):
     # Linker options; -rpath-link is very important for linking.
     env['CROSS_LDFLAGS'] = _expand('-L$CROSS_BASE/lib -Wl,-rpath-link,$CROSS_BASE/lib')
 
+    # pkg-config magic.
+    env['PKG_CONFIG_LIBDIR'] = _expand('$CROSS_BASE/lib/pkgconfig')
+    env['PKG_CONFIG_SYSROOT_DIR'] = _expand('$CROSS_BASE')
+
     # Add local binary paths to $PATH.
     cross_bin = _expand('$CROSS_BASE/bin')
     if cross_bin not in os.environ['PATH']:
@@ -75,12 +101,24 @@ def generate_environment(target_arch):
 
     # Build system tools.
     env['MAKE'] = '/usr/bin/make'
+    env['PATCH'] = '/usr/bin/patch'
 
     # Pull in any local changes that the local system requires.
-    try:
-        from local_environment import modify_environment
-        env = modify_environment(env)
-    except ImportError:
-        pass
+    if recurse:
+        try:
+            from local_environment import modify_environment
+
+            # Start tracking 'damage' to the environment to figure out what
+            # the local environment changes are.
+            env.track()
+            modify_environment(env)
+            env.track(tracking=False)
+
+            # If anything was changed in modify_environment, we need to actually
+            # re-generate the environment so we can pick up new expansions.
+            if env.has_overrides():
+                generate_environment(target_arch, env=env, recurse=False)
+        except ImportError:
+            pass
 
     return env

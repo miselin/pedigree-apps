@@ -19,7 +19,7 @@ class ZlibPackage(buildsystem.Package):
         return '1.2.8'
 
     def build_requires(self):
-        return [] # ['libtool']
+        return ['libtool']
 
     def options(self):
         return self._options
@@ -51,25 +51,8 @@ class ZlibPackage(buildsystem.Package):
     def links(self, env, deploydir, cross_dir):
         libs = ['libz.a', 'libz.so', 'libz.so.1', 'libz.so.1.2.8']
         headers = ['zconf.h', 'zlib.h']
-
-        symlinks = []
-
-        for lib in libs:
-            lib_source = os.path.join(deploydir, 'libraries', lib)
-            lib_target = os.path.join(cross_dir, 'lib', lib)
-            symlinks.append((lib_source, lib_target))
-
-        for include in headers:
-            include_source = os.path.join(deploydir, 'include', include)
-            include_target = os.path.join(cross_dir, 'include', include)
-            symlinks.append((include_source, include_target))
-
-        for source, target in symlinks:
-            print source, '->', target
-            if os.path.exists(target):
-                os.unlink(target)
-            os.symlink(source, target)
+        steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
 
 
-def get_package():
-    return ZlibPackage()
+def get_package_cls():
+    return ZlibPackage

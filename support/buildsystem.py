@@ -1,4 +1,9 @@
 
+import os
+import subprocess
+
+from . import steps
+
 
 class OptionalError(NotImplementedError):
     pass
@@ -33,6 +38,9 @@ class Package(object):
     Some methods are optional, others are not.
     """
 
+    def __init__(self, package_py_path):
+        self._path = os.path.dirname(package_py_path)
+
     def name(self):
         """Returns the name of the package (eg, "zlib")."""
         raise NotImplementedError()
@@ -62,11 +70,16 @@ class Package(object):
         """Download the source tarball to the given file."""
         raise OptionalError()
 
-    def patch(self, env, target):
+    def patch(self, env, srcdir):
         """Apply patches to the source tree.
 
         Automatically uses the patches from patches()."""
-        pass  # Do this.
+        patches = self.patches(env, srcdir)
+        for patch in patches:
+            real_patch = os.path.join(self._path, 'patches', patch)
+            with open(real_patch, 'r') as f:
+                subprocess.check_call([env['PATCH'], '-p1'], stdin=f,
+                    cwd=srcdir, env=env)
 
     def prebuild(self, env, srcdir):
         """Performs steps needed to prepare the build."""
@@ -88,7 +101,37 @@ class Package(object):
         """Performs steps needed after deployment completes."""
         raise OptionalError()
 
+    def repository(self, env, srcdir, deploydir):
+        """Creates a package from the deploydir."""
+        steps.create_package(self, deploydir, env)
+
     def links(self, env, deploydir, cross_dir):
         """Performs steps needed to link headers and libraries into the
         cross-compiler tree for future builds to access."""
         raise OptionalError()
+
+    def pkgconfig(self, env, deploydir, cross_dir):
+        """Links any found pkgconfig files for the cross-toolchain."""
+        target_path = env['PKG_CONFIG_LIBDIR']
+        if not os.path.isdir(target_path):
+            os.makedirs(target_path)
+
+        search_paths = ['libraries', 'lib', 'usr/lib']
+        for search_path in search_paths:
+            deploy_path = os.path.join(deploydir, search_path, 'pkgconfig')
+            if not os.path.isdir(deploy_path):
+                continue
+
+            for pcfile in os.listdir(deploy_path):
+                if not pcfile.endswith('.pc'):
+                    continue
+                pcfile_path = os.path.join(deploy_path, pcfile)
+                if not os.path.isfile(pcfile_path):
+                    continue
+
+                target_path = os.path.join(target_path, pcfile)
+                if os.path.isfile(target_path) or os.path.islink(target_path):
+                    os.unlink(target_path)
+
+                print target_path, '->', pcfile_path
+                os.symlink(pcfile_path, target_path)
