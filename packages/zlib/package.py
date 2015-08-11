@@ -29,19 +29,16 @@ class ZlibPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        """Performs steps needed to prepare the build."""
         steps.libtoolize(srcdir, env)
 
     def configure(self, env, srcdir):
-        """Performs steps needed to configure the build system."""
         env['CC'] = env['CROSS_CC']
         env['LD'] = env['CROSS_LD']
         env['LDSHARED'] = '%s -shared -Wl,-soname,libz.so.1,--version-script,zlib.map' % env['CROSS_LD']
-        steps.autoconf(self, srcdir, env, host=False,
+        steps.run_configure(self, srcdir, env, host=False,
             paths=('prefix', 'libdir', 'includedir'))
 
     def build(self, env, srcdir):
-        """Performs steps needed to actually build."""
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):

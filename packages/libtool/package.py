@@ -32,7 +32,7 @@ class LibtoolPackage(buildsystem.Package):
         steps.download(url, target)
 
     def configure(self, env, srcdir):
-        steps.autoconf(self, srcdir, env, extra_config=('--enable-shared',))
+        steps.run_configure(self, srcdir, env, extra_config=('--enable-shared',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
@@ -51,7 +51,6 @@ class LibtoolPackage(buildsystem.Package):
         target_path = os.path.join(cross_dir, 'bin')
 
         for bin in bins:
-
             source_contents = ''
             with open(os.path.join(deploydir, 'applications', bin), 'r') as f:
                 source_contents = f.read()

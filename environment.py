@@ -102,6 +102,11 @@ def generate_environment(target_arch, env=None, recurse=True):
     # Build system tools.
     env['MAKE'] = '/usr/bin/make'
     env['PATCH'] = '/usr/bin/patch'
+    env['MOUNT'] = '/bin/mount'
+    env['UMOUNT'] = '/bin/umount'
+    env['AUTOCONF'] = '/usr/bin/autoconf'
+    env['AUTORECONF'] = '/usr/bin/autoreconf'
+    env['ACLOCAL'] = '/usr/bin/aclocal'
 
     # Pull in any local changes that the local system requires.
     if recurse:

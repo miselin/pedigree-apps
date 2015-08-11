@@ -25,23 +25,39 @@ def get_builddir(srcdir, env, inplace):
     if inplace:
         return srcdir
     else:
-        return os.path.join(srcdir, 'pedigree-build')
+        path = os.path.join(srcdir, 'pedigree-build')
+        if not os.path.isdir(path):
+            os.makedirs(path)
+        return path
 
 
-def libtoolize(srcdir, env):
+def libtoolize(srcdir, env, ltdl_dir=None):
     """libtoolize's the target."""
     libtoolize = os.path.join(env['CROSS_BASE'], 'bin', 'libtoolize')
-    subprocess.check_call([libtoolize, '-i', '-f', '--ltdl'], cwd=srcdir,
-        env=env)
+    if ltdl_dir:
+        ltdl_dir = '=%s' % ltdl_dir
+    else:
+        ltdl_dir = ''
+    subprocess.check_call([libtoolize, '-i', '-f', '--ltdl%s' % ltdl_dir],
+        cwd=srcdir, env=env)
 
 
-def autoreconf(srcdir, env):
+def autoreconf(srcdir, env, extra_flags=()):
     """autoreconf's the target."""
-    subprocess.check_call(['autoreconf', '-ifs'], shell=True, cwd=srcdir,
-        env=env)
+    print srcdir
+    print os.listdir(srcdir)
+    subprocess.check_call([env['AUTORECONF'], '-ifs'] + list(extra_flags),
+        cwd=srcdir, env=env)
 
 
-def autoconf(package, srcdir, env, extra_opts=(), inplace=True, host=True,
+def autoconf(srcdir, env, aclocal_flags=()):
+    """Runs aclocal and then autoconf for the target."""
+    aclocal_cmd = [env['ACLOCAL']] + list(aclocal_flags)
+    subprocess.check_call(aclocal_cmd, cwd=srcdir, env=env)
+    subprocess.check_call([env['AUTOCONF']], cwd=srcdir, env=env)
+
+
+def run_configure(package, srcdir, env, extra_opts=(), inplace=True, host=True,
              extra_config=(), paths=None):
     """Runs an Autoconf configure script."""
     cmd_env = env.copy()
@@ -68,7 +84,7 @@ def autoconf(package, srcdir, env, extra_opts=(), inplace=True, host=True,
 
     opts.extend(extra_config)
 
-    subprocess.check_call(opts, cwd=srcdir, env=env)
+    subprocess.check_call(opts, cwd=builddir, env=env)
 
 
 def make(srcdir, env, target=None, inplace=True):
@@ -130,3 +146,12 @@ def create_package(package, deploydir, env):
         '--repo', repo_dir, '--name', package_name, '--ver', package_version,
         '--arch', package_arch], cwd=deploydir)
 
+
+def create_chroot(env, directory):
+    """Creates a chroot and updates the environment (eg $PATH) for it.
+
+    Will not enter the chroot, but because $PATH is broken, you should almost
+    always enter the chroot immediately after this function returns.
+    """
+    # TODO: figure out how to do this sanely.
+    pass
