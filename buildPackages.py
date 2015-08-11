@@ -43,12 +43,13 @@ def load_packages(env):
 def build_package(package, env):
     """Builds the given package."""
     package_id = '%s-%s' % (package.name(), package.version())
+    env = env.copy()
 
-    download_target = os.path.join(env['DOWNLOAD_TEMP'], package_id)
+    download_target = os.path.join(env['DOWNLOAD_TEMP'], '_%s' % package_id)
     srcdir = os.path.join(env['BUILD_BASE'], package_id)
     deploydir = os.path.join(env['OUTPUT_BASE'], package_id)
 
-    for d in [srcdir, deploydir]:
+    for d in [deploydir, srcdir]:
         if os.path.isdir(d):
             shutil.rmtree(d)
             os.makedirs(d)
@@ -64,7 +65,7 @@ def build_package(package, env):
             method = getattr(package, step)
 
             try:
-                method(env, download_target)
+                method(env.copy(), download_target)
             except buildsystem.OptionalError:
                 download_target = None
 
@@ -100,7 +101,7 @@ def build_package(package, env):
         method = getattr(package, step)
 
         try:
-            method(env, srcdir)
+            method(env.copy(), srcdir)
         except buildsystem.OptionalError:
             pass
 
@@ -109,7 +110,7 @@ def build_package(package, env):
         method = getattr(package, step)
 
         try:
-            method(env, srcdir, deploydir)
+            method(env.copy(), srcdir, deploydir)
         except buildsystem.OptionalError:
             pass
 
@@ -118,7 +119,7 @@ def build_package(package, env):
         method = getattr(package, step)
 
         try:
-            method(env, deploydir, env['CROSS_BASE'])
+            method(env.copy(), deploydir, env['CROSS_BASE'])
         except buildsystem.OptionalError:
             pass
 
