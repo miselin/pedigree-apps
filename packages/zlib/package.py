@@ -49,7 +49,3 @@ class ZlibPackage(buildsystem.Package):
         libs = ['libz.a', 'libz.so', 'libz.so.1', 'libz.so.1.2.8']
         headers = ['zconf.h', 'zlib.h']
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
-
-
-def get_package_cls():
-    return ZlibPackage

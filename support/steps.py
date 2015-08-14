@@ -87,12 +87,13 @@ def run_configure(package, srcdir, env, extra_opts=(), inplace=True, host=True,
     subprocess.check_call(opts, cwd=builddir, env=env)
 
 
-def make(srcdir, env, target=None, inplace=True):
+def make(srcdir, env, target=None, inplace=True, extra_opts=()):
     """Runs a Makefile."""
     builddir = get_builddir(srcdir, env, inplace)
     opts = [env['MAKE']]
     if target is not None:
         opts.append(target)
+    opts.extend(list(extra_opts))
     subprocess.check_call(opts, cwd=builddir, env=env)
 
 

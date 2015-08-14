@@ -66,7 +66,3 @@ class LibiconvPackage(buildsystem.Package):
         headers = ['libcharset.h', 'localcharset.h', 'iconv.h']
 
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
-
-
-def get_package_cls():
-    return LibiconvPackage

@@ -5,10 +5,10 @@ from support import buildsystem
 from support import steps
 
 
-class ZlibPackage(buildsystem.Package):
+class GettextPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(ZlibPackage, self).__init__(*args, **kwargs)
+        super(GettextPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
@@ -52,7 +52,3 @@ class ZlibPackage(buildsystem.Package):
         libs = ['libz.a', 'libz.so', 'libz.so.1', 'libz.so.1.2.8']
         headers = ['zconf.h', 'zlib.h']
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
-
-
-def get_package_cls():
-    return ZlibPackage

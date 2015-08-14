@@ -72,7 +72,3 @@ class LibtoolPackage(buildsystem.Package):
 
             # Mark the target executable now that we've copied the contents.
             os.chmod(target_file, 0755)
-
-
-def get_package_cls():
-    return LibtoolPackage
