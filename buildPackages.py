@@ -11,6 +11,7 @@ import tarfile
 import environment
 
 from support import buildsystem
+from support import steps
 from support import util
 
 
@@ -33,9 +34,13 @@ def load_packages(env):
             except Exception as e:
                 print >>sys.stderr, '%s failed to load (%s), ignoring.' % (
                     entry, e)
-            else:
-                package = loaded.get_package_cls()(module)
-                all_packages[package.name()] = package
+
+    # Collect subclasses of packages.
+    collected_packages = buildsystem.Package.__subclasses__()
+    for package_cls in collected_packages:
+        package = package_cls(sys.modules[package_cls.__module__].__file__)
+        if package.name():
+            all_packages[package.name()] = package
 
     return all_packages
 
@@ -52,7 +57,7 @@ def build_package(package, env):
     for d in [deploydir, srcdir]:
         if os.path.isdir(d):
             shutil.rmtree(d)
-            os.makedirs(d)
+        os.makedirs(d)
 
     pass0_steps = ('download',)
     pass1_steps = ('patch', 'prebuild', 'configure', 'build')
@@ -77,24 +82,27 @@ def build_package(package, env):
     # Extract the given tarball.
     if download_target is not None:
         mode = 'r'
-        tar_format = package.options().tarball_format
+        tar_format = package.options().tarfile_format
         if tar_format not in ['bare', 'xz']:
             mode = 'r:%s' % tar_format
+
+            if tar_format != 'none':
+                # tar --strip=1
+                def check_strip(tarinfo):
+                    return '/' in tarinfo.path
+                def strip_first(tarinfo):
+                    stripped = tarinfo.path.split('/')[1:]
+                    tarinfo.path = os.path.join(*stripped)
+                    return tarinfo
+
+                tar = tarfile.open(download_target, mode=mode)
+                tar.extractall(path=srcdir, members=(strip_first(x) for x in tar if check_strip(x)))
+                tar.close()
         elif tar_format == 'xz':
-            raise Exception('cannot handle xz just yet')
-
-        if tar_format != 'none':
-            # tar --strip=1
-            def check_strip(tarinfo):
-                return '/' in tarinfo.path
-            def strip_first(tarinfo):
-                stripped = tarinfo.path.split('/')[1:]
-                tarinfo.path = os.path.join(*stripped)
-                return tarinfo
-
-            tar = tarfile.open(download_target, mode=mode)
-            tar.extractall(path=srcdir, members=(strip_first(x) for x in tar if check_strip(x)))
-            tar.close()
+            # Can't do it in-process, shell out.
+            print download_target
+            print srcdir
+            subprocess.check_call([env['TAR'], '--strip', '1', '-xf', download_target], cwd=srcdir, env=env)
 
     for step in pass1_steps:
         print '== %s %s step ==' % (package_id, step)

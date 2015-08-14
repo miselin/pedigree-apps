@@ -13,12 +13,12 @@ class Options(object):
     """Custom object for options with validation."""
     __anything__ = object()
     __opts__ = {
-        'tarball_format': ('bz2', 'gz', 'xz', 'bare', 'none'),
+        'tarfile_format': ('bz2', 'gz', 'xz', 'bare', 'none'),
     }
 
     def __init__(self):
         # Set sensible defaults.
-        self.tarball_format = 'gz'
+        self.tarfile_format = 'gz'
 
     def __setattr__(self, key, value):
         obj = Options.__opts__.get(key, Options.__anything__)
