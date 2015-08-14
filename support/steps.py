@@ -44,8 +44,6 @@ def libtoolize(srcdir, env, ltdl_dir=None):
 
 def autoreconf(srcdir, env, extra_flags=()):
     """autoreconf's the target."""
-    print srcdir
-    print os.listdir(srcdir)
     subprocess.check_call([env['AUTORECONF'], '-ifs'] + list(extra_flags),
         cwd=srcdir, env=env)
 

@@ -116,7 +116,7 @@ class Package(object):
         if not os.path.isdir(target_path):
             os.makedirs(target_path)
 
-        search_paths = ['libraries', 'lib', 'usr/lib']
+        search_paths = ['libraries', 'lib', os.path.join('usr', 'lib')]
         for search_path in search_paths:
             deploy_path = os.path.join(deploydir, search_path, 'pkgconfig')
             if not os.path.isdir(deploy_path):
@@ -129,9 +129,9 @@ class Package(object):
                 if not os.path.isfile(pcfile_path):
                     continue
 
-                target_path = os.path.join(target_path, pcfile)
-                if os.path.isfile(target_path) or os.path.islink(target_path):
-                    os.unlink(target_path)
+                target_pcfile_path = os.path.join(target_path, pcfile)
+                if os.path.isfile(target_pcfile_path) or os.path.islink(target_pcfile_path):
+                    os.unlink(target_pcfile_path)
 
-                print target_path, '->', pcfile_path
-                os.symlink(pcfile_path, target_path)
+                print target_pcfile_path, '->', pcfile_path
+                os.symlink(pcfile_path, target_pcfile_path)
