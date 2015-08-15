@@ -56,7 +56,7 @@ def create_dependent_links(all_packages, package, env):
 
     # Wipe out links to start with.
     cross_base = env['CROSS_BASE']
-    cross_libs = os.path.join(cross_base, 'libraries')
+    cross_libs = os.path.join(cross_base, 'lib')
     cross_headers = os.path.join(cross_base, 'include')
 
     remove = []
