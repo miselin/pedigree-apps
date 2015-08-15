@@ -61,8 +61,7 @@ class LibiconvPackage(buildsystem.Package):
         steps.make(srcdir, env, 'install', inplace=False)
 
     def links(self, env, deploydir, cross_dir):
-        libs = ['libcharset.a', 'libiconv.la', 'libiconv.a', 'libcharset.la',
-            'libcharset.so', 'libiconv.so']
+        libs = ['libcharset.a', 'libcharset.so', 'libiconv.so']
         headers = ['libcharset.h', 'localcharset.h', 'iconv.h']
 
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)

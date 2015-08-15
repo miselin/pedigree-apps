@@ -52,9 +52,7 @@ class GlibPackage(buildsystem.Package):
         steps.make(srcdir, env, 'install')
 
     def links(self, env, deploydir, cross_dir):
-        libs = ['gio', 'libgio-2.0.la', 'libgthread-2.0.so',
-            'libgmodule-2.0.so', 'libgobject-2.0.so', 'libgthread-2.0.la',
-            'glib-2.0', 'libglib-2.0.la', 'libglib-2.0.so', 'libgmodule-2.0.la',
-            'libgobject-2.0.la', 'libgio-2.0.so']
+        libs = ['gio', 'libgthread-2.0.so', 'libgmodule-2.0.so',
+            'libgobject-2.0.so', 'glib-2.0', 'libglib-2.0.so', 'libgio-2.0.so']
         headers = ['glib-2.0', 'gio-unix-2.0']
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)

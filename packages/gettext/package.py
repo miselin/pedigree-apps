@@ -47,9 +47,8 @@ class GettextPackage(buildsystem.Package):
         steps.make(srcdir, env, 'install')
 
     def links(self, env, deploydir, cross_dir):
-        libs = ['libgettextlib.so', 'libgettextpo.la', 'libgettextpo.a',
-            'libgettextlib.la', 'libasprintf.so', 'libintl.a', 'gettext',
-            'libgettextsrc.so', 'libasprintf.la', 'libintl.so', 'libintl.la',
-            'libgettextpo.so', 'libgettextsrc.la', 'libasprintf.a']
+        libs = ['libgettextlib.so', 'libgettextpo.a', 'libasprintf.so',
+            'libintl.a', 'gettext', 'libgettextsrc.so', 'libintl.so',
+            'libgettextpo.so', 'libasprintf.a']
         headers = ['autosprintf.h', 'gettext-po.h', 'libintl.h']
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)

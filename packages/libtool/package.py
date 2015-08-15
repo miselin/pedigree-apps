@@ -42,7 +42,7 @@ class LibtoolPackage(buildsystem.Package):
         steps.make(srcdir, env, 'install')
 
     def links(self, env, deploydir, cross_dir):
-        libs = ['libltdl.a', 'libltdl.so', 'libltdl.la']
+        libs = ['libltdl.a', 'libltdl.so']
         headers = ['ltdl.h', 'libltdl']
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
 
