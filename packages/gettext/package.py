@@ -36,7 +36,8 @@ class GettextPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         env['CPPFLAGS'] = env['CROSS_CPPFLAGS']
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_config=(
+            '--with-libiconv-prefix=%s' % env['CROSS_BASE'],))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
@@ -46,9 +47,9 @@ class GettextPackage(buildsystem.Package):
         steps.make(srcdir, env, 'install')
 
     def links(self, env, deploydir, cross_dir):
-        print os.listdir(deploydir + '/libraries')
-        print os.listdir(deploydir + '/include')
-        raise Exception('foo')
-        libs = ['libz.a', 'libz.so', 'libz.so.1', 'libz.so.1.2.8']
-        headers = ['zconf.h', 'zlib.h']
+        libs = ['libgettextlib.so', 'libgettextpo.la', 'libgettextpo.a',
+            'libgettextlib.la', 'libasprintf.so', 'libintl.a', 'gettext',
+            'libgettextsrc.so', 'libasprintf.la', 'libintl.so', 'libintl.la',
+            'libgettextpo.so', 'libgettextsrc.la', 'libasprintf.a']
+        headers = ['autosprintf.h', 'gettext-po.h', 'libintl.h']
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
