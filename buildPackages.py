@@ -45,6 +45,53 @@ def load_packages(env):
     return all_packages
 
 
+def create_dependent_links(all_packages, package, env):
+    """Creates links for the package based on its dependencies.
+
+    First, this wipes out existing links from the cross-toolchain, and then
+    creates new links for every package the given package depends on. This
+    ensures no unintentional dependencies are collected along the way and that
+    the builds are not choosing the wrong dependencies.
+    """
+
+    # Wipe out links to start with.
+    cross_base = env['CROSS_BASE']
+    cross_libs = os.path.join(cross_base, 'libraries')
+    cross_headers = os.path.join(cross_base, 'include')
+
+    remove = []
+    for entry in os.listdir(cross_libs):
+        entry_path = os.path.join(cross_libs, entry)
+        if os.path.islink(entry_path):
+            remove.append(entry_path)
+    for entry in os.listdir(cross_headers):
+        entry_path = os.path.join(cross_headers, entry)
+        if os.path.islink(entry_path):
+            remove.append(entry_path)
+
+    for removal in remove:
+        os.unlink(removal)
+
+    # Traverse the dependency chain, pulling in dependencies of our dependencies
+    # and so on. This is important as we may have implicit dependencies.
+    def traverse_depends(depends, package):
+        package_depends = package.build_requires()
+        for dependency in package_depends:
+            dependent_package = all_packages[dependency]
+            depends.append(dependent_package)
+            traverse_depends(depends, dependent_package)
+    depends = []
+    traverse_depends(depends, package)
+
+    # Now, create all the dependent links.
+    for package in depends:
+        package_id = '%s-%s' % (package.name(), package.version())
+        deploydir = os.path.join(env['OUTPUT_BASE'], package_id)
+
+        env = env.copy()
+        package.links(env, deploydir, cross_base)
+
+
 def build_package(package, env):
     """Builds the given package."""
     package_id = '%s-%s' % (package.name(), package.version())
@@ -141,6 +188,7 @@ def build(packages, env):
             continue
 
         try:
+            create_dependent_links(dict(packages), package, env)
             build_package(package, env)
         except Exception as e:
             print >>sys.stderr, 'Building %s failed: %s' % (name, e.message)
