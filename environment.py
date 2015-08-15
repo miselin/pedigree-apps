@@ -46,6 +46,10 @@ def generate_environment(target_arch, env=None, recurse=True):
     # $LD_LIBRARY_PATH that contains '.' will cause a ton of weirdness.
     env['LD_LIBRARY_PATH'] = ''
 
+    # User to setuid() back to when dropping privileges.
+    env['UNPRIVILEGED_UID'] = '0'
+    env['UNPRIVILEGED_GID'] = '0'
+
     # Architecture-specific pieces.
     if target_arch == 'amd64':
         env['ARCH_TARGET'] = 'x86_64'
@@ -63,6 +67,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     env['SOURCE_BASE'] = _expand('$APPS_BASE/packages')
     env['DOWNLOAD_TEMP'] = _expand('$APPS_BASE/downloads')
     env['BUILD_BASE'] = _expand('$SOURCE_BASE/builds')
+    env['CHROOT_BASE'] = _expand('$BUILD_BASE/chroot')
 
     # Package manager.
     env['PACKMAN_TARGET_ARCH'] = target_arch
@@ -70,25 +75,30 @@ def generate_environment(target_arch, env=None, recurse=True):
     env['PACKMAN_REPO'] = _expand('$APPS_BASE/pup/package_repo')
 
     # Cross-toolchain.
-    env['CROSS_CC'] = _expand('$CROSS_BASE/bin/$ARCH_TARGET-pedigree-gcc')
-    env['CROSS_CXX'] = _expand('$CROSS_BASE/bin/$ARCH_TARGET-pedigree-gcc')
-    env['CROSS_CPP'] = _expand('$CROSS_BASE/bin/$ARCH_TARGET-pedigree-cpp')
-    env['CROSS_AS'] = _expand('$CROSS_BASE/bin/$ARCH_TARGET-pedigree-as')
-    env['CROSS_LD'] = _expand('$CROSS_BASE/bin/$ARCH_TARGET-pedigree-gcc')
-    env['CROSS_AR'] = _expand('$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ar')
-    env['CROSS_RANLIB'] = _expand('$CROSS_BASE/bin/$ARCH_TARGET-pedigree-ranlib')
+    env['CROSS_CC'] = _expand('$ARCH_TARGET-pedigree-gcc')
+    env['CROSS_CXX'] = _expand('$ARCH_TARGET-pedigree-gcc')
+    env['CROSS_CPP'] = _expand('$ARCH_TARGET-pedigree-cpp')
+    env['CROSS_AS'] = _expand('$ARCH_TARGET-pedigree-as')
+    env['CROSS_LD'] = _expand('$ARCH_TARGET-pedigree-gcc')
+    env['CROSS_AR'] = _expand('$ARCH_TARGET-pedigree-ar')
+    env['CROSS_RANLIB'] = _expand('$ARCH_TARGET-pedigree-ranlib')
     env['LIBS'] = _expand('')
+
+    # ccache cache directory (in the chroot).
+    env['CCACHE_DIR'] = _expand('/ccache')
+
+    # Actual ccache cache directory (it's bind-mounted into the chroot).
+    env['CCACHE_TARGET_DIR'] = _expand('$BUILD_BASE/_ccache')
 
     # Preprocessor options.
     # TODO(miselin): maybe we don't need these anymore.
-    env['CROSS_CPPFLAGS'] = _expand('-D__PEDIGREE__ -I$CROSS_BASE/include '
-        '-I$CROSS_BASE/include/SDL -I$CROSS_BASE/include/ncurses')
+    env['CROSS_CPPFLAGS'] = _expand('-D__PEDIGREE__ -I/include')
 
     # Linker options; -rpath-link is very important for linking.
-    env['CROSS_LDFLAGS'] = _expand('-L$CROSS_BASE/lib -Wl,-rpath-link,$CROSS_BASE/lib')
+    env['CROSS_LDFLAGS'] = _expand('-L/libraries -Wl,-rpath-link,/libraries')
 
-    # pkg-config magic.
-    env['PKG_CONFIG_LIBDIR'] = _expand('$CROSS_BASE/lib/pkgconfig')
+    # pkg-config magic (inside chroot).
+    env['PKG_CONFIG_LIBDIR'] = _expand('/libraries/pkgconfig')
     env['PKG_CONFIG_SYSROOT_DIR'] = _expand('$CROSS_BASE')
 
     # Add local binary paths to $PATH.

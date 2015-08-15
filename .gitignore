@@ -7,3 +7,4 @@ environment-i686.sh
 environment-amd64.sh
 environment-arm.sh
 *.pyc
+local_environment.py

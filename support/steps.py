@@ -6,6 +6,8 @@ import shutil
 import subprocess
 import urllib
 
+from . import util
+
 
 AUTOCONF_PATHFLAGS = {
     'bindir': '/applications',
@@ -33,7 +35,7 @@ def get_builddir(srcdir, env, inplace):
 
 def libtoolize(srcdir, env, ltdl_dir=None):
     """libtoolize's the target."""
-    libtoolize = os.path.join(env['CROSS_BASE'], 'bin', 'libtoolize')
+    libtoolize = '/applications/libtoolize'
     if ltdl_dir:
         ltdl_dir = '=%s' % ltdl_dir
     else:
@@ -137,6 +139,8 @@ def create_package(package, deploydir, env):
     package_version = package.version()
     package_arch = env['PACKMAN_TARGET_ARCH']
 
+    print deploydir
+
     # TODO(miselin): add dependency information to pup.
     subprocess.check_call([package_builder, 'makepkg', '--path', deploydir,
         '--repo', repo_dir, '--name', package_name, '--ver', package_version,
@@ -146,11 +150,100 @@ def create_package(package, deploydir, env):
         '--arch', package_arch], cwd=deploydir)
 
 
-def create_chroot(env, directory):
-    """Creates a chroot and updates the environment (eg $PATH) for it.
+def create_chroot(env):
+    """Create chroot if it doesn't exist yet and clean it out ready for a build.
 
-    Will not enter the chroot, but because $PATH is broken, you should almost
-    always enter the chroot immediately after this function returns.
+    Args:
+        env: environment to use and modify to use the chroot.
     """
-    # TODO: figure out how to do this sanely.
-    pass
+    elevated = os.getuid() == 0
+
+    chroot_base = env['CHROOT_BASE']
+    if not os.path.exists(chroot_base):
+        os.makedirs(chroot_base)
+
+    # Provide correct access while elevated.
+    if elevated:
+        os.chown(env['CHROOT_BASE'], int(env['UNPRIVILEGED_UID']),
+            int(env['UNPRIVILEGED_GID']))
+
+    # Host filesystem layout.
+    bind_mounts = {
+        'bin' : '/bin',
+        'sbin' : '/sbin',
+        'usr' : '/usr',
+        'lib' : '/lib',
+        'var' : '/var',
+        'proc' : '/proc',
+        'dev' : '/dev',
+        'etc' : '/etc',
+        'lib64' : '/lib64',
+        'sys' : '/sys',
+        'opt' : '/opt',
+        'cross' : env['CROSS_BASE'],
+        'ccache' : (True, env['CCACHE_TARGET_DIR']),
+        'download' : (True, env['DOWNLOAD_TEMP']),
+    }
+    pedigree_structure = ['applications', 'libraries', 'include', 'support',
+        'system', 'config', 'doc']
+    support_structure = ['tmp', 'run', 'patches', 'root', '__deploy']
+
+    extra_unprivileged_paths = ['ccache', 'download']
+
+    # Start by clearing out the chroot tree of anything not in our mounts.
+    for entry in os.listdir(chroot_base):
+        if entry in bind_mounts:
+            continue
+
+        entry_path = os.path.join(chroot_base, entry)
+        if os.path.isdir(entry_path):
+            shutil.rmtree(entry_path)
+        else:
+            os.unlink(entry_path)
+
+    # Create necessary Pedigree structure.
+    created_dirs = pedigree_structure + support_structure
+    if elevated:
+        created_dirs.extend(bind_mounts.keys())
+
+    for entry in created_dirs:
+        entry_target = os.path.join(chroot_base, entry)
+        if not os.path.isdir(entry_target):
+            os.makedirs(entry_target)
+
+        if elevated:
+            if ((entry in extra_unprivileged_paths) or
+                (entry not in bind_mounts.keys())):
+                os.chown(entry_target, int(env['UNPRIVILEGED_UID']),
+                    int(env['UNPRIVILEGED_GID']))
+
+    # Update the environment.
+    for k, v in env.items():
+        if v.startswith(env['CROSS_BASE']):
+            v = v.replace(env['CROSS_BASE'], '/cross')
+            env[k] = v
+    if '/cross/bin' not in env['PATH']:
+        env['PATH'] = util.expand(env, '/cross/bin:$PATH')
+
+    # Done, unless we need to verify mounts.
+    if not elevated:
+        return
+
+    # Mount.
+    for path, target in bind_mounts.items():
+        rw = False
+        if isinstance(target, tuple):
+            rw, target = target
+
+        path = os.path.join(chroot_base, path)
+        if not os.path.exists(target):
+            # eg, no /lib64 present. This is OK.
+            continue
+
+        if not os.listdir(path):
+            # Nothing here, we need to create the mount.
+            # We remount read-only so that the host filesystem cannot be easily
+            # wiped out by accident.
+            subprocess.check_call([env['MOUNT'], '--bind', target, path], env=env)
+            if not rw:
+                subprocess.check_call([env['MOUNT'], '--bind', '-o', 'remount,ro', target, path], env=env)

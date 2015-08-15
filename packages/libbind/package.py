@@ -22,6 +22,9 @@ class LibBindPackage(buildsystem.Package):
     def patches(self, env, srcdir):
         return []
 
+    def build_requires(self):
+        return ['libtool']
+
     def options(self):
         return self._options
 

@@ -1,6 +1,8 @@
 
+import imp
 import os
 import subprocess
+import sys
 
 from . import steps
 
@@ -76,7 +78,7 @@ class Package(object):
         Automatically uses the patches from patches()."""
         patches = self.patches(env, srcdir)
         for patch in patches:
-            real_patch = os.path.join(self._path, 'patches', patch)
+            real_patch = os.path.join('/', 'patches', patch)
             with open(real_patch, 'r') as f:
                 subprocess.check_call([env['PATCH'], '-p1'], stdin=f,
                     cwd=srcdir, env=env)
@@ -135,3 +137,34 @@ class Package(object):
 
                 print target_pcfile_path, '->', pcfile_path
                 os.symlink(pcfile_path, target_pcfile_path)
+
+
+def load_packages(env):
+    """Collects packages that exist.
+
+    This is done by traversing the packages directory to find package.py files,
+    importing them, and then collecting all Package subclasses.
+    """
+    all_packages = {}
+    packages_dir = env['SOURCE_BASE']
+    for entry in os.listdir(packages_dir):
+        entry_path = os.path.join(packages_dir, entry)
+        if not os.path.isdir(entry_path):
+            continue
+
+        module = os.path.join(entry_path, 'package.py')
+        if os.path.exists(module):
+            try:
+                loaded = imp.load_source('pedigree_%s' % entry, module)
+            except Exception as e:
+                print >>sys.stderr, '%s failed to load (%s), ignoring.' % (
+                    entry, e)
+
+    # Collect subclasses of packages.
+    collected_packages = Package.__subclasses__()
+    for package_cls in collected_packages:
+        package = package_cls(sys.modules[package_cls.__module__].__file__)
+        if package.name():
+            all_packages[package.name()] = package
+
+    return all_packages
