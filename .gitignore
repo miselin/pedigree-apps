@@ -6,3 +6,4 @@ environment.sh
 environment-i686.sh
 environment-amd64.sh
 environment-arm.sh
+*.pyc
