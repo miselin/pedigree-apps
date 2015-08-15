@@ -32,6 +32,18 @@ def prepare_compiler(env):
         ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include', '$CROSS_BASE/include/SDL'),
     )
 
+    # Clean up the base tree of the cross-compiler.
+    cleanup_dirs = ['lib', 'include', 'bin']
+    for cleanup in cleanup_dirs:
+        target = os.path.join(env['CROSS_BASE'], cleanup)
+
+        for entry in os.listdir(target):
+            entry = os.path.join(target, entry)
+            if os.path.islink(entry):
+                print 'unlink', entry
+                os.unlink(entry)
+
+    # Create specific links that must exist.
     for source, target in links:
         source = util.expand(env, source)
         target = util.expand(env, target)
