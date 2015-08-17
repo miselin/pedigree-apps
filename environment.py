@@ -90,13 +90,6 @@ def generate_environment(target_arch, env=None, recurse=True):
     # Actual ccache cache directory (it's bind-mounted into the chroot).
     env['CCACHE_TARGET_DIR'] = _expand('$BUILD_BASE/_ccache')
 
-    # Preprocessor options.
-    # TODO(miselin): maybe we don't need these anymore.
-    env['CROSS_CPPFLAGS'] = _expand('-D__PEDIGREE__ -I/include')
-
-    # Linker options; -rpath-link is very important for linking.
-    env['CROSS_LDFLAGS'] = _expand('-L/libraries -Wl,-rpath-link,/libraries')
-
     # pkg-config magic (inside chroot).
     env['PKG_CONFIG_LIBDIR'] = _expand('/libraries/pkgconfig')
     env['PKG_CONFIG_SYSROOT_DIR'] = _expand('$CROSS_BASE')
@@ -118,6 +111,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     env['AUTORECONF'] = '/usr/bin/autoreconf'
     env['ACLOCAL'] = '/usr/bin/aclocal'
     env['TAR'] = '/bin/tar'
+    env['CCACHE'] = '/usr/bin/ccache'
 
     # Pull in any local changes that the local system requires.
     if recurse:

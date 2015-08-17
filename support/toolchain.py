@@ -105,16 +105,12 @@ def chroot_spec(env):
 
     new_specs += additions
 
-    import difflib
-    print '\n'.join(difflib.unified_diff(current_specs.splitlines(), new_specs.splitlines()))
-
     specfile_name = 'spec-%s' % env['CROSS_TARGET']
     with open(os.path.join(env['CROSS_BASE'], specfile_name), 'w') as f:
         f.write(new_specs)
 
     # Create a secondary bin directory for our wrappers :-)
     bin2 = os.path.join(env['CROSS_BASE'], 'bin2')
-    print bin2
     if not os.path.isdir(bin2):
         os.makedirs(bin2)
 
