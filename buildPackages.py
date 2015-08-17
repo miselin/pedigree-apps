@@ -69,7 +69,10 @@ def main(argv):
     # Load up an environment ready for building.
     env = environment.generate_environment(argv[1])
 
-    # Prepare our chroot in which building will happen (requires elevation).
+    # Make sure we have a sane toolchain with a useful chroot spec file.
+    toolchain.chroot_spec(env)
+
+    # Prepare our chroot in which building will happen.
     # Don't let this modify our environment just yet.
     steps.create_chroot(env.copy())
 

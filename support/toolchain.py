@@ -1,5 +1,6 @@
 
 import os
+import subprocess
 
 from . import util
 
@@ -59,3 +60,67 @@ def prepare_compiler(env):
             shtuil.rmtree(target)
 
         os.symlink(source, target)
+
+
+def chroot_spec(env):
+    """Creates a new spec file for the build chroot.
+
+    This forces GCC to look in the correct place for its libraries during the
+    builds while allowing the use of a cross-toolchain that is already set up
+    for non-chroot compilations.
+
+    This will modify the environment so the compilers use the correct spec.
+
+    Args:
+        env: environment to use for the preparation
+    """
+
+    cc = env['CROSS_CC']
+    if not os.path.exists(cc):
+        cc = os.path.join(env['CROSS_BASE'], 'bin', env['CROSS_CC'])
+
+    if not os.path.exists(cc):
+        print >>sys.stderr, '$CC is useless'
+        return
+
+    # Get the existing specs.
+    current_specs = new_specs = subprocess.check_output([cc, '-dumpspecs'])
+
+    replacements = {
+        '%D': '-L/libraries -rpath-link /libraries %D',
+        '*cpp:\n': '*cpp:\n-I/include'
+    }
+
+    additions = '''*predefines:
+-D__PEDIGREE__
+
+%%rename cc1_cpu old_cc1_cpu
+*cc1_cpu:
+%s %%(old_cc1_cpu)
+
+''' % env['CROSS_CFLAGS']
+
+    for needle, repl in replacements.items():
+        new_specs = new_specs.replace(needle, repl)
+
+    new_specs += additions
+
+    import difflib
+    print '\n'.join(difflib.unified_diff(current_specs.splitlines(), new_specs.splitlines()))
+
+    specfile_name = 'spec-%s' % env['CROSS_TARGET']
+    with open(os.path.join(env['CROSS_BASE'], specfile_name), 'w') as f:
+        f.write(new_specs)
+
+    # Create a secondary bin directory for our wrappers :-)
+    bin2 = os.path.join(env['CROSS_BASE'], 'bin2')
+    print bin2
+    if not os.path.isdir(bin2):
+        os.makedirs(bin2)
+
+    bin2_cc = os.path.join(bin2, env['CROSS_CC'])
+    with open(bin2_cc, 'w') as f:
+        f.write('''#!/bin/sh
+%s /cross/bin/%s -specs=/cross/%s $*
+''' % (env['CCACHE'], env['CROSS_CC'], specfile_name))
+    os.chmod(bin2_cc, 0755)

@@ -139,8 +139,6 @@ def create_package(package, deploydir, env):
     package_version = package.version()
     package_arch = env['PACKMAN_TARGET_ARCH']
 
-    print deploydir
-
     # TODO(miselin): add dependency information to pup.
     subprocess.check_call([package_builder, 'makepkg', '--path', deploydir,
         '--repo', repo_dir, '--name', package_name, '--ver', package_version,
@@ -222,6 +220,8 @@ def create_chroot(env):
         if v.startswith(env['CROSS_BASE']):
             v = v.replace(env['CROSS_BASE'], '/cross')
             env[k] = v
+    if '/cross/bin2' not in env['PATH']:
+        env['PATH'] = util.expand(env, '/cross/bin2:$PATH')
     if '/cross/bin' not in env['PATH']:
         env['PATH'] = util.expand(env, '/cross/bin:$PATH')
 
