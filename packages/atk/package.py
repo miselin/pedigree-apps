@@ -5,18 +5,18 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class AtkPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(AtkPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self.tarfile_format = 'xz'
 
     def name(self):
-        return 'libffi'
+        return 'atk'
 
     def version(self):
-        return '3.1'
+        return '2.16.0'
 
     def build_requires(self):
         return ['libtool']
@@ -28,7 +28,7 @@ class LibffiPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://ftp.gnome.org/pub/gnome/sources/%(package)s/2.16/%(package)s-%(version)s.tar.xz' % {
             'package': self.name(),
             'version': self.version(),
         }

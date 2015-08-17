@@ -5,21 +5,21 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class FontconfigPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(FontconfigPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'fontconfig'
 
     def version(self):
-        return '3.1'
+        return '2.11.0'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'expat']
 
     def patches(self, env, srcdir):
         return []
@@ -28,7 +28,7 @@ class LibffiPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://www.freedesktop.org/software/%(package)s/release/%(package)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }

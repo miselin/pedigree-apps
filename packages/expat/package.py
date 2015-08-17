@@ -5,18 +5,18 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class ExpatPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(ExpatPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'expat'
 
     def version(self):
-        return '3.1'
+        return '2.0.1'
 
     def build_requires(self):
         return ['libtool']
@@ -28,7 +28,7 @@ class LibffiPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://sourceforge.net/projects/%(package)s/files/%(package)s/%(version)s/%(package)s-%(version)s.tar.gz/download' % {
             'package': self.name(),
             'version': self.version(),
         }
@@ -36,7 +36,6 @@ class LibffiPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

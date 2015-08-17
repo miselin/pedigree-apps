@@ -5,30 +5,31 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class MesaPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(MesaPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'mesa'
 
     def version(self):
-        return '3.1'
+        return '9.1.1'
 
     def build_requires(self):
         return ['libtool']
 
     def patches(self, env, srcdir):
-        return []
+        return ['configure.ac.diff', 'configure.diff', 'querymatrix.c.diff',
+            'ranlib.diff', 'shared.diff']
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'ftp://ftp.freedesktop.org/pub/%(package)s/%(version)s/MesaLib-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }

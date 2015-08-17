@@ -5,18 +5,18 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class PthPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(PthPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'pth'
 
     def version(self):
-        return '3.1'
+        return '2.0.7'
 
     def build_requires(self):
         return ['libtool']
@@ -28,15 +28,14 @@ class LibffiPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://ftp.gnu.org/gnu/%(package)s/%(package)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        pass
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

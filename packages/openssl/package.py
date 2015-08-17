@@ -5,41 +5,41 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class OpensslPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(OpensslPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'openssl'
 
     def version(self):
-        return '3.1'
+        return '1.0.1g'
 
     def build_requires(self):
         return ['libtool']
 
     def patches(self, env, srcdir):
-        return []
+        return ['1.0.1g-docfixes-diff.diff', 'Configure.diff', 'b_sock.c.diff',
+            'dso_dlfcn.c.diff', 'e_os.h.diff']
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://www.%(package)s.org/source/%(package)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        raise Exception('conversion had no idea how to configure')
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

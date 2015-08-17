@@ -5,30 +5,30 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class Apache2Package(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(Apache2Package, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'apache2'
 
     def version(self):
-        return '3.1'
+        return '2.2.27'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'glib']
 
     def patches(self, env, srcdir):
-        return []
+        return ['2.2.27/2.2.17.diff']
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://mirror.overthewire.com.au/pub/apache/%(package)s/%(package)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }
@@ -36,7 +36,6 @@ class LibffiPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

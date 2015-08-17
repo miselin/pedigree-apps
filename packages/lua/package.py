@@ -5,45 +5,44 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class LuaPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(LuaPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'lua'
 
     def version(self):
-        return '3.1'
+        return '5.1.4'
 
     def build_requires(self):
         return ['libtool']
 
     def patches(self, env, srcdir):
-        return []
+        return ['Makefile_root.diff', 'Makefile_src.diff', 'luaconf.h.diff']
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://www.%(package)s.org/ftp/%(package)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        raise Exception('conversion had no idea how to configure')
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        raise Exception('conversion had no idea how to install')

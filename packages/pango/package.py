@@ -5,21 +5,21 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class PangoPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(PangoPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self.tarfile_format = 'xz'
 
     def name(self):
-        return 'libffi'
+        return 'pango'
 
     def version(self):
-        return '3.1'
+        return '1.37.2'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'glib', 'harfbuzz', 'libfreetype', 'cairo']
 
     def patches(self, env, srcdir):
         return []
@@ -28,7 +28,7 @@ class LibffiPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://ftp.gnome.org/pub/GNOME/sources/%(package)s/1.37/%(package)s-%(version)s.tar.xz' % {
             'package': self.name(),
             'version': self.version(),
         }
@@ -36,7 +36,6 @@ class LibffiPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

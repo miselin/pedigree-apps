@@ -5,37 +5,36 @@ from support import buildsystem
 from support import steps
 
 
-class LibffiPackage(buildsystem.Package):
+class Python27Package(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibffiPackage, self).__init__(*args, **kwargs)
+        super(Python27Package, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'libffi'
+        return 'python27'
 
     def version(self):
-        return '3.1'
+        return '2.7.3'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'gettext', 'libiconv', 'curl', 'openssl', 'glib']
 
     def patches(self, env, srcdir):
-        return []
+        return ['Makefile.pre.in.diff', 'configure.in.diff', 'setup.py.diff']
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://sourceware.org/pub/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://python.org/ftp/python/%(version)s/%(package)s-%(version)s.tgz' % {
             'package': self.name(),
             'version': self.version(),
         }
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
         steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
@@ -46,4 +45,4 @@ class LibffiPackage(buildsystem.Package):
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        raise Exception('conversion had no idea how to install')
