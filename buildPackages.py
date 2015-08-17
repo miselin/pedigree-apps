@@ -39,7 +39,7 @@ def build_all(args, packages, env):
             print('Would build package "%s" (dry run).' % name)
             built.add(name)
             continue
-        elif name not in args.only:
+        elif args.only and name not in args.only:
             print('Not building package "%s" (not in list of packages to build).' % name)
             built.add(name)
             continue
