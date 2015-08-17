@@ -37,8 +37,6 @@ class GlibPackage(buildsystem.Package):
         steps.autoreconf(srcdir, env)  #, extra_flags=('-I', os.path.join(srcdir, 'libltdl')))
 
     def configure(self, env, srcdir):
-        env['CPPFLAGS'] = env['CROSS_CPPFLAGS']
-        env['LDFLAGS'] = env['CROSS_LDFLAGS']
         steps.run_configure(self, srcdir, env, extra_config=(
             'glib_cv_stack_grows=no', 'glib_cv_uscore=no', 'ac_cv_func_posix_getpwuid_r=no',
             'ac_cv_func_posix_getgrgid_r=no', '--with-libiconv',
