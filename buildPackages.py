@@ -9,6 +9,7 @@ import shutil
 import sys
 import subprocess
 import tarfile
+import traceback
 
 import environment
 
@@ -57,6 +58,7 @@ def build_all(args, packages, env):
             build.build_package(package, env)
         except Exception as e:
             print('Building %s failed: %s' % (name, e.message), file=sys.stderr)
+            traceback.print_exc()
             notbuilt_failed.add(name)
         else:
             built.add(name)
