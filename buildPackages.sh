@@ -4,6 +4,7 @@
 if [ "x$PATH_TO_CHROOT_SCRIPT" = "x" ]; then PATH_TO_CHROOT_SCRIPT=.; fi
 
 pip install -r ./requirements.txt
+pip install pydot  # For generating dependencies.dot
 
 set -e
 echo "Running $PATH_TO_CHROOT_SCRIPT/prepareChroot.py"
