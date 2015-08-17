@@ -27,9 +27,12 @@ def build_all(args, packages, env):
     """Takes an ordered list of packages and builds them one-by-one."""
 
     built = set()
+    notbuilt_deps = set()
+    notbuilt_failed = set()
     for name, package in packages:
         if not set(package.build_requires()).issubset(built):
             print('Package "%s" build-depends not met.' % name, file=sys.stderr)
+            notbuilt_deps.add(name)
             continue
 
         if args.dryrun:
@@ -54,9 +57,14 @@ def build_all(args, packages, env):
             build.build_package(package, env)
         except Exception as e:
             print('Building %s failed: %s' % (name, e.message), file=sys.stderr)
-            raise
+            notbuilt_failed.add(name)
         else:
             built.add(name)
+
+    for package in notbuilt_deps:
+        print('WARNING: package "%s" failed to build because of missing build dependencies.' % package)
+    for package in notbuilt_failed:
+        print('ERROR: package "%s" failed to build.' % package)
 
 
 def main(argv):
