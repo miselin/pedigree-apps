@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
+from __future__ import print_function
 
+import argparse
 import collections
 import imp
 import os
@@ -21,13 +23,22 @@ from support import util
 VALID_ARCH_TARGETS = ('amd64',)
 
 
-def build_all(packages, env):
+def build_all(args, packages, env):
     """Takes an ordered list of packages and builds them one-by-one."""
 
     built = set()
     for name, package in packages:
         if not set(package.build_requires()).issubset(built):
-            print >>sys.stderr, 'Package "%s" build-depends not met.' % name
+            print('Package "%s" build-depends not met.' % name, file=sys.stderr)
+            continue
+
+        if args.dryrun:
+            print('Would build package "%s" (dry run).' % name)
+            built.add(name)
+            continue
+        elif name not in args.only:
+            print('Not building package "%s" (not in list of packages to build).' % name)
+            built.add(name)
             continue
 
         try:
@@ -42,7 +53,7 @@ def build_all(packages, env):
             # Build!
             build.build_package(package, env)
         except Exception as e:
-            print >>sys.stderr, 'Building %s failed: %s' % (name, e.message)
+            print('Building %s failed: %s' % (name, e.message), file=sys.stderr)
             raise
         else:
             built.add(name)
@@ -56,18 +67,18 @@ def main(argv):
         os.setgid(int(env['UNPRIVILEGED_GID']))
         os.setuid(int(env['UNPRIVILEGED_UID']))
 
-    if len(argv) < 2:
-        print >>sys.stderr, 'Usage: buildPackages <arch_target>'
-        return 1
-
-    # TODO(miselin): use optparse or argparse or something like that
-    if argv[1] not in VALID_ARCH_TARGETS:
-        print >>sys.stderr, ('Valid arch_target values: %s' %
-            ','.join(VALID_ARCH_TARGETS))
-        return 1
+    parser = argparse.ArgumentParser(description='Build ports for Pedigree.')
+    parser.add_argument('--target', type=str, choices=VALID_ARCH_TARGETS,
+        required=True, help='Architecture target for the builds.')
+    parser.add_argument('--dryrun', action='store_true',
+        help='Do a dry run: only the packages that would be built are printed.')
+    parser.add_argument('--only', type=str, nargs='+', required=False,
+        help='Only build the given packages. Build-depends will not be built '
+            'so if this may not create stable or successful builds.')
+    args = parser.parse_args()
 
     # Load up an environment ready for building.
-    env = environment.generate_environment(argv[1])
+    env = environment.generate_environment(args.target)
 
     # Make sure we have a sane toolchain with a useful chroot spec file.
     toolchain.chroot_spec(env)
@@ -87,7 +98,7 @@ def main(argv):
     packages = deps.sort_dependencies(packages)
 
     # Build packages.
-    build_all(packages, env)
+    build_all(args, packages, env)
 
     return 0
 
