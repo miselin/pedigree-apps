@@ -3,7 +3,7 @@ import os
 import mock
 import unittest
 
-import deps
+from . import deps
 
 
 class DepsTest(unittest.TestCase):

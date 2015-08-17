@@ -2,7 +2,7 @@
 import mock
 import unittest
 
-import steps
+from . import steps
 
 
 class StepsTest(unittest.TestCase):

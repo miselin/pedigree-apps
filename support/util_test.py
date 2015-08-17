@@ -3,7 +3,7 @@ import os
 import mock
 import unittest
 
-import util
+from . import util
 
 
 class UtilTest(unittest.TestCase):
