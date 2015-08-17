@@ -35,7 +35,6 @@ class GettextPackage(buildsystem.Package):
         steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
-        env['CPPFLAGS'] = env['CROSS_CPPFLAGS']
         steps.run_configure(self, srcdir, env, extra_config=(
             '--with-libiconv-prefix=%s' % env['CROSS_BASE'],))
 
