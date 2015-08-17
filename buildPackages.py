@@ -27,6 +27,8 @@ VALID_ARCH_TARGETS = ('amd64',)
 def build_all(args, packages, env):
     """Takes an ordered list of packages and builds them one-by-one."""
 
+    me = os.getpid()
+
     built = set()
     notbuilt_deps = set()
     notbuilt_failed = set()
@@ -59,6 +61,8 @@ def build_all(args, packages, env):
         except Exception as e:
             print('Building %s failed: %s' % (name, e.message), file=sys.stderr)
             traceback.print_exc()
+            if os.getpid() != me:
+                exit(1)  # Exit with non-zero exit status - we're a forked child.
             notbuilt_failed.add(name)
         else:
             built.add(name)

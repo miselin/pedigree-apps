@@ -13,4 +13,4 @@ sudo PYTHONPATH="$PWD:$PYTHONPATH" "$PATH_TO_CHROOT_SCRIPT/prepareChroot.py"
 target_arch="$1"
 shift
 echo "Now performing build proper."
-python ./buildPackages.py --target=$target_arch $*
+LD_PRELOAD=libfakechroot.so python ./buildPackages.py --target=$target_arch $*
