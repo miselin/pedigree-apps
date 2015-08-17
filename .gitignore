@@ -10,3 +10,4 @@ environment-arm.sh
 local_environment.py
 .coverage
 coverage_html
+*.bak
