@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import os
 import shutil
@@ -29,7 +30,7 @@ def build_package(package, env):
 
     if not os.path.isfile(download_target):
         for step in pass0_steps:
-            print '== %s %s step ==' % (package_id, step)
+            print('== %s %s step ==' % (package_id, step))
             method = getattr(package, step)
 
             try:
@@ -39,7 +40,7 @@ def build_package(package, env):
 
     # Prepare to fill a chroot with the necessary files, now that we have the
     # source tarball downloaded and ready to extract.
-    print '== %s chroot step ==' % package_id
+    print('== %s chroot step ==' % package_id)
 
     # Drop in patches as well.
     try:
@@ -59,7 +60,7 @@ def build_package(package, env):
 
         # Complete final steps.
         for step in pass3_steps:
-            print '== %s %s step ==' % (package_id, step)
+            print('== %s %s step ==' % (package_id, step))
             method = getattr(package, step)
 
             try:
@@ -98,7 +99,7 @@ def build_package(package, env):
             subprocess.check_call([env['TAR'], '--strip', '1', '-xf', download_target], cwd=srcdir, env=env)
 
     for step in pass1_steps:
-        print '== %s %s step ==' % (package_id, step)
+        print('== %s %s step ==' % (package_id, step))
         method = getattr(package, step)
 
         try:
@@ -107,7 +108,7 @@ def build_package(package, env):
             pass
 
     for step in pass2_steps:
-        print '== %s %s step ==' % (package_id, step)
+        print('== %s %s step ==' % (package_id, step))
         method = getattr(package, step)
 
         try:

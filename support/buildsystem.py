@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import imp
 import os
@@ -135,7 +136,7 @@ class Package(object):
                 if os.path.isfile(target_pcfile_path) or os.path.islink(target_pcfile_path):
                     os.unlink(target_pcfile_path)
 
-                print target_pcfile_path, '->', pcfile_path
+                print(target_pcfile_path, '->', pcfile_path)
                 os.symlink(pcfile_path, target_pcfile_path)
 
 
@@ -157,8 +158,7 @@ def load_packages(env):
             try:
                 loaded = imp.load_source('pedigree_%s' % entry, module)
             except Exception as e:
-                print >>sys.stderr, '%s failed to load (%s), ignoring.' % (
-                    entry, e)
+                print('%s failed to load (%s), ignoring.' % (entry, e), file=sys.stderr)
 
     # Collect subclasses of packages.
     collected_packages = Package.__subclasses__()

@@ -127,7 +127,7 @@ def symlinks(deploydir, cross_dir, bins=(), libs=(), headers=()):
         symlinks.append((include_source, include_target))
 
     for source, target in symlinks:
-        print target, '->', source
+        print(target, '->', source)
         if os.path.exists(target) or os.path.islink(target):
             os.unlink(target)
         os.symlink(source, target)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import os
 import subprocess
@@ -11,7 +12,7 @@ def prepare_compiler(env):
     This is necessary to pick up changes in libc, libm, pthread, and various
     other Pedigree-specific libraries.
     """
-    print '== Preparing Compiler =='
+    print('== Preparing Compiler ==')
 
     links = (
         # Source -> Target
@@ -41,7 +42,7 @@ def prepare_compiler(env):
         for entry in os.listdir(target):
             entry = os.path.join(target, entry)
             if os.path.islink(entry):
-                print 'unlink', entry
+                print('unlink', entry)
                 os.unlink(entry)
 
     # Create specific links that must exist.
@@ -52,7 +53,7 @@ def prepare_compiler(env):
         if target.endswith('/'):
             target = os.path.join(target, os.path.basename(source))
 
-        print target, '->', source
+        print(target, '->', source)
 
         if os.path.isfile(target) or os.path.islink(target):
             os.unlink(target)
@@ -80,7 +81,7 @@ def chroot_spec(env):
         cc = os.path.join(env['CROSS_BASE'], 'bin', env['CROSS_CC'])
 
     if not os.path.exists(cc):
-        print >>sys.stderr, '$CC is useless'
+        print('$CC is useless', file=sys.stderr)
         return
 
     # Get the existing specs.
@@ -119,4 +120,4 @@ def chroot_spec(env):
         f.write('''#!/bin/sh
 %s /cross/bin/%s -specs=/cross/%s $*
 ''' % (env['CCACHE'], env['CROSS_CC'], specfile_name))
-    os.chmod(bin2_cc, 0755)
+    os.chmod(bin2_cc, 0o755)
