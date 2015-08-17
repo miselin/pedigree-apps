@@ -3,6 +3,8 @@
 # Path to prepareChroot.py
 if [ "x$PATH_TO_CHROOT_SCRIPT" = "x" ]; then PATH_TO_CHROOT_SCRIPT=.; fi
 
+pip install -r ./requirements.txt
+
 set -e
 echo "Running $PATH_TO_CHROOT_SCRIPT/prepareChroot.py"
 sudo PYTHONPATH="$PWD:$PYTHONPATH" "$PATH_TO_CHROOT_SCRIPT/prepareChroot.py"
