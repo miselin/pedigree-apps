@@ -33,6 +33,10 @@ def get_builddir(srcdir, env, inplace):
         return path
 
 
+def cmd(*args, **kwargs):
+    subprocess.check_call(*args, **kwargs)
+
+
 def libtoolize(srcdir, env, ltdl_dir=None):
     """libtoolize's the target."""
     libtoolize = '/applications/libtoolize'
@@ -40,21 +44,19 @@ def libtoolize(srcdir, env, ltdl_dir=None):
         ltdl_dir = '=%s' % ltdl_dir
     else:
         ltdl_dir = ''
-    subprocess.check_call([libtoolize, '-i', '-f', '--ltdl%s' % ltdl_dir],
-        cwd=srcdir, env=env)
+    cmd([libtoolize, '-i', '-f', '--ltdl%s' % ltdl_dir], cwd=srcdir, env=env)
 
 
 def autoreconf(srcdir, env, extra_flags=()):
     """autoreconf's the target."""
-    subprocess.check_call([env['AUTORECONF'], '-ifs'] + list(extra_flags),
-        cwd=srcdir, env=env)
+    cmd([env['AUTORECONF'], '-ifs'] + list(extra_flags), cwd=srcdir, env=env)
 
 
 def autoconf(srcdir, env, aclocal_flags=()):
     """Runs aclocal and then autoconf for the target."""
     aclocal_cmd = [env['ACLOCAL']] + list(aclocal_flags)
-    subprocess.check_call(aclocal_cmd, cwd=srcdir, env=env)
-    subprocess.check_call([env['AUTOCONF']], cwd=srcdir, env=env)
+    cmd(aclocal_cmd, cwd=srcdir, env=env)
+    cmd([env['AUTOCONF']], cwd=srcdir, env=env)
 
 
 def run_configure(package, srcdir, env, extra_opts=(), inplace=True, host=True,
@@ -84,7 +86,7 @@ def run_configure(package, srcdir, env, extra_opts=(), inplace=True, host=True,
 
     opts.extend(extra_config)
 
-    subprocess.check_call(opts, cwd=builddir, env=env)
+    cmd(opts, cwd=builddir, env=env)
 
 
 def make(srcdir, env, target=None, inplace=True, extra_opts=()):
@@ -94,7 +96,7 @@ def make(srcdir, env, target=None, inplace=True, extra_opts=()):
     if target is not None:
         opts.append(target)
     opts.extend(list(extra_opts))
-    subprocess.check_call(opts, cwd=builddir, env=env)
+    cmd(opts, cwd=builddir, env=env)
 
 
 def download(url, target):
@@ -140,10 +142,10 @@ def create_package(package, deploydir, env):
     package_arch = env['PACKMAN_TARGET_ARCH']
 
     # TODO(miselin): add dependency information to pup.
-    subprocess.check_call([package_builder, 'makepkg', '--path', deploydir,
+    cmd([package_builder, 'makepkg', '--path', deploydir,
         '--repo', repo_dir, '--name', package_name, '--ver', package_version,
         '--arch', package_arch], cwd=deploydir)
-    subprocess.check_call([package_builder, 'regpkg',
+    cmd([package_builder, 'regpkg',
         '--repo', repo_dir, '--name', package_name, '--ver', package_version,
         '--arch', package_arch], cwd=deploydir)
 
@@ -244,6 +246,6 @@ def create_chroot(env):
             # Nothing here, we need to create the mount.
             # We remount read-only so that the host filesystem cannot be easily
             # wiped out by accident.
-            subprocess.check_call([env['MOUNT'], '--bind', target, path], env=env)
+            cmd([env['MOUNT'], '--bind', target, path], env=env)
             if not rw:
-                subprocess.check_call([env['MOUNT'], '--bind', '-o', 'remount,ro', target, path], env=env)
+                cmd([env['MOUNT'], '--bind', '-o', 'remount,ro', target, path], env=env)
