@@ -1,6 +1,7 @@
 
 import os
 import shutil
+import subprocess
 import tarfile
 
 from . import buildsystem
