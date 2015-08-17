@@ -49,8 +49,12 @@ def sort_dependencies(packages):
     graph = networkx.DiGraph()
 
     for package_name, package in packages.items():
-        for depends in package.build_requires():
-            graph.add_edge(depends, package_name)
+        requires = package.build_requires()
+        if not requires:
+            graph.add_node(package_name)
+
+        for dependency in requires:
+            graph.add_edge(dependency, package_name)
 
     # Write out a nice dot graph if we can.
     try:
