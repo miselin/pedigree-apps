@@ -1,6 +1,7 @@
 
 import collections
 import os
+import networkx
 import tarfile
 
 
@@ -45,33 +46,25 @@ def sort_dependencies(packages):
     Returns:
         An iterable of (package_name, package) tuples.
     """
+    graph = networkx.DiGraph()
 
     tree = collections.defaultdict(list)
+    roots = set()
     for package_name, package in packages.items():
         _ = tree[package_name]
-        for depends in package.build_requires():
-            tree[depends].append(package_name)
-
-    # Tree is now a set of <package> -> <things depending on package> pairs.
-    # We need to sort the list so the package appears before everything that
-    # depends on it.
-    # TODO(miselin): this needs substantially more testing
-    seen = set()
-    result = []
-    for package, deps in tree.items():
-        insert = False
-        for dep in deps:
-            if dep in seen:
-                insert = True
-                break
-
-        insertion = (package, packages[package])
-
-        if insert:
-            result.insert(0, insertion)
+        requires = package.build_requires()
+        if not requires:
+            roots.add(package_name)
         else:
-            result.append(insertion)
+            for depends in requires:
+                graph.add_edge(depends, package_name)
 
-        seen.add(package)
+    # Write out a nice dot graph if we can.
+    try:
+        networkx.write_dot(graph, 'dependencies.dot')
+    except:
+        pass
 
-    return result
+    # Walk the tree to figure out the correct dependency order.
+    result = networkx.topological_sort(graph)
+    return [(package, packages[package]) for package in result]
