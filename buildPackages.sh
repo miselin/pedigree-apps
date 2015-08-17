@@ -4,6 +4,10 @@
 if [ "x$PATH_TO_CHROOT_SCRIPT" = "x" ]; then PATH_TO_CHROOT_SCRIPT=.; fi
 
 set -e
-sudo PYTHONPATH=$PWD:$PYTHONPATH $PATH_TO_CHROOT/prepareChroot.py
+echo "Running $PATH_TO_CHROOT_SCRIPT/prepareChroot.py"
+sudo PYTHONPATH="$PWD:$PYTHONPATH" "$PATH_TO_CHROOT_SCRIPT/prepareChroot.py"
 
-python ./buildPackages.py --target=$1 --dryrun
+target_arch="$1"
+shift
+echo "Now performing build proper."
+python ./buildPackages.py --target=$target_arch --dryrun $*
