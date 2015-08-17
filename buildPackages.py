@@ -61,11 +61,13 @@ def build_all(args, packages, env):
         except Exception as e:
             print('Building %s failed: %s' % (name, e.message), file=sys.stderr)
             traceback.print_exc()
-            if os.getpid() != me:
-                exit(1)  # Exit with non-zero exit status - we're a forked child.
             notbuilt_failed.add(name)
         else:
             built.add(name)
+
+        if os.getpid() != me:
+            exit(1)  # Exit with non-zero exit status - we're a forked child.
+            return
 
     for package in notbuilt_deps:
         print('WARNING: package "%s" failed to build because of missing build dependencies.' % package)
