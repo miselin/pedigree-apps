@@ -48,16 +48,9 @@ def sort_dependencies(packages):
     """
     graph = networkx.DiGraph()
 
-    tree = collections.defaultdict(list)
-    roots = set()
     for package_name, package in packages.items():
-        _ = tree[package_name]
-        requires = package.build_requires()
-        if not requires:
-            roots.add(package_name)
-        else:
-            for depends in requires:
-                graph.add_edge(depends, package_name)
+        for depends in package.build_requires():
+            graph.add_edge(depends, package_name)
 
     # Write out a nice dot graph if we can.
     try:
