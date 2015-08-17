@@ -49,6 +49,13 @@ def build_all(packages, env):
 
 
 def main(argv):
+    # Drop privileges ASAP if we got run as root.
+    if not os.getuid():
+        # Release privileges.
+        os.setgroups([])
+        os.setgid(int(env['UNPRIVILEGED_GID']))
+        os.setuid(int(env['UNPRIVILEGED_UID']))
+
     if len(argv) < 2:
         print >>sys.stderr, 'Usage: buildPackages <arch_target>'
         return 1
@@ -65,11 +72,6 @@ def main(argv):
     # Prepare our chroot in which building will happen (requires elevation).
     # Don't let this modify our environment just yet.
     steps.create_chroot(env.copy())
-
-    # Release privileges.
-    os.setgroups([])
-    os.setgid(int(env['UNPRIVILEGED_GID']))
-    os.setuid(int(env['UNPRIVILEGED_UID']))
 
     # Prepare the cross-toolchain for building. This includes preparing the
     # correct location for libc/libm, libpedigree, etc
