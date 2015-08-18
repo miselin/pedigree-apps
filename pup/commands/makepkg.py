@@ -78,7 +78,7 @@ def main(arglist):
 
     if len(fileList) == 0:
         print "The given package path has no files or directories in it."
-        exit()
+        exit(1)
 
     if not os.path.exists(repoBase):
         os.makedirs(repoBase)
