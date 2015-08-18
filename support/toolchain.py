@@ -121,6 +121,6 @@ def chroot_spec(env):
     bin2_cc = os.path.join(bin2, env['CROSS_CC'])
     with open(bin2_cc, 'w') as f:
         f.write('''#!/bin/sh
-%s /cross/bin/%s -specs=/cross/%s $*
+%s /cross/bin/%s -pipe -specs=/cross/%s $*
 ''' % (env['CCACHE'], env['CROSS_CC'], specfile_name))
     os.chmod(bin2_cc, 0o755)
