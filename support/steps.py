@@ -187,6 +187,7 @@ def create_chroot(env):
         'sys' : '/sys',
         'opt' : '/opt',
         'cross' : env['CROSS_BASE'],
+        'pedigree_src' : env['PEDIGREE_BASE'],
         'ccache' : (True, env['CCACHE_TARGET_DIR']),
         'download' : (True, env['DOWNLOAD_TEMP']),
     }
