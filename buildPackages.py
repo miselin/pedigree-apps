@@ -71,6 +71,14 @@ def build_all(args, packages, env):
         else:
             built.add(name)
 
+        # If tarball extraction fails, we'll end up here but a) in a child,
+        # and b) in the chroot.
+        if os.getpid() != me:
+            status = 0
+            if name in notbuilt_failed:
+                status = 1
+            exit(status)
+
     for package in notbuilt_deps:
         log.warning('package "%s" failed to build because of missing build dependencies.', package)
     for package in notbuilt_failed:
@@ -106,6 +114,8 @@ def main(argv):
     kwargs = {}
     if args.logfile:
         kwargs['filename'] = args.logfile
+        with open(args.logfile, 'w'):
+            pass
     if args.debug:
         kwargs['level'] = logging.DEBUG
     else:

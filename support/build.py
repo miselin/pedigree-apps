@@ -103,9 +103,16 @@ def build_package(package, env):
                     tarinfo.path = os.path.join(*stripped)
                     return tarinfo
 
-                tar = tarfile.open(download_target, mode=mode)
-                tar.extractall(path=srcdir, members=(strip_first(x) for x in tar if check_strip(x)))
-                tar.close()
+                try:
+                    tar = tarfile.open(download_target, mode=mode)
+                    tar.extractall(path=srcdir, members=(strip_first(x) for x in tar if check_strip(x)))
+                    tar.close()
+                except:
+                    # Wipe out the download if extraction failed.
+                    if os.path.exists(download_target):
+                        os.unlink(download_target)
+
+                    raise
         elif tar_format == 'xz':
             # Can't do it in-process, shell out.
             subprocess.check_call([env['TAR'], '--strip', '1', '-xf', download_target], cwd=srcdir, env=env)
