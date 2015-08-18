@@ -29,6 +29,7 @@ class PupSchema(object):
 
         self._version = i
         self._db.execute('PRAGMA user_version = %d' % i)
+        self._db.commit()
 
     def _upgrade_to_1(self, db):
         db.execute('DROP TABLE IF EXISTS packages')

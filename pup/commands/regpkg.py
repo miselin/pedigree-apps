@@ -1,114 +1,80 @@
 #!/usr/bin/env python
 '''
-    PUP: Pedigree UPdater
+PUP: Pedigree UPdater
 
-    Copyright (c) 2010 Matthew Iselin
+Copyright (c) 2015 Matthew Iselin
 
-    Permission to use, copy, modify, and distribute this software for any
-    purpose with or without fee is hereby granted, provided that the above
-    copyright notice and this permission notice appear in all copies.
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
 
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-    ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-    pip-regpkg: register a package within a given repository
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 '''
 
-import os, sys
-from optparse import OptionParser
 import hashlib
+import logging
+import os
+import sys
+import urllib
 import sqlite3
+import tarfile
 
-def main(arglist):
-    optParser = OptionParser(usage="%prog --repo REPO_PATH --name NAME --ver VERSION --arch ARCH [--deps LIST_OF_DEPS]",
-                             version="pup-regpkg 0.1")
-    optParser.add_option("--repo", dest="repoBase", help="""
-        Path to the directory containing the local package repository. This will be
-        where the new package will be created in. The package database should be in
-        this directory (but use pup-regpkg to register this package in the
-        database.""".replace("    ", "").strip())
-    optParser.add_option("--deps", dest="depsList", help="""
-        Space-separated list of packages the package being registered depends on.
-        These packages do not need to exist in the repository yet.""".replace("    ", "").strip())
-    optParser.add_option("--name", dest="packageName", help="""
-        The name of the package being registered.""".replace("    ", "").strip())
-    optParser.add_option("--ver", dest="packageVersion", help="""
-        The version of the package being registered.""".replace("    ", "").strip())
-    optParser.add_option("--arch", dest="packageArch", help="""
-        The architecture of the package being registered.""".replace("    ", "").strip())
+from . import base
+from . import schema
+from . import util
 
-    (options, args) = optParser.parse_args(arglist)
 
-    if options.repoBase == None:
-        print "You must specify a path to the repository via the --repo option."
-        exit()
+log = logging.getLogger(__name__)
 
-    repoBase = options.repoBase
-    if not (repoBase[-1] == "/" or repoBase[-1] == "\\"):
-        repoBase += "/"
 
-    if options.packageName == None:
-        print "You must specify a name for the package via the --name option."
-        exit()
-    elif options.packageVersion == None:
-        print "You must specify a version for the package via the --ver option."
-        exit()
-    elif options.packageArch == None:
-        print "You must specify an architecture for the package via the --arch option."
-        exit()
-    elif not options.packageArch.lower() in ["i686", "amd64", "arm"]:
-        print "The architecture must be i686, amd64, or arm."
-        exit()
+class RegisterPackageCommand(base.PupCommand):
 
-    packageName = options.packageName
-    packageVersion = options.packageVersion
-    packageArch = options.packageArch.lower()
+    def name(self):
+        return 'register'
 
-    deps = []
-    if options.depsList <> None:
-        deps = filter(lambda x: len(x) > 0, options.depsList.split(" "))
+    def help(self):
+        return 'register packages'
 
-    # Hash the package
-    packagePath = repoBase + packageName + "-" + packageVersion + "-" + packageArch + ".pup"
-    if not os.path.exists(packagePath):
-        print "Can't find the pup for this package!"
-        exit()
+    def add_arguments(self, parser):
+        parser.add_argument('--package', type=str, required=True,
+            help='name of the package to register')
+        parser.add_argument('--version', type=str, required=True,
+            help='version of the package to register')
+        parser.add_argument('--architecture', type=str, required=True,
+            choices=('amd64', 'arm'),
+            help='architecture of the package to register')
+        parser.add_argument('dependency', nargs='*', type=str,
+            help='packages this package should depend on')
 
-    fileHash = 0
-    with open(packagePath, "rb") as f:
-        fileHash = hashlib.sha1(f.read()).hexdigest()
+    def run(self, args, config):
+        package_name = '%s-%s-%s' % (args.package, args.version, args.architecture)
+        package_file = os.path.join(config.local_cache, '%s.pup' % package_name)
+        log.info('register package %s [%s]', package_name, package_file)
 
-    # Install into the database
-    alreadyExisted = os.path.exists(repoBase + "packages.pupdb")
-    db = sqlite3.connect(repoBase + "packages.pupdb")
+        if not os.path.isfile(package_file):
+            print('No file exists for package %s.', package_file)
+            return 1
 
-    if not alreadyExisted:
-        db.execute("""create table packages (
-                      pkid integer primary key autoincrement,
-                      name text(256),
-                      ver text(64),
-                      deps text(4096),
-                      sha1 text(42),
-                      arch text(64)
-                      )""")
+        h = hashlib.sha1()
+        with open(package_file, 'rb') as f:
+            h.update(f.read())
+        package_hash = h.hexdigest()
 
-    # Using a tuple here performs proper sanitisation of input strings to avoid SQL
-    # injection attacks (which would be fairly nasty!)
-    db.execute("delete from packages where name=? and ver=? and arch=?", (packageName, packageVersion, packageArch))
-    db.execute("insert into packages (name, ver, deps, sha1, arch) values (?, ?, ?, ?, ?)", (packageName, packageVersion, " ".join(deps), fileHash, packageArch))
+        if args.dependency:
+            deps = ','.join(args.dependency)
+        else:
+            deps = ''
 
-    # By now everything seems to have fun fine, commit the changes to the database
-    db.commit()
+        config.db.execute('delete from packages where name=? and version=? and architecture=?',
+            (args.package, args.version, args.architecture))
+        config.db.execute('insert into packages (name, version, dependencies, sha1, architecture) values (?, ?, ?, ?, ?)',
+            (args.package, args.version, deps, package_hash, args.architecture))
+        config.db.commit()
 
-    db.close()
-
-    print "Package '" + packageName + "-" + packageVersion + "' [" + packageArch + "] has now been registered."
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
-
+        print('Package "%s" has been registered.' % package_name)

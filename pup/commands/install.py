@@ -78,7 +78,7 @@ class InstallCommand(base.PupCommand):
             if os.path.isfile(package_file):
                 # Do we need to download again?
                 h = hashlib.sha1()
-                with open(package_file) as f:
+                with open(package_file, 'rb') as f:
                     h.update(f.read())
 
                 download = package_sha1 != h.hexdigest()
