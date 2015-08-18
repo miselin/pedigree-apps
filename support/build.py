@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 import subprocess
+import sys
 import tarfile
 
 from . import buildsystem
@@ -61,6 +62,11 @@ def build_package(package, env):
     child = os.fork()
     if child:
         _, status = os.waitpid(child, 0)
+
+        # Child finished, flush output before continuing.
+        sys.stdout.flush()
+        sys.stderr.flush()
+
         if status:
             raise Exception('build failed inside chroot')
 
