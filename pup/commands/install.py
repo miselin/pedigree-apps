@@ -22,14 +22,11 @@
 import hashlib
 import logging
 import os
-import sys
 import urllib
-import sqlite3
+import shutil
 import tarfile
 
 from . import base
-from puplib import schema
-from puplib import util
 
 
 log = logging.getLogger(__name__)
@@ -45,9 +42,10 @@ class InstallCommand(base.PupCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('package', nargs='+', type=str,
-            help='packages to install')
+                            help='packages to install')
         parser.add_argument('--nodeps', action='store_true',
-            help='ignore package dependencies (not recommended)')
+                            help='ignore any package dependencies '
+                                 '(not recommended)')
 
     def run(self, args, config):
         if not os.path.isdir(config.install_root):
@@ -57,11 +55,12 @@ class InstallCommand(base.PupCommand):
         packages = []
         for package in args.package:
             e = config.db.execute('SELECT * FROM packages WHERE name=? AND '
-                'architecture=? ORDER BY version DESC',
-                (package, config.architecture))
+                                  'architecture=? ORDER BY version DESC',
+                                  (package, config.architecture))
             result = e.fetchone()
             if result is None:
-                print('The package "%s" is not available. Try running `pup sync`?' % package)
+                print('The package "%s" is not available. Try running '
+                      ' `pup sync`?' % package)
                 return 1
 
             # TODO(miselin): extract dependencies?
@@ -74,7 +73,8 @@ class InstallCommand(base.PupCommand):
         banned_repos = set()
         for package in packages:
             package_name = '%(name)s-%(version)s-%(architecture)s' % package
-            package_file = os.path.join(config.local_cache, '%s.pup' % package_name)
+            pup_filename = '%s.pup' % package_name
+            package_file = os.path.join(config.local_cache, pup_filename)
 
             package_sha1 = package['sha1']
             download = True
@@ -91,11 +91,11 @@ class InstallCommand(base.PupCommand):
                 for repo in config.repo_urls:
                     if repo in banned_repos:
                         log.warn('ignoring repo %s, it has failed previously',
-                            repo)
+                                 repo)
                         continue
 
                     with open(package_file, 'wb') as t:
-                        remote_url = '%s/%s.pup' % (repo, package_name)
+                        remote_url = '%s/%s' % (repo, pup_filename)
                         try:
                             f = urllib.urlopen(remote_url)
                         except:
@@ -106,7 +106,8 @@ class InstallCommand(base.PupCommand):
                         f.close()
 
             if not os.path.isfile(package_file):
-                print('Could not download package "%s" from server.' % package['name'])
+                print('Could not download package "%s" from server.' % (
+                      package['name'],))
                 return 1
 
             # Install.

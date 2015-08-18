@@ -17,17 +17,13 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 '''
 
-import hashlib
 import logging
 import os
-import sys
 import urllib
+import shutil
 import sqlite3
-import tarfile
 
 from . import base
-from puplib import schema
-from puplib import util
 
 
 log = logging.getLogger(__name__)

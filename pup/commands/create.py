@@ -50,8 +50,10 @@ class CreatePackageCommand(base.PupCommand):
         if not os.path.isdir(config.local_cache):
             os.makedirs(config.local_cache)
 
-        package_name = '%s-%s-%s' % (args.package, args.version, args.architecture)
-        package_file = os.path.join(config.local_cache, '%s.pup' % package_name)
+        package_name = '%s-%s-%s' % (args.package, args.version,
+                                     args.architecture)
+        pup_filename = '%s.pup' % package_name
+        package_file = os.path.join(config.local_cache, pup_filename)
         log.info('create package %s [%s]', package_name, package_file)
 
         if not os.path.isdir(args.path):
@@ -70,8 +72,8 @@ class CreatePackageCommand(base.PupCommand):
             tar.add(entry, arcname=os.path.basename(entry))
         tar.close()
 
-        print('Package "%s" is now created at %s.' % (package_name, package_file))
+        print('Package "%s" is now created at %s.' % (package_name,
+                                                      package_file))
         print('Run `pup register --package=%s --version=%s --architecture=%s` '
-            'to register this package in the local repository.' % (
-            args.package, args.version, args.architecture))
-
+              'to register this package in the local repository.' % (
+                  args.package, args.version, args.architecture))
