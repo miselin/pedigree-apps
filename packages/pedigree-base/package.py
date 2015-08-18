@@ -28,11 +28,7 @@ class Pedigree_basePackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://www.pedigree-project.org/files/%(package)s/%(package)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
+        pass
 
     def prebuild(self, env, srcdir):
         pass

@@ -28,9 +28,10 @@ class LibfreetypePackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://download.sourceforge.net/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://download.sourceforge.net/%(urlpackage)s/%(urlpackage)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
+            'urlpackage': 'freetype',
         }
         steps.download(url, target)
 

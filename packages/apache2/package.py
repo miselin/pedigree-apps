@@ -16,7 +16,7 @@ class Apache2Package(buildsystem.Package):
         return 'apache2'
 
     def version(self):
-        return '2.2.27'
+        return '2.2.31'
 
     def build_requires(self):
         return ['libtool', 'glib']
@@ -28,9 +28,10 @@ class Apache2Package(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://mirror.overthewire.com.au/pub/apache/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://mirrors.koehn.com/apache/%(urlpackage)s/%(urlpackage)s-%(version)s.tar.bz2' % {
             'package': self.name(),
             'version': self.version(),
+            'urlpackage': 'httpd',
         }
         steps.download(url, target)
 

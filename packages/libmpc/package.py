@@ -28,9 +28,10 @@ class LibmpcPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://www.multiprecision.org/%(package)s/download/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://www.multiprecision.org/%(urlpackage)s/download/%(urlpackage)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
+            'urlpackage': 'mpc',
         }
         steps.download(url, target)
 

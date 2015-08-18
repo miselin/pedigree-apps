@@ -28,9 +28,10 @@ class LibgmpPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.gnu.org/gnu/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://ftp.gnu.org/gnu/%(urlpackage)s/%(urlpackage)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
+            'urlpackage': 'gmp',
         }
         steps.download(url, target)
 

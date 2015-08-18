@@ -28,7 +28,7 @@ class PrboomPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://downloads.sourceforge.net/project/%(package)s/%(package)s%20stable/%(version)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://downloads.sourceforge.net/project/%(package)s/%(package)s%%20stable/%(version)s/%(package)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }

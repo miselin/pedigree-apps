@@ -29,7 +29,7 @@ class MesaPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'ftp://ftp.freedesktop.org/pub/%(package)s/%(version)s/MesaLib-%(version)s.tar.gz' % {
+        url = 'ftp://ftp.freedesktop.org/pub/%(package)s/older-versions/9.x/%(version)s/MesaLib-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }

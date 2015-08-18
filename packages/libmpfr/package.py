@@ -16,7 +16,7 @@ class LibmpfrPackage(buildsystem.Package):
         return 'libmpfr'
 
     def version(self):
-        return '3.1.2'
+        return '3.1.3'
 
     def build_requires(self):
         return ['libtool']
@@ -28,9 +28,10 @@ class LibmpfrPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://www.%(package)s.org/%(package)s-current/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://www.mpfr.org/%(urlpackage)s-current/%(urlpackage)s-%(version)s.tar.xz' % {
             'package': self.name(),
             'version': self.version(),
+            'urlpackage': 'mpfr',
         }
         steps.download(url, target)
 

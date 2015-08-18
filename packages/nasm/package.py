@@ -44,5 +44,5 @@ class NasmPackage(buildsystem.Package):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
+        env['INSTALLROOT'] = deploydir
         steps.make(srcdir, env, target='install')

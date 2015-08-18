@@ -5,6 +5,9 @@ from support import buildsystem
 from support import steps
 
 
+raise Exception('apr is not ready for building')
+
+
 class AprPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):

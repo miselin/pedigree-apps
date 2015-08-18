@@ -28,7 +28,7 @@ class CairoPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://%(package)sgraphics.org/releases/%(package)s-%(version)s.tar.xz' % {
+        url = 'http://cairographics.org/releases/%(package)s-%(version)s.tar.xz' % {
             'package': self.name(),
             'version': self.version(),
         }

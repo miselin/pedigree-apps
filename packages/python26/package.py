@@ -28,9 +28,10 @@ class Python26Package(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://python.org/ftp/python/%(version)s/%(package)s-%(version)s.tgz' % {
+        url = 'http://python.org/ftp/python/%(version)s/%(urlpackage)s-%(version)s.tar.bz2' % {
             'package': self.name(),
             'version': self.version(),
+            'urlpackage': 'Python',
         }
         steps.download(url, target)
 

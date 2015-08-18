@@ -22,7 +22,7 @@ class VimPackage(buildsystem.Package):
         return ['ncurses']
 
     def patches(self, env, srcdir):
-        return ['pedigree-cache.diff', 'vim-7.3-cross.diff']
+        return ['pedigree.cache.diff', 'vim-7.3-cross.diff']
 
     def options(self):
         return self._options
