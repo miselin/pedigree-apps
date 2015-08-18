@@ -8,6 +8,8 @@ try:
 except ImportError:
     from configparser import SafeConfigParser
 
+from . import schema
+
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +29,7 @@ class PupConfig(object):
         log.debug('loading database from %s', self.db_path)
         self.db = sqlite3.connect(self.db_path)
         self.db.row_factory = SqliteDictFactory
+        self.schema = schema.PupSchema(self.db)
 
         if not os.path.isdir(self.local_cache):
             os.makedirs(self.local_cache)
@@ -43,11 +46,26 @@ def load_config(args):
     parser = SafeConfigParser()
     parser.read(pup_config)
 
-    repos = [server[1] for server in parser.items("remotes")]
+    if parser.has_section('remotes'):
+        repos = [server[1] for server in parser.items('remotes')]
+    else:
+        repos = []
+
+    if parser.has_section('paths'):
+        local_cache = parser.get('paths', 'localdb')
+        install_root = parser.get('paths', 'installroot')
+    else:
+        local_cache = '/support/pup/db'
+        install_root = '/'
+
+    if parser.has_section('settings'):
+        architecture = parser.get('settings', 'arch')
+    else:
+        architecture = 'amd64'
 
     return PupConfig(
         repos,
-        parser.get("paths", "localdb"),
-        parser.get("paths", "installroot"),
-        parser.get("settings", "arch"),
+        local_cache,
+        install_root,
+        architecture
     )

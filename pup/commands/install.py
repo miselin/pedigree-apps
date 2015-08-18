@@ -28,8 +28,8 @@ import sqlite3
 import tarfile
 
 from . import base
-from . import schema
-from . import util
+from puplib import schema
+from puplib import util
 
 
 log = logging.getLogger(__name__)
@@ -50,6 +50,9 @@ class InstallCommand(base.PupCommand):
             help='ignore package dependencies (not recommended)')
 
     def run(self, args, config):
+        if not os.path.isdir(config.install_root):
+            os.makedirs(config.install_root)
+
         # Do all the given packages exist?
         packages = []
         for package in args.package:
@@ -89,6 +92,7 @@ class InstallCommand(base.PupCommand):
                     if repo in banned_repos:
                         log.warn('ignoring repo %s, it has failed previously',
                             repo)
+                        continue
 
                     with open(package_file, 'wb') as t:
                         remote_url = '%s/%s.pup' % (repo, package_name)

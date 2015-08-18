@@ -1,6 +1,8 @@
 
+# flake8: noqa
+
 # Register known commands.
 from . import install
-#from . import makepkg
-from . import regpkg
-#from . import sync
+from . import create
+from . import register
+from . import sync

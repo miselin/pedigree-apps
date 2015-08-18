@@ -1,7 +1,4 @@
 
-from . import schema
-
-
 class PupCommand(object):
     """Base class for all pup commands."""
 

@@ -23,8 +23,8 @@ import os
 import sys
 
 from commands import base
-from commands import schema
-from commands import util
+from puplib import schema
+from puplib import util
 
 
 PUP_OPS = ('makepkg', 'regpkg', 'sync', 'install')
@@ -49,6 +49,10 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
+
+    if not args.which:
+        parser.print_help()
+        exit(1)
 
     config = util.load_config(args)
 

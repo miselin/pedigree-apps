@@ -16,6 +16,9 @@ class PupSchema(object):
     def latest_version(self):
         return 1
 
+    def version(self):
+        return self._version
+
     def upgrade(self):
         if self._version >= self.latest_version():
             log.debug('nothing to be done in schema upgrade')

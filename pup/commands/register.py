@@ -26,8 +26,8 @@ import sqlite3
 import tarfile
 
 from . import base
-from . import schema
-from . import util
+from puplib import schema
+from puplib import util
 
 
 log = logging.getLogger(__name__)

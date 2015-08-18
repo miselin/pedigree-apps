@@ -1,68 +1,88 @@
 #!/usr/bin/env python
 '''
-    PUP: Pedigree UPdater
+PUP: Pedigree UPdater
 
-    Copyright (c) 2010 Matthew Iselin
+Copyright (c) 2015 Matthew Iselin
 
-    Permission to use, copy, modify, and distribute this software for any
-    purpose with or without fee is hereby granted, provided that the above
-    copyright notice and this permission notice appear in all copies.
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
 
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-    WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-    MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-    ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-    pup-sync.py: sync the local database with a remote repository
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 '''
 
-import os, sys, urllib, sqlite3
+import hashlib
+import logging
+import os
+import sys
+import urllib
+import sqlite3
+import tarfile
 
-import pup_common
+from . import base
+from puplib import schema
+from puplib import util
 
-def main(arglist):
 
-    remotePath, localPath, ignore, ignore = pup_common.getConfig(arglist)
-    
-    if localPath[-1] == "/":
-        localPath = localPath[0:-1]
+log = logging.getLogger(__name__)
 
-    if not os.path.exists(localPath):
-        os.makedirs(localPath)
-    
-    localFile = localPath + "/packages_new.pupdb"
 
-    # TODO: merge multiple databases (and store the server on which each package can be found?)
-    success = False
-    for server in remotePath:
-        remoteUrl = "%s/packages.pupdb" % (server)
-    
-        print "    -> syncing with %s" % (remoteUrl),
-        try:
-            o = urllib.FancyURLopener()
-            o.retrieve(remoteUrl, localFile)
-            success = True
-            print "(OK)"
-            break
-        except:
-            print "(failed)"
-            continue
-    
-    if not success:
-        print "Error: couldn't download package information from any server."
-        exit(1)
-    
-    # If the database isn't a valid sqlite database, this will fail
-    s = sqlite3.connect(localFile)
-    e = s.execute("select * from packages")
-    s.close()
-    
-    os.rename(localFile, localPath + "/packages.pupdb")
-    
-    print "Synchronisation complete."
+class SyncCommand(base.PupCommand):
 
-if __name__ == '__main__':
-    main(sys.argv[1:])
+    def name(self):
+        return 'sync'
+
+    def help(self):
+        return 'sync package database'
+
+    def add_arguments(self, parser):
+        pass
+
+    def run(self, args, config):
+        if not os.path.isdir(config.local_cache):
+            os.makedirs(config.local_cache)
+
+        new_database = os.path.join(config.local_cache, 'packages_new.pupdb')
+        target_database = os.path.join(config.local_cache, 'packages.pupdb')
+
+        banned_repos = set()
+        for repo in config.repo_urls:
+            if repo in banned_repos:
+                log.warn('ignoring repo %s, it has failed previously', repo)
+                continue
+
+            with open(new_database, 'wb') as t:
+                remote_url = '%s/packages.pupdb' % repo
+                try:
+                    log.info('trying %s', remote_url)
+                    f = urllib.urlopen(remote_url)
+                    log.info('%s is OK', remote_url)
+                except:
+                    banned_repos.add(repo)
+                    continue
+
+                shutil.copyfileobj(f, t)
+                f.close()
+
+        if not os.path.isfile(new_database):
+            print('Could not download updated database from server.')
+            return 1
+
+        # Verify the database is correct.
+        conn = sqlite3.connect(new_database)
+        cursor = conn.execute('PRAGMA user_version')
+        if cursor.fetchone()[0] != config.schema.version():
+            print('Downloaded database schema version mismatch.')
+            os.unlink(new_database)
+            return 1
+        conn.close()
+
+        os.rename(new_database, target_database)
+
+        print('Synchronisation complete.')
