@@ -1,11 +1,14 @@
-from __future__ import print_function
 
 import imp
+import logging
 import os
 import subprocess
 import sys
 
 from . import steps
+
+
+log = logging.getLogger(__name__)
 
 
 class OptionalError(NotImplementedError):
@@ -136,7 +139,7 @@ class Package(object):
                 if os.path.isfile(target_pcfile_path) or os.path.islink(target_pcfile_path):
                     os.unlink(target_pcfile_path)
 
-                print(target_pcfile_path, '->', pcfile_path)
+                log.debug('symlink: %s -> %s', target_pcfile_path, pcfile_path)
                 os.symlink(pcfile_path, target_pcfile_path)
 
 
@@ -158,7 +161,7 @@ def load_packages(env):
             try:
                 loaded = imp.load_source('pedigree_%s' % entry, module)
             except Exception as e:
-                print('%s failed to load (%s), ignoring.' % (entry, e), file=sys.stderr)
+                log.exception('%s failed to load, ignoring.', entry)
 
     # Collect subclasses of packages.
     collected_packages = Package.__subclasses__()

@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import collections
 import imp
+import logging
 import os
 import shutil
 import sys
@@ -22,6 +23,10 @@ from support import util
 
 
 VALID_ARCH_TARGETS = ('amd64',)
+LOGGING_FORMAT = '%(asctime)s %(module)-15s %(funcName)-20s %(levelname)-10s %(message)s'
+
+
+log = logging.getLogger()
 
 
 def build_all(args, packages, env):
@@ -34,16 +39,16 @@ def build_all(args, packages, env):
     notbuilt_failed = set()
     for name, package in packages:
         if not set(package.build_requires()).issubset(built):
-            print('Package "%s" build-depends not met.' % name, file=sys.stderr)
+            log.error('Package "%s" build-depends not met.', name)
             notbuilt_deps.add(name)
             continue
 
         if args.dryrun:
-            print('Would build package "%s" (dry run).' % name)
+            log.info('Would build package "%s" (dry run).', name)
             built.add(name)
             continue
         elif args.only and name not in args.only:
-            print('Not building package "%s" (not in list of packages to build).' % name)
+            log.info('Not building package "%s" (not in list of packages to build).', name)
             built.add(name)
             continue
 
@@ -61,16 +66,15 @@ def build_all(args, packages, env):
         except SystemExit:
             raise
         except Exception as e:
-            print('Building %s failed: %s' % (name, e.message), file=sys.stderr)
-            traceback.print_exc()
+            log.exception('Building %s failed.', name)
             notbuilt_failed.add(name)
         else:
             built.add(name)
 
     for package in notbuilt_deps:
-        print('WARNING: package "%s" failed to build because of missing build dependencies.' % package)
+        log.warning('package "%s" failed to build because of missing build dependencies.', package)
     for package in notbuilt_failed:
-        print('ERROR: package "%s" failed to build.' % package)
+        log.error('package "%s" failed to build.', package)
 
 
 def main(argv):
@@ -89,7 +93,25 @@ def main(argv):
     parser.add_argument('--only', type=str, nargs='+', required=False,
         help='Only build the given packages. Build-depends will not be built '
             'so if this may not create stable or successful builds.')
+    parser.add_argument('--logfile', type=str, required=False,
+        help='File to write logs to. stdout will be used if this is not '
+            'provided.')
+    parser.add_argument('--logformat', type=str, default=LOGGING_FORMAT,
+        help='Log entry format.')
+    parser.add_argument('--debug', action='store_true',
+        help='Whether to enable debug logging.')
     args = parser.parse_args()
+
+    # Set up the root logger.
+    kwargs = {}
+    if args.logfile:
+        kwargs['filename'] = args.logfile
+    if args.debug:
+        kwargs['level'] = logging.DEBUG
+    else:
+        kwargs['level'] = logging.INFO
+    kwargs['format'] = args.logformat
+    logging.basicConfig(**kwargs)
 
     # Load up an environment ready for building.
     env = environment.generate_environment(args.target)
@@ -113,6 +135,9 @@ def main(argv):
 
     # Build packages.
     build_all(args, packages, env)
+
+    # All done with logging.
+    logging.shutdown()
 
     return 0
 

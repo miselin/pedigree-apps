@@ -1,9 +1,12 @@
-from __future__ import print_function
 
+import logging
 import os
 import subprocess
 
 from . import util
+
+
+log = logging.getLogger(__name__)
 
 
 def prepare_compiler(env):
@@ -12,7 +15,7 @@ def prepare_compiler(env):
     This is necessary to pick up changes in libc, libm, pthread, and various
     other Pedigree-specific libraries.
     """
-    print('== Preparing Compiler ==')
+    log.info('== Preparing Compiler ==')
 
     links = (
         # Source -> Target
@@ -42,7 +45,7 @@ def prepare_compiler(env):
         for entry in os.listdir(target):
             entry = os.path.join(target, entry)
             if os.path.islink(entry):
-                print('unlink', entry)
+                log.debug('unlink %s', entry)
                 os.unlink(entry)
 
     # Create specific links that must exist.
@@ -53,7 +56,7 @@ def prepare_compiler(env):
         if target.endswith('/'):
             target = os.path.join(target, os.path.basename(source))
 
-        print(target, '->', source)
+        log.debug('%s -> %s', target, source)
 
         if os.path.isfile(target) or os.path.islink(target):
             os.unlink(target)
@@ -81,7 +84,7 @@ def chroot_spec(env):
         cc = os.path.join(env['CROSS_BASE'], 'bin', env['CROSS_CC'])
 
     if not os.path.exists(cc):
-        print('$CC is useless', file=sys.stderr)
+        log.error('$CC is useless')
         return
 
     # Get the existing specs.

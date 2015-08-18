@@ -1,12 +1,16 @@
 
 # Provides functions for common parts of build steps.
 
+import logging
 import os
 import shutil
 import subprocess
 import urllib
 
 from . import util
+
+
+log = logging.getLogger(__name__)
 
 
 AUTOCONF_PATHFLAGS = {
@@ -34,6 +38,7 @@ def get_builddir(srcdir, env, inplace):
 
 
 def cmd(*args, **kwargs):
+    log.debug('cmd: %r %r', args, kwargs)
     subprocess.check_call(*args, **kwargs)
 
 
@@ -127,7 +132,7 @@ def symlinks(deploydir, cross_dir, bins=(), libs=(), headers=()):
         symlinks.append((include_source, include_target))
 
     for source, target in symlinks:
-        print(target, '->', source)
+        logging.debug('symlink: %s -> %s', target, source)
         if os.path.exists(target) or os.path.islink(target):
             os.unlink(target)
         os.symlink(source, target)
