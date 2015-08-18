@@ -105,6 +105,7 @@ def make(srcdir, env, target=None, inplace=True, extra_opts=()):
 
 
 def download(url, target):
+    log.debug('download "%s" -> %s', url, target)
     with open(target, 'wb') as t:
         f = urllib.urlopen(url)
         shutil.copyfileobj(f, t)

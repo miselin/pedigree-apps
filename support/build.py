@@ -53,8 +53,14 @@ def build_package(package, env):
         patches = []
 
     for patch in patches:
+        target_dir = os.path.join(env['CHROOT_BASE'], 'patches')
+        if '/' in patch:
+            dirname = os.path.join(target_dir, os.path.dirname(patch))
+            if not os.path.isdir(dirname):
+                os.makedirs(dirname)
+
         shutil.copy2(os.path.join(package._path, 'patches', patch),
-            os.path.join(env['CHROOT_BASE'], 'patches', patch))
+            os.path.join(target_dir, patch))
 
     # Clean up our handles before forking.
     sys.stdout.flush()
@@ -77,6 +83,7 @@ def build_package(package, env):
 
             try:
                 method(env.copy(), srcdir, deploydir)
+                pass
             except buildsystem.OptionalError:
                 pass
 
@@ -89,33 +96,29 @@ def build_package(package, env):
     srcdir = '/src'
 
     # Extract the given tarball.
-    if download_target is not None:
-        tar_format = package.options().tarfile_format
-        if tar_format not in ['bare', 'xz']:
-            mode = 'r:%s' % tar_format
+    if os.path.exists(download_target):
+        # tar --strip=1
+        def check_strip(tarinfo):
+            return '/' in tarinfo.path
+        def strip_first(tarinfo):
+            stripped = tarinfo.path.split('/')[1:]
+            tarinfo.path = os.path.join(*stripped)
+            return tarinfo
 
-            if tar_format != 'none':
-                # tar --strip=1
-                def check_strip(tarinfo):
-                    return '/' in tarinfo.path
-                def strip_first(tarinfo):
-                    stripped = tarinfo.path.split('/')[1:]
-                    tarinfo.path = os.path.join(*stripped)
-                    return tarinfo
+        try:
+            try:
+                tar = tarfile.open(download_target)
+                tar.extractall(path=srcdir, members=(strip_first(x) for x in tar if check_strip(x)))
+                tar.close()
+            except tarfile.ReadError:
+                # Can't do it in-process, shell out.
+                subprocess.check_call([env['TAR'], '--strip', '1', '-xf', download_target], cwd=srcdir, env=env)
+        except:
+            # Wipe out the download if extraction failed.
+            if os.path.exists(download_target):
+                os.unlink(download_target)
 
-                try:
-                    tar = tarfile.open(download_target, mode=mode)
-                    tar.extractall(path=srcdir, members=(strip_first(x) for x in tar if check_strip(x)))
-                    tar.close()
-                except:
-                    # Wipe out the download if extraction failed.
-                    if os.path.exists(download_target):
-                        os.unlink(download_target)
-
-                    raise
-        elif tar_format == 'xz':
-            # Can't do it in-process, shell out.
-            subprocess.check_call([env['TAR'], '--strip', '1', '-xf', download_target], cwd=srcdir, env=env)
+            raise
 
     for step in pass1_steps:
         log.info('== %s %s step ==', package_id, step)
