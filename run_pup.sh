@@ -1,4 +1,5 @@
 #!/bin/bash
 
-PYTHONPATH=./pup:$PYTHONPATH ./pup/scripts/pup $*
+# Usage: ./run_pup.sh ...
+PYTHONPATH=./pup:$PYTHONPATH ./pup/frontend/main.py $*
 
