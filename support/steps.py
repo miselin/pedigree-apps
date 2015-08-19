@@ -153,12 +153,12 @@ def create_package(package, deploydir, env):
 
     # TODO(miselin): add dependency information.
     cmd([package_builder, '--config=%s' % config_file, 'create',
-        '--path', deploydir, '--package', package_name,
-        '--version', package_version, '--architecture', package_arch],
+         '--path', deploydir, '--package', package_name,
+         '--version', package_version, '--architecture', package_arch],
         cwd=deploydir)
     cmd([package_builder, '--config=%s' % config_file, 'register',
-        '--package', package_name, '--version', package_version,
-        '--architecture', package_arch], cwd=deploydir)
+         '--package', package_name, '--version', package_version,
+         '--architecture', package_arch], cwd=deploydir)
 
 
 def create_chroot(env):
