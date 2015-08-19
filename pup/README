@@ -1,0 +1,9 @@
+Pedigree UPdater
+================
+
+pup provides Pedigree with package management in a way that works for both cross
+compilation and installation on Pedigree proper.
+
+The pup tool allows for package creation, registering of packages with
+repository databases, synchronisation of repository databases to the local host,
+and installation of packages based on the metadata in a repository database.

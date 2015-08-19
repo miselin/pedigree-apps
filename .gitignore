@@ -12,3 +12,7 @@ local_environment.py
 coverage_html
 *.bak
 *.dot
+venv
+pup/build
+pup/dist
+*.egg-info

@@ -129,6 +129,9 @@ def main(argv):
     # Make sure we have a sane toolchain with a useful chroot spec file.
     toolchain.chroot_spec(env)
 
+    # Set up our local pup config.
+    toolchain.prepare_package_manager(env)
+
     # Prepare our chroot in which building will happen.
     # Don't let this modify our environment just yet.
     steps.create_chroot(env.copy())

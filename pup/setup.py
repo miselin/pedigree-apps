@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup, find_packages
+
 
 setup(name='pup',
       version='1.0',
@@ -8,7 +9,11 @@ setup(name='pup',
       author='Matthew Iselin',
       author_email='matthew@theiselins.net',
       url='https://www.pedigree-project.org',
-      packages=['pup', 'pup.commands', 'pup.lib'],
-      scripts=['scripts/pup'],
-      data_files=[('/config', ['pup.conf.default'])],
+      packages=find_packages(),
+      data_files=[('config', ['pup.conf.default'])],
+      entry_points={
+            'console_scripts': [
+                'pup=frontend.main:main',
+            ],
+      },
 )

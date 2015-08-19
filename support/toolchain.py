@@ -66,6 +66,25 @@ def prepare_compiler(env):
         os.symlink(source, target)
 
 
+def prepare_package_manager(env):
+    """Create necessary configuration files for the package manager."""
+    with open(os.path.join(env['APPS_BASE'], 'pup.conf'), 'w') as f:
+        f.write('''
+[paths]
+installroot=/
+localdb=%(repo)s
+
+[settings]
+arch=%(arch)s
+
+[remotes]
+server=http://pup.pedigree-project.org/pup
+''' % {
+        'repo': env['PACKMAN_REPO'],
+        'arch': env['PACKMAN_TARGET_ARCH']
+        })
+
+
 def chroot_spec(env):
     """Creates a new spec file for the build chroot.
 
