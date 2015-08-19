@@ -20,11 +20,13 @@ class Options(object):
     __anything__ = object()
     __opts__ = {
         'tarfile_format': ('bz2', 'gz', 'xz', 'bare', 'none'),
+        'always_download': (True, False),
     }
 
     def __init__(self):
         # Set sensible defaults.
         self.tarfile_format = 'gz'
+        self.always_download = False
 
     def __setattr__(self, key, value):
         obj = Options.__opts__.get(key, Options.__anything__)

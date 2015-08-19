@@ -140,20 +140,26 @@ def symlinks(deploydir, cross_dir, bins=(), libs=(), headers=()):
 
 
 def create_package(package, deploydir, env):
-    package_builder = env['PACKMAN_PATH']
+    package_builder = os.path.join(env['PACKMAN_PATH'], 'frontend', 'main.py')
     repo_dir = env['PACKMAN_REPO']
+    config_file = os.path.join(env['APPS_BASE'], 'pup.conf')
 
     package_name = package.name()
     package_version = package.version()
     package_arch = env['PACKMAN_TARGET_ARCH']
 
-    # TODO(miselin): add dependency information to pup.
-    cmd([package_builder, 'makepkg', '--path', deploydir,
-        '--repo', repo_dir, '--name', package_name, '--ver', package_version,
-        '--arch', package_arch], cwd=deploydir)
-    cmd([package_builder, 'regpkg',
-        '--repo', repo_dir, '--name', package_name, '--ver', package_version,
-        '--arch', package_arch], cwd=deploydir)
+    env = env.copy()
+
+    env['PYTHONPATH'] = env['PACKMAN_PATH']
+
+    # TODO(miselin): add dependency information.
+    cmd([package_builder, '--config=%s' % config_file, 'create',
+        '--path', deploydir, '--package', package_name,
+        '--version', package_version, '--architecture', package_arch],
+        cwd=deploydir)
+    cmd([package_builder, '--config=%s' % config_file, 'register',
+        '--package', package_name, '--version', package_version,
+        '--architecture', package_arch], cwd=deploydir)
 
 
 def create_chroot(env):
