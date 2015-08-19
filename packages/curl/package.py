@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -28,7 +26,7 @@ class CurlPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://%(package)s.haxx.se/download/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://curl.haxx.se/download/%(package)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }

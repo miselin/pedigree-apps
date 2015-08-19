@@ -19,8 +19,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import argparse
 import logging
-import os
-import sys
 
 from pup.commands import base
 from pup.lib import schema

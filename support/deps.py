@@ -1,5 +1,4 @@
 
-import collections
 import os
 import networkx
 import tarfile
@@ -11,8 +10,9 @@ def collect_dependences(known_packages, package):
     Returns:
         A list of Package objects that are required for the given package.
     """
-    # Traverse the dependency chain, pulling in dependencies of our dependencies
-    # and so on. This is important as we may have implicit dependencies.
+    # Traverse the dependency chain, pulling in dependencies of our
+    # dependencies and so on. This is important as we may have implicit
+    # dependencies.
     def traverse_depends(depends, pkg):
         package_depends = pkg.build_requires()
         for dependency in package_depends:
@@ -32,7 +32,8 @@ def install_dependent_packages(all_packages, package, env):
 
     # Now, create all the dependent links.
     for package in depends:
-        package_filename = '%s-%s-%s.pup' % (package.name(), package.version(), env['PACKMAN_TARGET_ARCH'])
+        package_filename = '%s-%s-%s.pup' % (package.name(), package.version(),
+                                             env['PACKMAN_TARGET_ARCH'])
         package_path = os.path.join(env['PACKMAN_REPO'], package_filename)
 
         tar = tarfile.open(package_path)

@@ -32,7 +32,8 @@ def build_package(package, env):
     pass2_steps = ('deploy', 'postdeploy')
     pass3_steps = ('repository',)
 
-    if package.options().always_download or not os.path.isfile(download_target):
+    if (package.options().always_download or
+            not os.path.isfile(download_target)):
         for step in pass0_steps:
             log.info('== %s %s step ==', package_id, step)
             method = getattr(package, step)
@@ -60,7 +61,7 @@ def build_package(package, env):
                 os.makedirs(dirname)
 
         shutil.copy2(os.path.join(package._path, 'patches', patch),
-            os.path.join(target_dir, patch))
+                     os.path.join(target_dir, patch))
 
     # Clean up our handles before forking.
     sys.stdout.flush()
@@ -100,6 +101,7 @@ def build_package(package, env):
         # tar --strip=1
         def check_strip(tarinfo):
             return '/' in tarinfo.path
+
         def strip_first(tarinfo):
             stripped = tarinfo.path.split('/')[1:]
             tarinfo.path = os.path.join(*stripped)
@@ -108,11 +110,14 @@ def build_package(package, env):
         try:
             try:
                 tar = tarfile.open(download_target)
-                tar.extractall(path=srcdir, members=(strip_first(x) for x in tar if check_strip(x)))
+                tar.extractall(path=srcdir,
+                               members=(strip_first(x) for x in tar
+                                        if check_strip(x)))
                 tar.close()
             except tarfile.ReadError:
                 # Can't do it in-process, shell out.
-                subprocess.check_call([env['TAR'], '--strip', '1', '-xf', download_target], cwd=srcdir, env=env)
+                subprocess.check_call([env['TAR'], '--strip', '1', '-xf',
+                                       download_target], cwd=srcdir, env=env)
         except:
             # Wipe out the download if extraction failed.
             if os.path.exists(download_target):

@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -28,10 +26,10 @@ class GzipPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.gnu.org/gnu/%(package)s/%(package)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
+        url = ('http://ftp.gnu.org/gnu/%(package)s/'
+               '%(package)s-%(version)s.tar.gz' % {
+                   'package': self.name(),
+                   'version': self.version()})
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):

@@ -12,8 +12,8 @@ setup(name='pup',
       packages=find_packages(),
       data_files=[('config', ['pup.conf.default'])],
       entry_points={
-            'console_scripts': [
-                'pup=frontend.main:main',
-            ],
+          'console_scripts': [
+              'pup=frontend.main:main',
+          ],
       },
-)
+      )

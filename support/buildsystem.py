@@ -87,7 +87,7 @@ class Package(object):
             real_patch = os.path.join('/', 'patches', patch)
             with open(real_patch, 'r') as f:
                 subprocess.check_call([env['PATCH'], '-p1'], stdin=f,
-                    cwd=srcdir, env=env)
+                                      cwd=srcdir, env=env)
 
     def prebuild(self, env, srcdir):
         """Performs steps needed to prepare the build."""
@@ -138,7 +138,8 @@ class Package(object):
                     continue
 
                 target_pcfile_path = os.path.join(target_path, pcfile)
-                if os.path.isfile(target_pcfile_path) or os.path.islink(target_pcfile_path):
+                if (os.path.isfile(target_pcfile_path) or
+                        os.path.islink(target_pcfile_path)):
                     os.unlink(target_pcfile_path)
 
                 log.debug('symlink: %s -> %s', target_pcfile_path, pcfile_path)
@@ -161,8 +162,8 @@ def load_packages(env):
         module = os.path.join(entry_path, 'package.py')
         if os.path.exists(module):
             try:
-                loaded = imp.load_source('pedigree_%s' % entry, module)
-            except Exception as e:
+                imp.load_source('pedigree_%s' % entry, module)
+            except Exception:
                 log.exception('%s failed to load, ignoring.', entry)
 
     # Collect subclasses of packages.

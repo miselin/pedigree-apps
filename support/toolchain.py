@@ -1,6 +1,7 @@
 
 import logging
 import os
+import shutil
 import subprocess
 
 from . import util
@@ -19,22 +20,35 @@ def prepare_compiler(env):
 
     links = (
         # Source -> Target
-        ('$PEDIGREE_BASE/build/kernel/crt0.o', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/kernel/crti.o', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/kernel/crtn.o', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libpthread.so', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libpedigree.so', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libpedigree-c.so', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libpedigree.so', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libc.so', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libm.so', '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libs/libui.so', '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/kernel/crt0.o',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/kernel/crti.o',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/kernel/crtn.o',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/libpthread.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/libpedigree.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/libpedigree-c.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/libpedigree.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/libc.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/libm.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/libs/libui.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
 
-        ('$PEDIGREE_BASE/src/subsys/posix/include', '$CROSS_BASE/$CROSS_TARGET/include'),
-        ('$PEDIGREE_BASE/src/subsys/native/include', '$CROSS_BASE/include/pedigree-native'),
+        ('$PEDIGREE_BASE/src/subsys/posix/include',
+            '$CROSS_BASE/$CROSS_TARGET/include'),
+        ('$PEDIGREE_BASE/src/subsys/native/include',
+            '$CROSS_BASE/include/pedigree-native'),
 
         ('$PEDIGREE_BASE/build/libSDL.so', '$CROSS_BASE/lib/'),
-        ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include', '$CROSS_BASE/include/SDL'),
+        ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include',
+            '$CROSS_BASE/include/SDL'),
     )
 
     # Clean up the base tree of the cross-compiler.
@@ -61,7 +75,7 @@ def prepare_compiler(env):
         if os.path.isfile(target) or os.path.islink(target):
             os.unlink(target)
         if os.path.isdir(target):
-            shtuil.rmtree(target)
+            shutil.rmtree(target)
 
         os.symlink(source, target)
 
@@ -80,9 +94,9 @@ arch=%(arch)s
 [remotes]
 server=http://pup.pedigree-project.org/pup
 ''' % {
-        'repo': env['PACKMAN_REPO'],
-        'arch': env['PACKMAN_TARGET_ARCH']
-        })
+                'repo': env['PACKMAN_REPO'],
+                'arch': env['PACKMAN_TARGET_ARCH']
+                })
 
 
 def chroot_spec(env):
@@ -107,7 +121,7 @@ def chroot_spec(env):
         return
 
     # Get the existing specs.
-    current_specs = new_specs = subprocess.check_output([cc, '-dumpspecs'])
+    new_specs = subprocess.check_output([cc, '-dumpspecs'])
 
     replacements = {
         '%D': '-L/libraries -rpath-link /libraries %D',

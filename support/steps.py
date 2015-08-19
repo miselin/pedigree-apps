@@ -65,7 +65,7 @@ def autoconf(srcdir, env, aclocal_flags=()):
 
 
 def run_configure(package, srcdir, env, extra_opts=(), inplace=True, host=True,
-             extra_config=(), paths=None):
+                  extra_config=(), paths=None):
     """Runs an Autoconf configure script."""
     cmd_env = env.copy()
 
@@ -141,7 +141,6 @@ def symlinks(deploydir, cross_dir, bins=(), libs=(), headers=()):
 
 def create_package(package, deploydir, env):
     package_builder = os.path.join(env['PACKMAN_PATH'], 'frontend', 'main.py')
-    repo_dir = env['PACKMAN_REPO']
     config_file = os.path.join(env['APPS_BASE'], 'pup.conf')
 
     package_name = package.name()
@@ -163,7 +162,7 @@ def create_package(package, deploydir, env):
 
 
 def create_chroot(env):
-    """Create chroot if it doesn't exist yet and clean it out ready for a build.
+    """Create chroot if it doesn't exist yet and clean it out ready to build.
 
     Args:
         env: environment to use and modify to use the chroot.
@@ -177,28 +176,28 @@ def create_chroot(env):
     # Provide correct access while elevated.
     if elevated:
         os.chown(env['CHROOT_BASE'], int(env['UNPRIVILEGED_UID']),
-            int(env['UNPRIVILEGED_GID']))
+                 int(env['UNPRIVILEGED_GID']))
 
     # Host filesystem layout.
     bind_mounts = {
-        'bin' : '/bin',
-        'sbin' : '/sbin',
-        'usr' : '/usr',
-        'lib' : '/lib',
-        'var' : '/var',
-        'proc' : '/proc',
-        'dev' : '/dev',
-        'etc' : '/etc',
-        'lib64' : '/lib64',
-        'sys' : '/sys',
-        'opt' : '/opt',
-        'cross' : env['CROSS_BASE'],
-        'pedigree_src' : env['PEDIGREE_BASE'],
-        'ccache' : (True, env['CCACHE_TARGET_DIR']),
-        'download' : (True, env['DOWNLOAD_TEMP']),
+        'bin': '/bin',
+        'sbin': '/sbin',
+        'usr': '/usr',
+        'lib': '/lib',
+        'var': '/var',
+        'proc': '/proc',
+        'dev': '/dev',
+        'etc': '/etc',
+        'lib64': '/lib64',
+        'sys': '/sys',
+        'opt': '/opt',
+        'cross': env['CROSS_BASE'],
+        'pedigree_src': env['PEDIGREE_BASE'],
+        'ccache': (True, env['CCACHE_TARGET_DIR']),
+        'download': (True, env['DOWNLOAD_TEMP']),
     }
     pedigree_structure = ['applications', 'libraries', 'include', 'support',
-        'system', 'config', 'doc']
+                          'system', 'config', 'doc']
     support_structure = ['tmp', 'run', 'patches', 'root', '__deploy']
 
     extra_unprivileged_paths = ['ccache', 'download']
@@ -226,9 +225,9 @@ def create_chroot(env):
 
         if elevated:
             if ((entry in extra_unprivileged_paths) or
-                (entry not in bind_mounts.keys())):
+                    (entry not in bind_mounts.keys())):
                 os.chown(entry_target, int(env['UNPRIVILEGED_UID']),
-                    int(env['UNPRIVILEGED_GID']))
+                         int(env['UNPRIVILEGED_GID']))
 
     # Update the environment.
     for k, v in env.items():
@@ -261,4 +260,5 @@ def create_chroot(env):
             # wiped out by accident.
             cmd([env['MOUNT'], '--bind', target, path], env=env)
             if not rw:
-                cmd([env['MOUNT'], '--bind', '-o', 'remount,ro', target, path], env=env)
+                cmd([env['MOUNT'], '--bind', '-o', 'remount,ro', target, path],
+                    env=env)

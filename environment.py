@@ -124,8 +124,9 @@ def generate_environment(target_arch, env=None, recurse=True):
             modify_environment(env)
             env.track(tracking=False)
 
-            # If anything was changed in modify_environment, we need to actually
-            # re-generate the environment so we can pick up new expansions.
+            # If anything was changed in modify_environment, we need to
+            # actually re-generate the environment so we can pick up new
+            # expansions.
             if env.has_overrides():
                 generate_environment(target_arch, env=env, recurse=False)
         except ImportError:
