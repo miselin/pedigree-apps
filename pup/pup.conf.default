@@ -2,7 +2,8 @@
 installroot=/
 localdb=/support/pup/db
 
+[settings]
+arch=amd64
+
 [remotes]
 server=http://pup.pedigree-project.org/pup
-server=http://www.theiselins.net/pup
-

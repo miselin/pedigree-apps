@@ -32,7 +32,7 @@ def build_package(package, env):
     pass2_steps = ('deploy', 'postdeploy')
     pass3_steps = ('repository',)
 
-    if not os.path.isfile(download_target):
+    if package.options().always_download or not os.path.isfile(download_target):
         for step in pass0_steps:
             log.info('== %s %s step ==', package_id, step)
             method = getattr(package, step)
