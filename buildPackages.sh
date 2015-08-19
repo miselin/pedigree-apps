@@ -13,6 +13,7 @@ set -e
 # Install needed packages.
 pip install -q -r ./requirements.txt
 pip install -q pydot  # For generating dependencies.dot
+pip install -q flake8  # For runtests.sh
 
 # Make pup available for the builds.
 pip install -q --upgrade pup/
