@@ -92,6 +92,9 @@ def main(argv):
                         help='Only build the given packages. Build-depends '
                         'will not be built so if this may not create stable '
                         'or successful builds.')
+    parser.add_argument('--only-depends', type=str, nargs='+', required=False,
+                        help='Only build the given packages and their '
+                        'dependencies.')
     parser.add_argument('--logfile', type=str, required=False,
                         help='File to write logs to. stdout will be used if '
                         'this is not provided.')
@@ -142,6 +145,20 @@ def main(argv):
 
     # Sort dependencies so the build is performed correctly.
     packages = deps.sort_dependencies(packages)
+
+    # Filter based on only/only-depends.
+    if args.only:
+        packages = ((name, package) for name, package in packages
+                    if name in args.only)
+    if args.only_depends:
+        actual_packages = []
+        wanted_depends = set()
+        for name, package in reversed(packages):
+            if name in args.only_depends or name in wanted_depends:
+                actual_packages.append((name, package))
+                wanted_depends.update(package.build_requires())
+
+        packages = tuple(reversed(actual_packages))
 
     # Build packages.
     build_all(args, packages, env)
