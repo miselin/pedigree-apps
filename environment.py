@@ -72,6 +72,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     # Package manager.
     env['PACKMAN_TARGET_ARCH'] = target_arch
     env['PACKMAN_PATH'] = _expand('$APPS_BASE/pup')
+    env['PACKMAN_SCRIPT'] = _expand('$VIRTUAL_ENV/bin/pup')
     env['PACKMAN_REPO'] = _expand('$APPS_BASE/pup/package_repo')
 
     # Cross-toolchain.
