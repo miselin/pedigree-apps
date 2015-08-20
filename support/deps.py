@@ -55,7 +55,7 @@ def sort_dependencies(packages):
             graph.add_node(package_name)
 
         for dependency in requires:
-            graph.add_edge(dependency, package_name)
+            graph.add_edge(package_name, dependency)
 
     # Write out a nice dot graph if we can.
     try:
@@ -64,5 +64,5 @@ def sort_dependencies(packages):
         pass
 
     # Walk the tree to figure out the correct dependency order.
-    result = networkx.topological_sort(graph)
+    result = networkx.topological_sort(graph, reverse=True)
     return [(package, packages[package]) for package in result]
