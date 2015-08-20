@@ -11,20 +11,8 @@ DEFINE_RE = re.compile(r'\#define\s+?(?P<name>.*?)\s+(?P<value>.*)')
 
 
 def main():
-    environment = os.path.join(
-        os.path.dirname(sys.argv[0]), '..', 'environment.sh')
-
-    # Grab variables from the environment.
-    env_args = ['sh', '-c', 'source %s && echo $CROSS_BASE' % (environment,)]
-    cross_base = subprocess.check_output(env_args)
-    if not cross_base or not os.path.exists(cross_base.strip()):
-        print >>sys.stderr, ("$CROSS_BASE is undefined, please check the apps "
-            "build environment")
-        exit(1)
-    cross_base = cross_base.strip()
-
-    include_dir = os.path.join(cross_base, 'include', 'SDL')
-    libs_dir = os.path.join(cross_base, 'lib')
+    include_dir = os.path.join('/include', 'SDL')
+    libs_dir = os.path.join('/libraries')
 
     # Parse header file, extract version
     sdl_version_header = os.path.join(include_dir, 'SDL_version.h')

@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 
+from . import steps
 from . import util
 
 
@@ -41,14 +42,9 @@ def prepare_compiler(env):
         ('$PEDIGREE_BASE/build/libs/libui.so',
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
 
-        ('$PEDIGREE_BASE/src/subsys/posix/include',
+        # NO $CROSS_TARGET include directory - use /include!!
+        (None,
             '$CROSS_BASE/$CROSS_TARGET/include'),
-        ('$PEDIGREE_BASE/src/subsys/native/include',
-            '$CROSS_BASE/include/pedigree-native'),
-
-        ('$PEDIGREE_BASE/build/libSDL.so', '$CROSS_BASE/lib/'),
-        ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include',
-            '$CROSS_BASE/include/SDL'),
     )
 
     # Clean up the base tree of the cross-compiler.
@@ -64,20 +60,53 @@ def prepare_compiler(env):
 
     # Create specific links that must exist.
     for source, target in links:
-        source = util.expand(env, source)
+        if source:
+            source = util.expand(env, source)
         target = util.expand(env, target)
 
         if target.endswith('/'):
             target = os.path.join(target, os.path.basename(source))
 
-        log.debug('%s -> %s', target, source)
+        if source:
+            log.debug('link %s -> %s', target, source)
+        else:
+            log.debug('rm   %s', target)
 
         if os.path.isfile(target) or os.path.islink(target):
             os.unlink(target)
         if os.path.isdir(target):
             shutil.rmtree(target)
 
-        os.symlink(source, target)
+        if source:
+            os.symlink(source, target)
+
+
+def pedigree_into_chroot(env, chroot_dir):
+    """Copy Pedigree-specific files into the given chroot for compilation.
+
+    This is needed to provide the correct files, especially for #includes.
+    """
+
+    copy_paths = (
+        ('$PEDIGREE_BASE/src/subsys/posix/include', 'include/'),
+        ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include', 'include/SDL'),
+        ('$PEDIGREE_BASE/build/libSDL.so', 'libraries/'),
+        ('$APPS_BASE/bin/sdl-config', 'applications/'),
+    )
+
+    for source, target in copy_paths:
+        source = util.expand(env, source)
+
+        target_path = os.path.join(chroot_dir, target)
+        if not os.path.isdir(target_path):
+            os.makedirs(target_path)
+
+        flags = '-a'
+        if os.path.isdir(source):
+            flags += 'rT'  # merge directory trees
+
+        # Copy files (use cp - much more elegant than doing this in Python)
+        steps.cmd(['/bin/cp', flags, source, target_path])
 
 
 def prepare_package_manager(env):
@@ -125,13 +154,10 @@ def chroot_spec(env):
 
     replacements = {
         '%D': '-L/libraries -rpath-link /libraries %D',
-        '*cpp:\n': '*cpp:\n-I/include'
+        '*cpp:\n': '*cpp:\n-D__PEDIGREE__ -I/include'
     }
 
-    additions = '''*predefines:
--D__PEDIGREE__
-
-%%rename cc1_cpu old_cc1_cpu
+    additions = '''%%rename cc1_cpu old_cc1_cpu
 *cc1_cpu:
 %s %%(old_cc1_cpu)
 

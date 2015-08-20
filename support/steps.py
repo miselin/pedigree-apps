@@ -64,7 +64,7 @@ def autoconf(srcdir, env, aclocal_flags=()):
     cmd([env['AUTOCONF']], cwd=srcdir, env=env)
 
 
-def run_configure(package, srcdir, env, extra_opts=(), inplace=True, host=True,
+def run_configure(package, srcdir, env, inplace=True, host=True,
                   extra_config=(), paths=None):
     """Runs an Autoconf configure script."""
     cmd_env = env.copy()

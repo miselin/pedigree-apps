@@ -53,6 +53,9 @@ def build_all(args, packages, env):
             # Prepare chroot for building this package.
             steps.create_chroot(env)
 
+            # Drop in support files from Pedigree build.
+            toolchain.pedigree_into_chroot(env, env['CHROOT_BASE'])
+
             # Install our build_requires packages to the chroot path.
             deps.install_dependent_packages(dict(packages), package, env)
 
