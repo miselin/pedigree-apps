@@ -39,11 +39,11 @@ class LibffiPackage(buildsystem.Package):
         steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, inplace=False)
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, inplace=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', inplace=False)
