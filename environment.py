@@ -93,7 +93,6 @@ def generate_environment(target_arch, env=None, recurse=True):
 
     # pkg-config magic (inside chroot).
     env['PKG_CONFIG_LIBDIR'] = _expand('/libraries/pkgconfig')
-    env['PKG_CONFIG_SYSROOT_DIR'] = _expand('$CROSS_BASE')
 
     # Add local binary paths to $PATH.
     cross_bin = _expand('$CROSS_BASE/bin')
