@@ -13,7 +13,7 @@ setup(name='pup',
       data_files=[('config', ['pup.conf.default'])],
       entry_points={
           'console_scripts': [
-              'pup=frontend.main:main',
+              'pup=pedigree_updater.frontend.main:main',
           ],
       },
       )

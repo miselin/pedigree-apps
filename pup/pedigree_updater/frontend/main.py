@@ -20,9 +20,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 import argparse
 import logging
 
-from pup.commands import base
-from pup.lib import schema
-from pup.lib import util
+from pedigree_updater.commands import base
+from pedigree_updater.lib import schema
+from pedigree_updater.lib import util
 
 
 log = logging.getLogger()
