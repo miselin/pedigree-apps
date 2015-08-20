@@ -19,7 +19,7 @@ class CoreutilsPackage(buildsystem.Package):
         return '8.6'
 
     def build_requires(self):
-        return ['gettext']
+        return ['gettext', 'libgmp']
 
     def patches(self, env, srcdir):
         return []
