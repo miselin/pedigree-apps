@@ -126,19 +126,22 @@ def main(argv):
         os.setgid(int(env['UNPRIVILEGED_GID']))
         os.setuid(int(env['UNPRIVILEGED_UID']))
 
-    # Make sure we have a sane toolchain with a useful chroot spec file.
-    toolchain.chroot_spec(env)
+    if not args.dryrun:
+        # Make sure we have a sane toolchain with a useful chroot spec file.
+        toolchain.chroot_spec(env)
 
-    # Set up our local pup config.
-    toolchain.prepare_package_manager(env)
+        # Set up our local pup config.
+        toolchain.prepare_package_manager(env)
 
-    # Prepare our chroot in which building will happen.
-    # Don't let this modify our environment just yet.
-    steps.create_chroot(env.copy())
+        # Prepare our chroot in which building will happen.
+        # Don't let this modify our environment just yet.
+        steps.create_chroot(env.copy())
 
-    # Prepare the cross-toolchain for building. This includes preparing the
-    # correct location for libc/libm, libpedigree, etc
-    toolchain.prepare_compiler(env)
+        # Prepare the cross-toolchain for building. This includes preparing the
+        # correct location for libc/libm, libpedigree, etc
+        toolchain.prepare_compiler(env)
+    else:
+        log.info('not touching filesystem, dry run')
 
     # Get packages to build.
     packages = buildsystem.load_packages(env)
