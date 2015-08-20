@@ -20,7 +20,10 @@ class LibBindPackage(buildsystem.Package):
         return '6.0'
 
     def patches(self, env, srcdir):
-        return []
+        # resolv.h comes out by default with no #include for netinet/in.h, which
+        # breaks in fun ways if it's not included by something that has already
+        # included that.
+        return ['resolv.h.diff']
 
     def build_requires(self):
         return ['libtool']
@@ -56,10 +59,8 @@ class LibBindPackage(buildsystem.Package):
         steps.autoconf(srcdir, env, aclocal_flags=('-I', 'libltdl', '-I', 'libltdl/m4'))
 
     def configure(self, env, srcdir):
-        env['CFLAGS'] = '-fPIC'
-        env['CXXFLAGS'] = '-fPIC'
         steps.run_configure(self, srcdir, env,
-            extra_config=('--with-randomdev="dev»/urandom"',))
+            extra_config=('--with-randomdev="dev»/urandom"', '--with-pic'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
