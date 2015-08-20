@@ -33,14 +33,13 @@ class GlibPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        #steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)  #, extra_flags=('-I', os.path.join(srcdir, 'libltdl')))
+        steps.libtoolize(srcdir, env)
+        steps.autoconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
             'glib_cv_stack_grows=no', 'glib_cv_uscore=no', 'ac_cv_func_posix_getpwuid_r=no',
-            'ac_cv_func_posix_getgrgid_r=no', '--with-libiconv',
-            '--with-sysroot=%s' % env['CROSS_BASE']))
+            'ac_cv_func_posix_getgrgid_r=no', '--with-libiconv'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
