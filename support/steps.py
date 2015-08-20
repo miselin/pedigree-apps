@@ -152,11 +152,13 @@ def create_package(package, deploydir, env):
     env['PYTHONPATH'] = env['PACKMAN_PATH']
 
     # TODO(miselin): add dependency information.
-    cmd([package_builder, '--config=%s' % config_file, 'create',
+    cmd(['/usr/bin/env', 'python', package_builder,
+         '--config=%s' % config_file, 'create',
          '--path', deploydir, '--package', package_name,
          '--version', package_version, '--architecture', package_arch],
         cwd=deploydir)
-    cmd([package_builder, '--config=%s' % config_file, 'register',
+    cmd(['/usr/bin/env', 'python', package_builder,
+         '--config=%s' % config_file, 'register',
          '--package', package_name, '--version', package_version,
          '--architecture', package_arch], cwd=deploydir)
 
