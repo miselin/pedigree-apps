@@ -35,10 +35,29 @@ class ReadlinePackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        with open(os.path.join(srcdir, 'support', 'shobj-conf'), 'w') as f:
+            f.write('''#!/bin/sh
+echo SHOBJ_STATUS=supported
+echo SHLIB_STATUS=supported
+
+echo SHOBJ_CC=\'$ARCH_TARGET-pedigree-gcc\'
+echo SHOBJ_CFLAGS=\'$CFLAGS -fPIC -shared\'
+echo SHOBJ_LD=\'$ARCH_TARGET-pedigree-gcc\'
+echo SHOBJ_LDFLAGS=\'$LDFLAGS -shared\'
+echo SHOBJ_XLDFLAGS=
+echo SHOBJ_LIBS=
+
+echo SHLIB_DOT=\'.\'
+echo SHLIB_LIBPREF=\'lib\'
+echo SHLIB_LIBSUFF=\'so\'
+
+echo SHLIB_LIBVERSION=\'so\'
+echo SHLIB_DLLVERSION=
+''')
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_config=(
+                            'bash_cv_wcwidth_broken=yes',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

@@ -19,7 +19,7 @@ class WgetPackage(buildsystem.Package):
         return '1.15'
 
     def build_requires(self):
-        return ['libbind']
+        return ['libbind', 'openssl']
 
     def patches(self, env, srcdir):
         return []
@@ -38,7 +38,8 @@ class WgetPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_flags=(
+                            '--with-ssl=openssl',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

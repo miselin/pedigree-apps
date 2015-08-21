@@ -39,7 +39,9 @@ class OpensslPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        raise Exception('conversion had no idea how to configure')
+        steps.cmd([os.path.join(srcdir, 'Configure'), 'threads', 'shared',
+                  'zlib-dynamic', '--prefix=/', '--openssldir=/support/openssl',
+                  'pedigree-gcc'], cwd=srcdir, env=env)
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

@@ -36,11 +36,16 @@ class MesaPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        env['NOCONFIGURE'] = 'yes'
+        steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_flags=(
+                            '--enable-osmesa', '--with-osmesa-bits=8',
+                            '--disable-dri', '--disable-glx',
+                            '--with-dri-drivers=swrast',
+                            '--without-gallium-drivers', '--disable-egl',
+                            '--enable-shared'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

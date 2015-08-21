@@ -19,7 +19,7 @@ class LibpngPackage(buildsystem.Package):
         return '1.5.4'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'zlib']
 
     def patches(self, env, srcdir):
         return []

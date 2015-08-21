@@ -19,7 +19,7 @@ class LibmpcPackage(buildsystem.Package):
         return '0.8.2'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'libgmp']
 
     def patches(self, env, srcdir):
         return []

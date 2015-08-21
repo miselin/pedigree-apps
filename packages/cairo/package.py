@@ -37,6 +37,8 @@ class CairoPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
+        env['NOCONFIGURE'] = 'yes'
+        steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

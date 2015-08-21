@@ -38,7 +38,9 @@ class PrboomPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_flags=('--disable-gl',
+                            '--with-waddir=/support/prboom/wads',
+                            '--disable-i386-asm'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

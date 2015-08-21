@@ -19,7 +19,7 @@ class AtkPackage(buildsystem.Package):
         return '2.16.0'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'glib']
 
     def patches(self, env, srcdir):
         return []

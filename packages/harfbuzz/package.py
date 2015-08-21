@@ -19,7 +19,7 @@ class HarfbuzzPackage(buildsystem.Package):
         return '1.0.1'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'glib', 'libfreetype', 'cairo', 'fontconfig']
 
     def patches(self, env, srcdir):
         return []

@@ -32,7 +32,8 @@ class GettextPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.autoreconf(srcdir, env)
+        steps.libtoolize(srcdir, env)
+        # steps.autoconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
