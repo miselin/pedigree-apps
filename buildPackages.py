@@ -32,7 +32,8 @@ def build_all(args, packages, env):
     notbuilt_deps = set()
     notbuilt_failed = set()
     for name, package in packages:
-        if not set(package.build_requires()).issubset(built):
+        if ((not args.nodeps) and
+                (not set(package.build_requires()).issubset(built))):
             log.error('Package "%s" build-depends not met.', name)
             notbuilt_deps.add(name)
             continue
@@ -98,6 +99,8 @@ def main(argv):
     parser.add_argument('--only-depends', type=str, nargs='+', required=False,
                         help='Only build the given packages and their '
                         'dependencies.')
+    parser.add_argument('--nodeps', action='store_true',
+                        help='Ignore missing build dependencies.')
     parser.add_argument('--logfile', type=str, required=False,
                         help='File to write logs to. stdout will be used if '
                         'this is not provided.')
@@ -153,9 +156,6 @@ def main(argv):
     packages = deps.sort_dependencies(packages)
 
     # Filter based on only/only-depends.
-    if args.only:
-        packages = ((name, package) for name, package in packages
-                    if name in args.only)
     if args.only_depends:
         actual_packages = []
         wanted_depends = set()
