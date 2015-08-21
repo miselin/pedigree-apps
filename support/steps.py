@@ -65,7 +65,7 @@ def autoconf(srcdir, env, aclocal_flags=()):
 
 
 def run_configure(package, srcdir, env, inplace=True, host=True,
-                  extra_config=(), paths=None):
+                  extra_config=(), paths=None, not_paths=None):
     """Runs an Autoconf configure script."""
     cmd_env = env.copy()
 
@@ -82,6 +82,8 @@ def run_configure(package, srcdir, env, inplace=True, host=True,
 
     for opt, value in AUTOCONF_PATHFLAGS.items():
         if opt not in paths:
+            continue
+        elif not_paths and opt in not_paths:
             continue
 
         if '$' in value:
@@ -233,9 +235,9 @@ def create_chroot(env):
         if v.startswith(env['CROSS_BASE']):
             v = v.replace(env['CROSS_BASE'], '/cross')
             env[k] = v
-    if '/cross/bin2' not in env['PATH']:
+    if util.path_in_colon_list('/cross/bin2', env['PATH']):
         env['PATH'] = util.expand(env, '/cross/bin2:$PATH')
-    if '/cross/bin' not in env['PATH']:
+    if util.path_in_colon_list('/cross/bin', env['PATH']):
         env['PATH'] = util.expand(env, '/cross/bin:$PATH')
 
     # Done, unless we need to verify mounts.
