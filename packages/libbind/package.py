@@ -59,6 +59,8 @@ class LibBindPackage(buildsystem.Package):
         steps.autoconf(srcdir, env, aclocal_flags=('-I', 'libltdl', '-I', 'libltdl/m4'))
 
     def configure(self, env, srcdir):
+        env['CFLAGS'] = '-fPIC -g -O2'
+        env['CXXFLAGS'] = '-fPIC -g -O2'
         steps.run_configure(self, srcdir, env,
             extra_config=('--with-randomdev="dev»/urandom"', '--with-pic'))
 
