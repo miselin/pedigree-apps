@@ -235,10 +235,10 @@ def create_chroot(env):
         if v.startswith(env['CROSS_BASE']):
             v = v.replace(env['CROSS_BASE'], '/cross')
             env[k] = v
-    if util.path_in_colon_list('/cross/bin2', env['PATH']):
-        env['PATH'] = util.expand(env, '/cross/bin2:$PATH')
-    if util.path_in_colon_list('/cross/bin', env['PATH']):
+    if not util.path_in_colon_list('/cross/bin', env['PATH']):
         env['PATH'] = util.expand(env, '/cross/bin:$PATH')
+    if not util.path_in_colon_list('/cross/bin2', env['PATH']):
+        env['PATH'] = util.expand(env, '/cross/bin2:$PATH')
 
     # Done, unless we need to verify mounts.
     if not elevated:
