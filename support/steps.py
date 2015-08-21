@@ -57,11 +57,12 @@ def autoreconf(srcdir, env, extra_flags=()):
     cmd([env['AUTORECONF'], '-ifs'] + list(extra_flags), cwd=srcdir, env=env)
 
 
-def autoconf(srcdir, env, aclocal_flags=()):
+def autoconf(srcdir, env, aclocal_flags=(), only_aclocal=False):
     """Runs aclocal and then autoconf for the target."""
     aclocal_cmd = [env['ACLOCAL']] + list(aclocal_flags)
     cmd(aclocal_cmd, cwd=srcdir, env=env)
-    cmd([env['AUTOCONF']], cwd=srcdir, env=env)
+    if not only_aclocal:
+        cmd([env['AUTOCONF']], cwd=srcdir, env=env)
 
 
 def run_configure(package, srcdir, env, inplace=True, host=True,
