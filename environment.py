@@ -77,7 +77,7 @@ def generate_environment(target_arch, env=None, recurse=True):
 
     # Cross-toolchain.
     env['CROSS_CC'] = _expand('$ARCH_TARGET-pedigree-gcc')
-    env['CROSS_CXX'] = _expand('$ARCH_TARGET-pedigree-gcc')
+    env['CROSS_CXX'] = _expand('$ARCH_TARGET-pedigree-g++')
     env['CROSS_CPP'] = _expand('$ARCH_TARGET-pedigree-cpp')
     env['CROSS_AS'] = _expand('$ARCH_TARGET-pedigree-as')
     env['CROSS_LD'] = _expand('$ARCH_TARGET-pedigree-gcc')
