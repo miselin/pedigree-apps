@@ -26,10 +26,13 @@ class PupConfig(object):
         self.install_root = install_root
         self.architecture = architecture
         self.db_path = os.path.join(self.local_cache, 'packages.pupdb')
-        log.debug('loading database from %s', self.db_path)
-        self.db = sqlite3.connect(self.db_path)
-        self.db.row_factory = SqliteDictFactory
-        self.schema = schema.PupSchema(self.db)
+        if os.path.exists(self.db_path):
+            log.debug('loading database from %s', self.db_path)
+            self.db = sqlite3.connect(self.db_path)
+            self.db.row_factory = SqliteDictFactory
+            self.schema = schema.PupSchema(self.db)
+        else:
+            self.db = None
 
         if not os.path.isdir(self.local_cache):
             os.makedirs(self.local_cache)

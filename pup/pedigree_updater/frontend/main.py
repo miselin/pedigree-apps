@@ -54,8 +54,9 @@ def main():
     config = util.load_config(args)
 
     # Perform schema upgrade if needed.
-    pup_schema = schema.PupSchema(config.db)
-    pup_schema.upgrade()
+    if config.db:
+        pup_schema = schema.PupSchema(config.db)
+        pup_schema.upgrade()
 
     cmd = cmds[args.which]
     if cmd.run(args, config):
