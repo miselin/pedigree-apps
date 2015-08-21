@@ -154,7 +154,7 @@ def chroot_spec(env):
 
     replacements = {
         '%D': '-L/libraries -rpath-link /libraries %D',
-        '*cpp:\n': '*cpp:\n-D__PEDIGREE__ -I/include'
+        '*cpp:\n': '*cpp:\n-D__PEDIGREE__ -I/include -isystem /include/c++/%(version)'
     }
 
     additions = '''%%rename cc1_cpu old_cc1_cpu
