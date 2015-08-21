@@ -16,10 +16,10 @@ class LibfreetypePackage(buildsystem.Package):
         return 'libfreetype'
 
     def version(self):
-        return '2.4.6'
+        return '2.6'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'zlib']
 
     def patches(self, env, srcdir):
         return ['autogen.sh.diff']
@@ -28,7 +28,7 @@ class LibfreetypePackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://download.sourceforge.net/%(urlpackage)s/%(urlpackage)s-%(version)s.tar.gz' % {
+        url = 'http://download.savannah.gnu.org/releases/%(urlpackage)s/%(urlpackage)s-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
             'urlpackage': 'freetype',
@@ -36,6 +36,11 @@ class LibfreetypePackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
+        # $(wildcard ...) breaks with fakechroot.
+        pattern = 's@$(wildcard@$(shell ls@g'
+        steps.cmd('find %s -type f -print0 | xargs -0 sed -i.bak \'%s\'' % (
+            srcdir, pattern), cwd=srcdir, env=env, shell=True)
+
         env['NOCONFIGURE'] = 'yes'
         steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
 
