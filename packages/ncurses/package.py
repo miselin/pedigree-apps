@@ -35,10 +35,13 @@ class NcursesPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        steps.libtoolize(srcdir, env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, not_paths=('docdir',))
+        # TODO(miselin): fix c++ bindings
+        steps.run_configure(self, srcdir, env, not_paths=('docdir',),
+                            extra_config=('--with-libtool', '--with-shared',
+                                          '--without-cxx-binding'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
