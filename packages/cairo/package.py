@@ -19,7 +19,8 @@ class CairoPackage(buildsystem.Package):
         return '1.12.10'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'libpng', 'zlib', 'libfreetype', 'fontconfig',
+                'pixman', 'glib']
 
     def patches(self, env, srcdir):
         return []
