@@ -36,7 +36,8 @@ class LibfreetypePackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        env['NOCONFIGURE'] = 'yes'
+        steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
