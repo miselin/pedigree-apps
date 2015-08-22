@@ -36,6 +36,7 @@ class LibpngPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
+        steps.autoconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
