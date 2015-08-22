@@ -37,6 +37,9 @@ class LibgmpPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
+        steps.autoconf(srcdir, env, aclocal_flags=(
+                           '-I', os.path.join(srcdir, 'libltdl'),
+                           '-I', os.path.join('libltdl', 'm4')))
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
@@ -47,3 +50,13 @@ class LibgmpPackage(buildsystem.Package):
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
         steps.make(srcdir, env, target='install')
+
+        # gmp installs some headers into the arch-specific $PREFIX/include
+        # directory - so let's pull those out now.
+        deploy_include = os.path.join(deploydir, 'include')
+        if not os.path.isdir(deploy_include):
+            os.makedirs(deploy_include)
+
+        steps.cmd(['/bin/mv',
+                   os.path.join(deploydir, 'support/libgmp/include', 'gmp.h'),
+                   os.path.join(deploy_include, 'gmp.h')])

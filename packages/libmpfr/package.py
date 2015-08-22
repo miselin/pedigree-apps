@@ -1,5 +1,6 @@
 
 import os
+import subprocess
 
 from support import buildsystem
 from support import steps
@@ -19,7 +20,7 @@ class LibmpfrPackage(buildsystem.Package):
         return '3.1.3'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'libgmp']
 
     def patches(self, env, srcdir):
         return []
@@ -36,14 +37,20 @@ class LibmpfrPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        steps.libtoolize(srcdir, env)
+        steps.autoconf(srcdir, env, aclocal_flags=(
+                           '-I', os.path.join(srcdir, 'libltdl'),
+                           '-I', os.path.join('libltdl', 'm4')))
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        build_cc_machine = subprocess.check_output(
+            ['/usr/bin/gcc', '-dumpmachine'])
+        steps.run_configure(self, srcdir, env, inplace=False, extra_config=(
+                                '--build=%s' % build_cc_machine,))
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, inplace=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', inplace=False)

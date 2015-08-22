@@ -23,6 +23,7 @@ AUTOCONF_PATHFLAGS = {
     'oldincludedir': '/include',
     'mandir': '/doc/man',
     'prefix': '/support/$package',
+    'exec-prefix': '/support/$package',
     'docdir': '/docs/$package',
 }
 

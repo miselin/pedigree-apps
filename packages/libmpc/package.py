@@ -19,7 +19,7 @@ class LibmpcPackage(buildsystem.Package):
         return '0.8.2'
 
     def build_requires(self):
-        return ['libtool', 'libgmp']
+        return ['libtool', 'libgmp', 'libmpfr']
 
     def patches(self, env, srcdir):
         return []
@@ -36,7 +36,10 @@ class LibmpcPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        steps.libtoolize(srcdir, env)
+        steps.autoconf(srcdir, env, aclocal_flags=(
+                           '-I', os.path.join(srcdir, 'libltdl'),
+                           '-I', os.path.join('libltdl', 'm4')))
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
