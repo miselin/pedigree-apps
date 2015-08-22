@@ -28,8 +28,6 @@ def build_package(package, env):
         os.makedirs(d)
 
     pass0_steps = ('download',)
-    pass1_steps = ('patch', 'prebuild', 'configure', 'build')
-    pass2_steps = ('deploy', 'postdeploy')
     pass3_steps = ('repository',)
 
     if (package.options().always_download or
@@ -63,11 +61,27 @@ def build_package(package, env):
         shutil.copy2(os.path.join(package._path, 'patches', patch),
                      os.path.join(target_dir, patch))
 
+    # Log path for the child. We open it in the parent so the child just gets
+    # a file descriptor, without having to have the file present inside the
+    # chroot proper.
+    logdir = os.path.join(env['BUILD_BASE'], 'logs')
+    if not os.path.isdir(logdir):
+        os.makedirs(logdir)
+    child_logpath = os.path.join(logdir, 'build-%s.log' % package_id)
+    log_file = open(child_logpath, 'w')
+
+    log.info('== %s log file is %s ==', package_id, child_logpath)
+
     # Clean up our handles before forking.
     sys.stdout.flush()
     sys.stderr.flush()
     child = os.fork()
     if child:
+        # Close our reference to the log file, we don't care anymore.
+        log_file.close()
+        log_file = None
+
+        # Wait for the forked child to complete, get its status.
         _, status = os.waitpid(child, 0)
 
         # Child finished, flush output before continuing.
@@ -90,7 +104,27 @@ def build_package(package, env):
 
         return
 
+    # Before entering chroot, redirect output to the build log file.
+    log_fd = log_file.fileno()
+    os.dup2(log_fd, sys.stdout.fileno())
+    os.dup2(log_fd, sys.stderr.fileno())
+
     os.chroot(env['CHROOT_BASE'])
+
+    # Handle all exceptions inside the chroot build so they don't bubble up
+    # to the parent, which is not meant to be in the chroot.
+    try:
+        in_chroot(env, package, package_id, download_filename)
+    except SystemExit:
+        raise
+    except:
+        log.exception('build failure due to Python exception')
+        exit(2)
+
+
+def in_chroot(env, package, package_id, download_filename):
+    pass1_steps = ('patch', 'prebuild', 'configure', 'build')
+    pass2_steps = ('deploy', 'postdeploy')
 
     download_target = os.path.join('/download', download_filename)
     deploydir = '/__deploy'

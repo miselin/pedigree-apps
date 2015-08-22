@@ -150,7 +150,7 @@ def chroot_spec(env):
         return
 
     # Get the existing specs.
-    new_specs = subprocess.check_output([cc, '-dumpspecs'])
+    new_specs = subprocess.check_output([cc, '-dumpspecs']).decode('utf-8')
 
     replacements = {
         '%D': '-L/libraries -rpath-link /libraries %D',

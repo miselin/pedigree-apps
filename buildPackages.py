@@ -116,6 +116,14 @@ def main(argv):
         kwargs['filename'] = args.logfile
         with open(args.logfile, 'w'):
             pass
+    else:
+        # Clone stderr so forked children can have their stderr redirected.
+        # This allows us to log stdout/stderr from all subprocesses but still
+        # have all logging calls end up going to the true stderr.
+        # This is only necessary if we aren't already writing logs to a file.
+        stderr_dup = os.dup(sys.stderr.fileno())
+        log_stream = os.fdopen(stderr_dup, 'w')
+        kwargs['stream'] = log_stream
     if args.debug:
         kwargs['level'] = logging.DEBUG
     else:
