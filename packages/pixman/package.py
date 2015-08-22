@@ -42,6 +42,8 @@ class PixmanPackage(buildsystem.Package):
                        only_aclocal=True)
 
     def configure(self, env, srcdir):
+        # TODO(miselin): fix TLS in pixman (it causes a linker error).
+        env['CPPFLAGS'] = '-DPIXMAN_NO_TLS'
         steps.run_configure(self, srcdir, env, extra_config=('--disable-gtk',))
 
     def build(self, env, srcdir):
