@@ -35,7 +35,11 @@ class ExpatPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
+        steps.libtoolize(os.path.join(srcdir, 'conftools'), env)
+        steps.autoconf(srcdir, env, aclocal_flags=(
+                           '-I', os.path.join(srcdir, 'conftools', 'libltdl'),
+                           '-I', os.path.join(srcdir, 'conftools', 'libltdl',
+                                              'm4')))
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, not_paths=('docdir',))
@@ -44,5 +48,5 @@ class ExpatPackage(buildsystem.Package):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', extra_opts=(
+            'DESTDIR=%s' % deploydir,))
