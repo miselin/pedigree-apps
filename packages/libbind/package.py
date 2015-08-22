@@ -69,16 +69,3 @@ class LibBindPackage(buildsystem.Package):
 
     def deploy(self, env, srcdir, deploydir):
         steps.make(srcdir, env, 'install', extra_opts=('DESTDIR=%s' % deploydir,))
-
-    def links(self, env, deploydir, cross_dir):
-        libs = ['libbind.a']
-        headers = ['irs.h', 'netgroup.h', 'resolv.h', 'netdb.h', 'res_update.h',
-            'arpa', 'isc', 'irp.h', 'hesiod.h']
-        steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
-
-        libresolv_source = os.path.join(deploydir, 'libraries', 'libbind.a')
-        libresolv_target = os.path.join(cross_dir, 'lib', 'libresolv.a')
-        print libresolv_target, '->', libresolv_source
-        if os.path.exists(libresolv_target) or os.path.islink(libresolv_target):
-            os.unlink(libresolv_target)
-        os.symlink(libresolv_source, libresolv_target)
