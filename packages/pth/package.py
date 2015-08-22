@@ -36,11 +36,11 @@ class PthPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, not_paths=('docdir,'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', extra_opts=(
+            'DESTDIR=%s' % deploydir,))

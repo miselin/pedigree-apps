@@ -191,3 +191,9 @@ def chroot_spec(env):
 %s /cross/bin/%s -pipe -specs=/cross/%s $*
 ''' % (env['CCACHE'], env['CROSS_CXX'], specfile_name))
     os.chmod(bin2_cxx, 0o755)
+
+    # Create a dangling symlink for libtool. This won't be usable unless
+    # packages actually declare libtool as a build-requires.
+    libtool_link = os.path.join(bin2, 'libtool')
+    if not (os.path.exists(libtool_link) or os.path.islink(libtool_link)):
+        os.symlink('/applications/libtool', libtool_link)

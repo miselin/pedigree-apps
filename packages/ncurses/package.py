@@ -38,10 +38,11 @@ class NcursesPackage(buildsystem.Package):
         steps.libtoolize(srcdir, env)
 
     def configure(self, env, srcdir):
-        # TODO(miselin): fix c++ bindings
+        # TODO(miselin): shared libstdc++
         steps.run_configure(self, srcdir, env, not_paths=('docdir',),
-                            extra_config=('--with-libtool', '--with-shared',
-                                          '--without-cxx-binding'))
+                            extra_config=(
+                                '--with-libtool=/applications/libtool',
+                                '--with-shared', '--without-cxx-binding'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
