@@ -48,5 +48,5 @@ class NcursesPackage(buildsystem.Package):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', extra_opts=(
+            'DESTDIR=%s' % deploydir,))
