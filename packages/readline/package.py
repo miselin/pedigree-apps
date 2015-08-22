@@ -37,23 +37,24 @@ class ReadlinePackage(buildsystem.Package):
     def prebuild(self, env, srcdir):
         with open(os.path.join(srcdir, 'support', 'shobj-conf'), 'w') as f:
             f.write('''#!/bin/sh
-echo SHOBJ_STATUS=supported
-echo SHLIB_STATUS=supported
 
-echo SHOBJ_CC=\'$ARCH_TARGET-pedigree-gcc\'
-echo SHOBJ_CFLAGS=\'$CFLAGS -fPIC -shared\'
-echo SHOBJ_LD=\'$ARCH_TARGET-pedigree-gcc\'
-echo SHOBJ_LDFLAGS=\'$LDFLAGS -shared\'
-echo SHOBJ_XLDFLAGS=
-echo SHOBJ_LIBS=
+echo SHOBJ_STATUS="supported"
+echo SHLIB_STATUS="supported"
 
-echo SHLIB_DOT=\'.\'
-echo SHLIB_LIBPREF=\'lib\'
-echo SHLIB_LIBSUFF=\'so\'
+echo SHOBJ_CC="%(CROSS_TARGET)s-gcc"
+echo SHOBJ_CFLAGS=\\"-fPIC -shared\\"
+echo SHOBJ_LD="%(CROSS_TARGET)s-gcc"
+echo SHOBJ_LDFLAGS="-shared"
+echo SHOBJ_XLDFLAGS=""
+echo SHOBJ_LIBS=""
 
-echo SHLIB_LIBVERSION=\'so\'
-echo SHLIB_DLLVERSION=
-''')
+echo SHLIB_DOT="."
+echo SHLIB_LIBPREF="lib"
+echo SHLIB_LIBSUFF="so"
+
+echo SHLIB_LIBVERSION="so"
+echo SHLIB_DLLVERSION=""
+''' % env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
@@ -63,5 +64,5 @@ echo SHLIB_DLLVERSION=
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', extra_opts=(
+            'DESTDIR=%s' % deploydir,))
