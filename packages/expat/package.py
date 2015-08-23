@@ -22,7 +22,7 @@ class ExpatPackage(buildsystem.Package):
         return ['libtool']
 
     def patches(self, env, srcdir):
-        return []
+        return ['libtool.m4.diff']
 
     def options(self):
         return self._options
@@ -35,11 +35,8 @@ class ExpatPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(os.path.join(srcdir, 'conftools'), env)
-        steps.autoconf(srcdir, env, aclocal_flags=(
-                           '-I', os.path.join(srcdir, 'conftools', 'libltdl'),
-                           '-I', os.path.join(srcdir, 'conftools', 'libltdl',
-                                              'm4')))
+        steps.libtoolize(srcdir, env)
+        steps.autoconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, not_paths=('docdir',))

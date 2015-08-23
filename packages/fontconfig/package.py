@@ -19,7 +19,7 @@ class FontconfigPackage(buildsystem.Package):
         return '2.11.0'
 
     def build_requires(self):
-        return ['libtool', 'expat']
+        return ['libtool', 'expat', 'libfreetype', 'zlib', 'libpng']
 
     def patches(self, env, srcdir):
         return []
@@ -36,13 +36,13 @@ class FontconfigPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.autoconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, extra_opts=('V=1',))
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir

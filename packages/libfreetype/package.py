@@ -45,7 +45,7 @@ class LibfreetypePackage(buildsystem.Package):
         steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_config=('--without-png',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
