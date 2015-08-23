@@ -41,7 +41,11 @@ class CairoPackage(buildsystem.Package):
         steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        # similar to pixman, without this the build goes crazy
+        env['CPPFLAGS'] = '-DCAIRO_NO_MUTEX=1'
+        steps.run_configure(self, srcdir, env, extra_config=(
+            '--disable-xcd', '--disable-xlib', '--without-x', '--disable-ps',
+            '--disable-pdf', '--enable-shared'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
