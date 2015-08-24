@@ -106,7 +106,8 @@ def pedigree_into_chroot(env, chroot_dir):
             flags += 'rT'  # merge directory trees
 
         # Copy files (use cp - much more elegant than doing this in Python)
-        steps.cmd(['/bin/cp', flags, source, target_path])
+        if os.path.exists(source):
+            steps.cmd(['/bin/cp', flags, source, target_path])
 
 
 def prepare_package_manager(env):
