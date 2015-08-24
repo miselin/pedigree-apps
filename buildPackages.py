@@ -15,7 +15,7 @@ from support import steps
 from support import toolchain
 
 
-VALID_ARCH_TARGETS = ('amd64',)
+VALID_ARCH_TARGETS = ('amd64', 'arm')
 LOGGING_FORMAT = ('%(asctime)s %(module)-15s %(funcName)-20s %(levelname)-10s '
                   '%(message)s')
 

@@ -57,6 +57,13 @@ def generate_environment(target_arch, env=None, recurse=True):
         env['CROSS_CFLAGS'] = _expand('-O3 -m$ARCH_BITS -march=k8 -msse2')
         env['CROSS_CXXFLAGS'] = env['CROSS_CFLAGS']
         env['CROSS_TARGET'] = _expand('$ARCH_TARGET-pedigree')
+    elif target_arch == 'arm':
+        env['ARCH_TARGET'] = 'arm'
+        env['ARCH_BITS'] = '64'
+        env['CROSS_CFLAGS'] = _expand('-O3 -mcpu=cortex-a8 -mtune=cortex-a8 '
+                                      '-mfpu=vfp')
+        env['CROSS_CXXFLAGS'] = _expand('$CROSS_CFLAGS')
+        env['CROSS_TARGET'] = _expand('$ARCH_TARGET-pedigree')
 
     # Generic system setup. Overrides come from the
     # local_environment.modify_environment function if it exists.
