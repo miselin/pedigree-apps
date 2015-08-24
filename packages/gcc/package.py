@@ -19,10 +19,11 @@ class GccPackage(buildsystem.Package):
         return '4.8.2'
 
     def build_requires(self):
-        return ['libtool', 'libgmp', 'libmpfr', 'libmpc']
+        return ['libtool', 'libgmp', 'libmpfr', 'libmpc', 'libffi', 'libiconv',
+                'gettext']
 
     def patches(self, env, srcdir):
-        return ['4.8.2/pedigree-gcc.diff']
+        return ['4.8.2/pedigree-gcc.diff', 'override.m4.diff']
 
     def options(self):
         return self._options
@@ -35,8 +36,10 @@ class GccPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        for subdir in ['', 'libbacktrace', 'libssp', 'libstdc++-v3']:
+            steps.libtoolize(os.path.join(srcdir, subdir), env)
+            steps.autoreconf(os.path.join(srcdir, subdir), env,
+                             extra_flags=('-v',))
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

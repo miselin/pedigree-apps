@@ -19,7 +19,7 @@ class BinutilsPackage(buildsystem.Package):
         return '2.24'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'libiconv', 'gettext']
 
     def patches(self, env, srcdir):
         return ['2.24/pedigree-binutils.diff']
@@ -38,7 +38,8 @@ class BinutilsPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env,
+                            extra_config=('--disable-werror',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
