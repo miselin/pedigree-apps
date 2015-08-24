@@ -162,10 +162,9 @@ def chroot_spec(env):
 
     additions = ''
     if 'cc1_cpu' in new_specs:
-        additions += '%rename cc1_cpu old_cc1_cpu\n'
+        additions += '%rename cc1_cpu old_cc1_cpu\n\n'
 
-    additions += '''
-*cc1_cpu:
+    additions += '''*cc1_cpu:
     %s %%(old_cc1_cpu)
 ''' % env['CROSS_CFLAGS']
 
