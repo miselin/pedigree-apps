@@ -162,9 +162,10 @@ def chroot_spec(env):
 
     additions = ''
     if 'cc1_cpu' in new_specs:
-        additions += '%%rename cc1_cpu old_cc1_cpu\n'
+        additions += '%rename cc1_cpu old_cc1_cpu\n'
 
-    additions += '''*cc1_cpu:
+    additions += '''
+*cc1_cpu:
     %s %%(old_cc1_cpu)
 ''' % env['CROSS_CFLAGS']
 
@@ -185,14 +186,14 @@ def chroot_spec(env):
     bin2_cc = os.path.join(bin2, env['CROSS_CC'])
     with open(bin2_cc, 'w') as f:
         f.write('''#!/bin/sh
-%s /cross/bin/%s -pipe -specs=/cross/%s $*
+%s /cross/bin/%s -pipe -specs=/cross/%s "$@"
 ''' % (env['CCACHE'], env['CROSS_CC'], specfile_name))
     os.chmod(bin2_cc, 0o755)
 
     bin2_cxx = os.path.join(bin2, env['CROSS_CXX'])
     with open(bin2_cxx, 'w') as f:
         f.write('''#!/bin/sh
-%s /cross/bin/%s -pipe -specs=/cross/%s $*
+%s /cross/bin/%s -pipe -specs=/cross/%s "$@"
 ''' % (env['CCACHE'], env['CROSS_CXX'], specfile_name))
     os.chmod(bin2_cxx, 0o755)
 
