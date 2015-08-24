@@ -45,7 +45,7 @@ class CairoPackage(buildsystem.Package):
         env['CPPFLAGS'] = '-DCAIRO_NO_MUTEX=1'
         steps.run_configure(self, srcdir, env, extra_config=(
             '--disable-xcd', '--disable-xlib', '--without-x', '--disable-ps',
-            '--disable-pdf', '--enable-shared'))
+            '--disable-pdf', '--enable-shared', '--disable-full-testing'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
