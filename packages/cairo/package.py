@@ -48,6 +48,24 @@ class CairoPackage(buildsystem.Package):
             '--disable-pdf', '--enable-shared', '--disable-full-testing'))
 
     def build(self, env, srcdir):
+        # Fudge the test makefiles because Cairo's test assume all features
+        # are actually enabled.
+        ignore_makefile = '''
+ign:
+\t@echo '<ignored>'
+
+all: ign
+
+install: ign
+
+clean: ign
+'''
+
+        with open(os.path.join(srcdir, 'test', 'Makefile'), 'w') as f:
+            f.write(ignore_makefile)
+        with open(os.path.join(srcdir, 'perf', 'Makefile'), 'w') as f:
+            f.write(ignore_makefile)
+
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
