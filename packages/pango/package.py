@@ -37,10 +37,26 @@ class PangoPackage(buildsystem.Package):
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
 
+        env['NOCONFIGURE'] = 'yes'
+        steps.cmd([os.path.join(srcdir, 'autogen.sh')], env=env, cwd=srcdir)
+
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
 
     def build(self, env, srcdir):
+        # Wipe out the test Makefile (only linker tests).
+        # TODO(miselin): fix this rather than rip out the Makefile
+        ignore_makefile = '''
+ign:
+\t@echo '<ignored>'
+all: ign
+install: ign
+clean: ign
+'''
+
+        with open(os.path.join(srcdir, 'tests', 'Makefile'), 'w') as f:
+            f.write(ignore_makefile)
+
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):

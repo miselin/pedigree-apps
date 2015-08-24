@@ -53,11 +53,8 @@ class CairoPackage(buildsystem.Package):
         ignore_makefile = '''
 ign:
 \t@echo '<ignored>'
-
 all: ign
-
 install: ign
-
 clean: ign
 '''
 
