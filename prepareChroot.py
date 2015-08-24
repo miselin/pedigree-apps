@@ -15,7 +15,7 @@ def main():
         exit(1)
 
     # Load up an environment ready for building.
-    env = environment.generate_environment('')
+    env = environment.generate_environment(sys.argv[1])
 
     print('Creating chroot, please wait...')
     steps.create_chroot(env)

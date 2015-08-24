@@ -21,8 +21,9 @@ pip install -q --upgrade pup/
 # Check the installation worked (will break the build if it did not).
 pup -h >/dev/null
 
-sudo PYTHONPATH="$PWD:$PYTHONPATH" "$PATH_TO_CHROOT_SCRIPT/prepareChroot.py"
-
 target_arch="$1"
 shift
+
+sudo PYTHONPATH="$PWD:$PYTHONPATH" "$PATH_TO_CHROOT_SCRIPT/prepareChroot.py" "$target_arch"
+
 LD_PRELOAD=libfakechroot.so python ./buildPackages.py --target=$target_arch $*
