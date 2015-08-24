@@ -40,7 +40,7 @@ class MesaPackage(buildsystem.Package):
         steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, extra_flags=(
+        steps.run_configure(self, srcdir, env, extra_config=(
                             '--enable-osmesa', '--with-osmesa-bits=8',
                             '--disable-dri', '--disable-glx',
                             '--with-dri-drivers=swrast',
