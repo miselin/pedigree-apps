@@ -157,13 +157,15 @@ def chroot_spec(env):
         '%D': '-L/libraries -rpath-link /libraries %D',
         '*cpp:\n': ('*cpp:\n-D__PEDIGREE__ -I/include -isystem '
                     '/include/c++/%%(version) -isystem '
-                    '/include/c++/%%(version)/%s' % env['CROSS_TARGET'])
+                    '/include/c++/%%(version)/%s ' % env['CROSS_TARGET'])
     }
 
-    additions = '''%%rename cc1_cpu old_cc1_cpu
-*cc1_cpu:
-%s %%(old_cc1_cpu)
+    additions = ''
+    if 'cc1_cpu' in new_specs:
+        additions += '%%rename cc1_cpu old_cc1_cpu\n'
 
+    additions += '''*cc1_cpu:
+    %s %%(old_cc1_cpu)
 ''' % env['CROSS_CFLAGS']
 
     for needle, repl in replacements.items():
@@ -185,6 +187,7 @@ def chroot_spec(env):
         f.write('''#!/bin/sh
 %s /cross/bin/%s -pipe -specs=/cross/%s $*
 ''' % (env['CCACHE'], env['CROSS_CC'], specfile_name))
+    os.chmod(bin2_cc, 0o755)
 
     bin2_cxx = os.path.join(bin2, env['CROSS_CXX'])
     with open(bin2_cxx, 'w') as f:
