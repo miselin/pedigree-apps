@@ -49,7 +49,7 @@ class GccPackage(buildsystem.Package):
         steps.run_configure(self, srcdir, env, inplace=False, extra_config=(
             '--disable-sjlj-exceptions', '--enable-shared',
             '--with-system-zlib', '--enable-languages=c,c++',
-            '--disable-libstdcxx-pch'))
+            '--disable-libstdcxx-pch', '--with-newlib'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env, inplace=False)
