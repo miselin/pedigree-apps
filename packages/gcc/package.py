@@ -20,10 +20,15 @@ class GccPackage(buildsystem.Package):
 
     def build_requires(self):
         return ['libtool', 'libgmp', 'libmpfr', 'libmpc', 'libffi', 'libiconv',
-                'gettext']
+                'gettext', 'zlib']
 
     def patches(self, env, srcdir):
-        return ['4.8.2/pedigree-gcc.diff', 'override.m4.diff']
+        # gengtypes patch from, fixes cross-build where fputc_unlocked is
+        # available on build but not host.
+        # https://git.yoctoproject.org/cgit.cgi/poky/plain/meta/recipes-devtools/gcc/gcc-4.8/0044-gengtypes.patch
+        # TODO(miselin): we should also patch fixheaders
+        return ['4.8.2/pedigree-gcc.diff', 'override.m4.diff',
+                '0044-gengtypes.patch']
 
     def options(self):
         return self._options
@@ -38,15 +43,17 @@ class GccPackage(buildsystem.Package):
     def prebuild(self, env, srcdir):
         for subdir in ['', 'libbacktrace', 'libssp', 'libstdc++-v3']:
             steps.libtoolize(os.path.join(srcdir, subdir), env)
-            steps.autoreconf(os.path.join(srcdir, subdir), env,
-                             extra_flags=('-v',))
+            steps.autoreconf(os.path.join(srcdir, subdir), env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, inplace=False, extra_config=(
+            '--disable-sjlj-exceptions', '--enable-shared',
+            '--with-system-zlib', '--enable-languages=c,c++',
+            '--disable-libstdcxx-pch'))
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, inplace=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', inplace=False)
