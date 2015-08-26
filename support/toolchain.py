@@ -182,19 +182,16 @@ def chroot_spec(env):
     if not os.path.isdir(bin2):
         os.makedirs(bin2)
 
-    bin2_cc = os.path.join(bin2, env['CROSS_CC'])
-    with open(bin2_cc, 'w') as f:
-        f.write('''#!/bin/sh
-%s /cross/bin/%s -pipe -specs=/cross/%s "$@"
-''' % (env['CCACHE'], env['CROSS_CC'], specfile_name))
-    os.chmod(bin2_cc, 0o755)
+    compilers = (env['CROSS_CC'], env['CROSS_CXX'],
+                 '%s-c++' % env['CROSS_TARGET'])
 
-    bin2_cxx = os.path.join(bin2, env['CROSS_CXX'])
-    with open(bin2_cxx, 'w') as f:
-        f.write('''#!/bin/sh
+    for compiler in compilers:
+        bin2_compiler = os.path.join(bin2, compiler)
+        with open(bin2_compiler, 'w') as f:
+            f.write('''#!/bin/sh
 %s /cross/bin/%s -pipe -specs=/cross/%s "$@"
-''' % (env['CCACHE'], env['CROSS_CXX'], specfile_name))
-    os.chmod(bin2_cxx, 0o755)
+''' % (env['CCACHE'], compiler, specfile_name))
+        os.chmod(bin2_compiler, 0o755)
 
     # Create a dangling symlink for libtool. This won't be usable unless
     # packages actually declare libtool as a build-requires.
