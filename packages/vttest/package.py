@@ -38,7 +38,7 @@ class VttestPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, not_paths=('docdir',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
