@@ -46,10 +46,15 @@ class GccPackage(buildsystem.Package):
             steps.autoreconf(os.path.join(srcdir, subdir), env)
 
     def configure(self, env, srcdir):
+        # Note: --target MUST be specified as well as --host. This is necessary
+        # for libgcc and libstdc++-v3, as both of those are built for the
+        # target, and when we don't specify an explicit target, the configure
+        # implicitly uses the build system cc etc
         steps.run_configure(self, srcdir, env, inplace=False, extra_config=(
             '--disable-sjlj-exceptions', '--enable-shared',
             '--with-system-zlib', '--enable-languages=c,c++',
-            '--disable-libstdcxx-pch', '--with-newlib'))
+            '--disable-libstdcxx-pch', '--with-newlib', '--disable-multilib',
+            '--target=%s' % env['CROSS_TARGET']))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env, inplace=False)
