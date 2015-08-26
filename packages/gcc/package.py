@@ -43,7 +43,13 @@ class GccPackage(buildsystem.Package):
     def prebuild(self, env, srcdir):
         for subdir in ['', 'libbacktrace', 'libssp', 'libstdc++-v3']:
             steps.libtoolize(os.path.join(srcdir, subdir), env)
-            steps.autoreconf(os.path.join(srcdir, subdir), env)
+            if os.path.isfile(os.path.join(srcdir, subdir, 'configure.ac')):
+                steps.autoreconf(os.path.join(srcdir, subdir), env,
+                                 extra_flags=(
+                                    '-I', os.path.join(srcdir, subdir,
+                                                       'libltdl'),
+                                    '-I', os.path.join(srcdir, subdir,
+                                                       'libltdl', 'm4')))
 
     def configure(self, env, srcdir):
         # Note: --target MUST be specified as well as --host. This is necessary
