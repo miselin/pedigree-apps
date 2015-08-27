@@ -19,10 +19,13 @@ class PrboomPackage(buildsystem.Package):
         return '2.5.0'
 
     def build_requires(self):
-        return []
+        return ['libiconv', 'libpng', 'cairo', 'pixman', 'fontconfig',
+                'expat', 'libfreetype']
 
     def patches(self, env, srcdir):
-        return ['fix_sdl_configure.diff']
+        # libpng diff from https://github.com/archhurd/packages/blob/master/extra/prboom/libpng-1.4.patch
+        # This fixes up references to things that don't exist.
+        return ['fix_sdl_configure.diff', 'libpng.diff']
 
     def options(self):
         return self._options
@@ -38,9 +41,10 @@ class PrboomPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, extra_flags=('--disable-gl',
-                            '--with-waddir=/support/prboom/wads',
-                            '--disable-i386-asm'))
+        steps.run_configure(self, srcdir, env, extra_config=(
+            'ac_cv_path_SDL_CONFIG=/applications/sdl-config', '--disable-gl',
+            '--with-waddir=/support/prboom/wads', '--disable-i386-asm',
+            '--without-libpng'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
