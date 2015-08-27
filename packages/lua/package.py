@@ -38,11 +38,16 @@ class LuaPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        raise Exception('conversion had no idea how to configure')
+        pass
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, target='posix', extra_opts=(
+            'ARCH_TARGET=%s' % env['CROSS_TARGET'],))
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        raise Exception('conversion had no idea how to install')
+        steps.make(srcdir, env, target='install', extra_opts=(
+            'INSTALL_TOP=%s' % deploydir,
+            'INSTALL_BIN=%s/applications' % deploydir,
+            'INSTALL_LIB=%s/libraries' % deploydir,
+            'INSTALL_LMOD=%s/support/lua/share/5.1' % deploydir,
+            'INSTALL_CMOD=%s/libraries/lua/5.1' % deploydir,))
