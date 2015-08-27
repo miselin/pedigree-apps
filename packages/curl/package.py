@@ -1,3 +1,6 @@
+# coding: utf-8
+
+import os
 
 from support import buildsystem
 from support import steps
@@ -17,7 +20,7 @@ class CurlPackage(buildsystem.Package):
         return '7.21.1'
 
     def build_requires(self):
-        return ['libtool', 'libbind']
+        return ['libtool', 'libbind', 'zlib', 'openssl']
 
     def patches(self, env, srcdir):
         return []
@@ -33,10 +36,15 @@ class CurlPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        steps.libtoolize(srcdir, env)
+        steps.autoreconf(srcdir, env, extra_flags=(
+            '-I', os.path.join(srcdir, 'libltdl'),
+            '-I', os.path.join(srcdir, 'libltdl', 'm4')))
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        env['LIBS'] = '-lbind'
+        steps.run_configure(self, srcdir, env, extra_config=(
+            '--enable-shared', '--with-random=dev»/urandom'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
