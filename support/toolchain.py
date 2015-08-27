@@ -91,6 +91,12 @@ def pedigree_into_chroot(env, chroot_dir):
         ('$PEDIGREE_BASE/src/subsys/posix/include', 'include/'),
         ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include', 'include/SDL'),
         ('$PEDIGREE_BASE/build/libSDL.so', 'libraries/'),
+        ('$PEDIGREE_BASE/build/libpedigree.so', 'libraries/'),
+        ('$PEDIGREE_BASE/build/libpedigree-c.so', 'libraries/'),
+        ('$PEDIGREE_BASE/build/libs/libui.so', 'libraries/'),
+        ('$PEDIGREE_BASE/images/local/libraries/libstdc++.so', 'libraries/'),
+        ('$PEDIGREE_BASE/images/local/libraries/libstdc++.a', 'libraries/'),
+        ('$PEDIGREE_BASE/images/local/libraries/libsupc++.a', 'libraries/'),
         ('$APPS_BASE/bin/sdl-config', 'applications/'),
     )
 

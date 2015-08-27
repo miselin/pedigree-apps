@@ -57,11 +57,11 @@ def main():
     args = parser.parse_args()
 
     pedigree_sdl_config = {
-        'cflags': '-D_GNU_SOURCE=1 -isystem %s' % (include_dir,),
-        'libs': '-L %s -lSDL' % (libs_dir,),
-        'static_libs': ('-L %s -lSDL  -lui -lpedigree-c -lpthread -lstdc++ '
+        'cflags': '-D_GNU_SOURCE=1 -I%s' % (include_dir,),
+        'libs': '-L %s -lSDL -pthread' % (libs_dir,),
+        'static_libs': ('-L %s -lSDL  -lui -lpedigree-c -lpthread '
             '-lcairo -lpixman-1 -lfontconfig -lexpat -lfreetype -lpng -lz '
-            '-liconv' % (libs_dir,)),
+            '-liconv -lstdc++' % (libs_dir,)),
     }
 
     for k, v in pedigree_sdl_config.iteritems():
