@@ -35,10 +35,12 @@ class VimPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        steps.autoconf(os.path.join(srcdir, 'src'), env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_config=(
+            '--with-tlib=ncurses', '--cache-file=auto/config.cache',
+            '--enable-256-color'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
