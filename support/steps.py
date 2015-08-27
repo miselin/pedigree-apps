@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 AUTOCONF_PATHFLAGS = {
     'bindir': '/applications',
     'sbindir': '/applications',
-    'libexecdir': '/applications',
+    'libexecdir': '/applications/internal',
     'sysconfdir': '/config',
     'libdir': '/libraries',
     'includedir': '/include',
@@ -255,6 +255,7 @@ def create_chroot(env):
         path = os.path.join(chroot_base, path)
         if not os.path.exists(target):
             # eg, no /lib64 present. This is OK.
+            log.error('chroot target %r does not exist', target)
             continue
 
         if not os.listdir(path):
