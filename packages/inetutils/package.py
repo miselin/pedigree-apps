@@ -19,7 +19,7 @@ class InetutilsPackage(buildsystem.Package):
         return '1.8'
 
     def build_requires(self):
-        return ['libtool', 'libbind']
+        return ['libtool', 'libbind', 'readline']
 
     def patches(self, env, srcdir):
         return []
@@ -38,7 +38,13 @@ class InetutilsPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        env['LIBS'] = '-lbind'
+        steps.run_configure(self, srcdir, env, extra_config=(
+            '--disable-ifconfig', '--disable-logger', '--disable-rlogin',
+            '--disable-rsh', '--disable-rexec', '--disable-rcp',
+            '--disable-rexecd', '--disable-rlogind', '--disable-rshd',
+            '--disable-syslogd', '--disable-uucpd', '--disable-ftpd',
+            '--disable-talkd'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
