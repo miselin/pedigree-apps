@@ -19,10 +19,11 @@ class DosboxPackage(buildsystem.Package):
         return '0.74'
 
     def build_requires(self):
-        return []
+        return ['libiconv', 'libpng', 'cairo', 'pixman', 'fontconfig',
+                'expat', 'libfreetype']
 
     def patches(self, env, srcdir):
-        return ['configure.diff', 'status.h.diff']
+        return ['status.h.diff']
 
     def options(self):
         return self._options
@@ -38,7 +39,11 @@ class DosboxPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_config=(
+            'ac_cv_path_SDL_CONFIG=/applications/sdl-config',
+            '--disable-alsatest', '--disable-opengl', '--enable-core-inline',
+            '--enable-dynamic-core', '--enable-dynrec', '--enable-fpu',
+            '--enable-fpu-x86', '--disable-unaligned-memory'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
