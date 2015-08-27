@@ -19,11 +19,11 @@ class OpensslPackage(buildsystem.Package):
         return '1.0.1g'
 
     def build_requires(self):
-        return ['libtool']
+        return ['libtool', 'zlib', 'libgmp']
 
     def patches(self, env, srcdir):
-        return ['1.0.1g-docfixes-diff.diff', 'Configure.diff', 'b_sock.c.diff',
-            'dso_dlfcn.c.diff', 'e_os.h.diff']
+        return ['1.0.1g-docfixes-diff.diff', 'Configure.diff',
+                'dso_dlfcn.c.diff']
 
     def options(self):
         return self._options
@@ -39,13 +39,22 @@ class OpensslPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.cmd([os.path.join(srcdir, 'Configure'), 'threads', 'shared',
-                  'zlib-dynamic', '--prefix=/', '--openssldir=/support/openssl',
-                  'pedigree-gcc'], cwd=srcdir, env=env)
+        env['CC'] = env['CROSS_CC']
+        steps.cmd(['/bin/sh', os.path.join(srcdir, 'Configure'), 'threads',
+                       'shared', 'zlib-dynamic', '--prefix=/',
+                       '--openssldir=/support/openssl', 'pedigree-gcc'],
+                  cwd=srcdir, env=env)
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', extra_opts=(
+            'INSTALL_PREFIX=%s' % deploydir,))
+        renames = (
+            ('lib64', 'libraries'),
+            ('bin', 'applications'),
+        )
+        for old, new in renames:
+            os.rename(os.path.join(deploydir, old),
+                      os.path.join(deploydir, new))
