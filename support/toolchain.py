@@ -205,5 +205,6 @@ def chroot_spec(env):
     if not (os.path.exists(libtool_link) or os.path.islink(libtool_link)):
         os.symlink('/applications/libtool', libtool_link)
     libtoolize_link = os.path.join(bin2, 'libtoolize')
-    if not (os.path.exists(libtoolize_link) or os.path.islink(libtoolize_link)):
+    if not (os.path.exists(libtoolize_link) or
+            os.path.islink(libtoolize_link)):
         os.symlink('/applications/libtoolize', libtoolize_link)
