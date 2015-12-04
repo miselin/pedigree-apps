@@ -94,6 +94,7 @@ def pedigree_into_chroot(env, chroot_dir):
         ('$PEDIGREE_BASE/build/libpedigree.so', 'libraries/'),
         ('$PEDIGREE_BASE/build/libpedigree-c.so', 'libraries/'),
         ('$PEDIGREE_BASE/build/libs/libui.so', 'libraries/'),
+        ('$PEDIGREE_BASE/images/local/support/gcc/include/c++', 'include/c++'),
         ('$PEDIGREE_BASE/images/local/libraries/libstdc++.so', 'libraries/'),
         ('$PEDIGREE_BASE/images/local/libraries/libstdc++.a', 'libraries/'),
         ('$PEDIGREE_BASE/images/local/libraries/libsupc++.a', 'libraries/'),
