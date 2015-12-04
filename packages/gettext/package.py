@@ -36,7 +36,9 @@ class GettextPackage(buildsystem.Package):
         # steps.autoconf(srcdir, env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        env['CXX'] = '/bin/false'
+        steps.run_configure(self, srcdir, env, extra_config=(
+            'gl_cv_have_weak=no',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
