@@ -23,6 +23,11 @@ fi
 
 mkdir -p standalone && cd standalone
 
+# Create a Python virtual environment if one doesn't exist yet.
+if [ ! -e "venv" ]; then
+    virtualenv --system-site-packages venv
+fi
+
 # Grab Pedigree first.
 if [ ! -e "pedigree" ]; then
     git clone --depth 1 https://github.com/miselin/pedigree.git
