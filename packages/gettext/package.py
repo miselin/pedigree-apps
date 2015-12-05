@@ -37,7 +37,7 @@ class GettextPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
-            'gl_cv_have_weak=no',))
+            'gl_cv_have_weak=no', '--disable-threads'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
