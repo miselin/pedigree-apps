@@ -5,7 +5,7 @@
 # the pedigree-apps build to be completely self-contained.
 
 # TODO(miselin): assumes running on a build slave
-# TODO(miselin): assumes Debian as the host system, and an x86_64 target.
+# TODO(miselin): assumes Debian as the host system
 
 # Abort the build immediately if anything goes wrong.
 set -e
@@ -19,6 +19,12 @@ LOCALDIR="$PWD"
 if [ ! -e "./buildPackages.py" ]; then
     echo "Must be run in pedigree-apps root directory." 1>&2
     exit 1
+fi
+
+# Grab architecture for building.
+EASY_BUILD_TARGET=$1
+if [ "x$EASY_BUILD_TARGET" = "x" ]; then
+    EASY_BUILD_TARGET=x64
 fi
 
 mkdir -p standalone && cd standalone
@@ -36,7 +42,7 @@ fi
 # Go ahead and build it.
 cd pedigree
 git pull
-./easy_build_x64.sh noconfirm debian build_images=0
+./easy_build_$EASY_BUILD_TARGET.sh noconfirm debian build_images=0
 cd ..
 
 # Create our local configuration, ready to ship.
