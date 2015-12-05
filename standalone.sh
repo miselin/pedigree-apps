@@ -47,6 +47,7 @@ def modify_environment(env):
     _expand = functools.partial(expand, env)
     env['PEDIGREE_BASE'] = _expand('$LOCALDIR/standalone/pedigree')
     env['APPS_BASE'] = _expand('$LOCALDIR')
+    env['CCACHE_TARGET_DIR'] = '/mnt/ram/ccache'
 
     env['UNPRIVILEGED_GID'] = '$UNPRIV_GID'
     env['UNPRIVILEGED_UID'] = '$UNPRIV_UID'
