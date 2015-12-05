@@ -1,7 +1,5 @@
 #!/bin/bash
 
-exit 0
-
 if [ "x$VIRTUAL_ENV" = "x" ]; then
     echo "Please run buildPackages.sh inside a Python virtualenv." >&2
     exit 1
