@@ -31,7 +31,7 @@ fi
 # Go ahead and build it.
 cd pedigree
 git pull
-./easy_build_x64.sh debian build_images=0
+./easy_build_x64.sh noconfirm debian build_images=0
 cd ..
 
 # Create our local configuration, ready to ship.
