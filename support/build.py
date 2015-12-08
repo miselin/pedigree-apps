@@ -109,7 +109,12 @@ def build_package(package, env):
     os.dup2(log_fd, sys.stdout.fileno())
     os.dup2(log_fd, sys.stderr.fileno())
 
-    os.chroot(env['CHROOT_BASE'])
+    # Remove symlinks and get a full absolute path for the chroot.
+    chroot_base = os.path.realpath(env['CHROOT_BASE'])
+    os.chroot(chroot_base)
+
+    # Jump straight to the root of the chroot.
+    os.chdir('/')
 
     # Handle all exceptions inside the chroot build so they don't bubble up
     # to the parent, which is not meant to be in the chroot.
