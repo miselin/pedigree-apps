@@ -38,7 +38,7 @@ class WgetPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, extra_flags=(
+        steps.run_configure(self, srcdir, env, extra_config=(
                             '--with-ssl=openssl',))
 
     def build(self, env, srcdir):
