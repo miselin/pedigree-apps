@@ -16,7 +16,7 @@ class GettextPackage(buildsystem.Package):
         return 'gettext'
 
     def version(self):
-        return '0.18.1'
+        return '0.19.6'
 
     def build_requires(self):
         return ['libtool', 'libiconv']
