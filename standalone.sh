@@ -10,8 +10,8 @@
 # Abort the build immediately if anything goes wrong.
 set -e
 
-UNPRIV_UID=$UID
-UNPRIV_GID=$GID
+UNPRIV_UID=$(id -u $USER)
+UNPRIV_GID=$(id -g $USER)
 
 LOCALDIR="$PWD"
 
