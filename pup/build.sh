@@ -8,5 +8,6 @@ cd $(dirname $(readlink -f $0))
 python3 setup.py bdist_wheel
 
 cd $OLDWD
+mkdir -p $APPS_BASE/pup/package_repo
 
 ./runwithenv.py sh -c 'cp pup/dist/pup*.whl $APPS_BASE/pup/package_repo/pup.whl'
