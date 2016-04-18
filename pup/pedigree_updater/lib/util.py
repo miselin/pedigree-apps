@@ -31,6 +31,11 @@ class PupConfig(object):
         else:
             log.info('creating new database at %s', self.db_path)
 
+            # Make sure the intermediate directories exist first.
+            parent_dir = os.path.dirname(os.path.abspath(self.db_path))
+            if not os.path.isdir(parent_dir):
+                os.makedirs(parent_dir)
+
         self.db = sqlite3.connect(self.db_path)
         self.db.row_factory = SqliteDictFactory
         self.schema = schema.PupSchema(self.db)
