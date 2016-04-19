@@ -73,6 +73,9 @@ class SyncCommand(base.PupCommand):
 
         # If we didn't have a database before, reload config
         have_db = os.path.exists(target_database)
+        if config.created:
+            log.info('overwriting newly-created database with synced database')
+            have_db = False
         if not have_db:
             os.rename(new_database, target_database)
             new_database = target_database

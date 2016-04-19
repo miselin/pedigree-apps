@@ -28,8 +28,10 @@ class PupConfig(object):
         self.db_path = os.path.join(self.local_cache, 'packages.pupdb')
         if os.path.exists(self.db_path):
             log.debug('loading database from %s', self.db_path)
+            self.created = False
         else:
             log.info('creating new database at %s', self.db_path)
+            self.created = True
 
             # Make sure the intermediate directories exist first.
             parent_dir = os.path.dirname(os.path.abspath(self.db_path))
