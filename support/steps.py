@@ -157,6 +157,8 @@ def create_package(package, deploydir, env):
 
     env['PYTHONPATH'] = env['PACKMAN_PATH']
 
+    key = env['UPLOAD_KEY']
+
     # TODO(miselin): add dependency information.
     cmd([env['PACKMAN_SCRIPT'], '--config=%s' % config_file, 'create',
          '--path', deploydir, '--package', package_name,
@@ -164,7 +166,7 @@ def create_package(package, deploydir, env):
         cwd=deploydir)
     cmd([env['PACKMAN_SCRIPT'], '--config=%s' % config_file, 'register',
          '--package', package_name, '--version', package_version,
-         '--architecture', package_arch], cwd=deploydir)
+         '--architecture', package_arch, '--key', key], cwd=deploydir)
 
 
 def split_paths(path):

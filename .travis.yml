@@ -10,7 +10,9 @@ language: python
 matrix:
   include:
   - compiler: gcc
-    env: TARGET=amd64 PACKAGE=libtool
+    env:
+      - TARGET=amd64 PACKAGE=libtool
+      - secure: "W9NNuKNiJf+vx1QR3K4Cyt3yBgRKRO2Raqt8szG5uryyRX777uqD7+mxekWJEsTdR7gQHStKXEZwA9tNnCQusN09gd8VG7j1RxxlyrjM3HNt0qwyFbZNrbIMKxBV2K2Y6lSljLm3DQd7yO9799rnlo9q6jygg/zhyMbfLlIshgA="
     os: linux
     python: '2.7'
     sudo: true
