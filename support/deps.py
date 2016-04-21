@@ -41,12 +41,8 @@ def install_dependent_packages(all_packages, package, env):
         tar.close()
 
 
-def sort_dependencies(packages):
-    """Sorts the given packages based on dependencies.
-
-    Returns:
-        An iterable of (package_name, package) tuples.
-    """
+def build_package_graph(packages):
+    """Build a networkx.DiGraph from the given set of packages."""
     graph = networkx.DiGraph()
 
     for package_name, package in packages.items():
@@ -57,6 +53,17 @@ def sort_dependencies(packages):
         for dependency in requires:
             graph.add_edge(package_name, dependency)
 
+    return graph
+
+
+def sort_dependencies(packages):
+    """Sorts the given packages based on dependencies.
+
+    Returns:
+        An iterable of (package_name, package) tuples.
+    """
+    graph = build_package_graph(packages)
+
     # Write out a nice dot graph if we can.
     try:
         networkx.write_dot(graph, 'dependencies.dot')
@@ -66,3 +73,16 @@ def sort_dependencies(packages):
     # Walk the tree to figure out the correct dependency order.
     result = networkx.topological_sort(graph, reverse=True)
     return [(package, packages[package]) for package in result]
+
+
+def get_final_packages(packages):
+    """Gets the list of packages that nothing depends upon.
+
+    Returns:
+        An iterable of package name strings.
+    """
+    graph = build_package_graph(packages)
+
+    for node in graph.nodes():
+        if not graph.predecessors(node):
+            yield node
