@@ -54,18 +54,16 @@ class InstallCommand(base.PupCommand):
         # Do all the given packages exist?
         packages = []
         for package in args.package:
-            e = config.db.execute('SELECT * FROM packages WHERE name=? AND '
-                                  'architecture=? ORDER BY version DESC',
-                                  (package, config.architecture))
-            result = e.fetchone()
-            if result is None:
+            desired = '%s-%s' % (package, config.architecture)
+
+            if desired not in config.db:
                 print('The package "%s" is not available. Try running '
                       ' `pup sync`?' % package)
                 return 1
 
             # TODO(miselin): extract dependencies?
 
-            packages.append(result)
+            packages.append(config.db[desired])
 
         # OK, good to go.
         print('Installing %d packages...' % len(packages))

@@ -7,3 +7,4 @@ arch=amd64
 
 [remotes]
 server=http://pup.pedigree-project.org
+upload=http://the-pedigree-project.appspot.com

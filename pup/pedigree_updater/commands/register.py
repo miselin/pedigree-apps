@@ -17,9 +17,11 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 '''
 
+import base64
 import hashlib
 import logging
 import os
+import urllib
 
 from . import base
 
@@ -43,6 +45,8 @@ class RegisterPackageCommand(base.PupCommand):
         parser.add_argument('--architecture', type=str, required=True,
                             choices=('amd64', 'arm'),
                             help='architecture of the package to register')
+        parser.add_argument('--key', type=str, required=True,
+                            help='Upload key for the repository')
         parser.add_argument('dependency', nargs='*', type=str,
                             help='packages this package should depend on')
 
@@ -51,29 +55,36 @@ class RegisterPackageCommand(base.PupCommand):
                                      args.architecture)
         pup_filename = '%s.pup' % package_name
         package_file = os.path.join(config.local_cache, pup_filename)
-        log.info('register package %s [%s]', package_name, package_file)
-
         if not os.path.isfile(package_file):
             print('No file exists for package %s.', package_file)
             return 1
 
-        h = hashlib.sha1()
+        log.info('register package %s [%s]', package_name, package_file)
+
         with open(package_file, 'rb') as f:
-            h.update(f.read())
-        package_hash = h.hexdigest()
+            contents = f.read()
 
-        if args.dependency:
-            deps = ','.join(args.dependency)
+        postdata = {
+            'name': args.package,
+            'vers': args.version,
+            'arch': args.architecture,
+            'blob': base64.b64encode(contents),
+            'key': 'upload',
+            'key_value': args.key,
+        }
+        postdata = urllib.urlencode(postdata)
+
+        url = '%s/upload' % (config.upload_url,)
+        if not url:
+            print('No upload URL is configured in the config file.')
+            return 1
+
+        response = urllib.urlopen(url, postdata)
+
+        result = response.read()
+        if result != 'ok':
+            print('Registering package "%s" failed: %s' % (package_name,
+                                                           result))
+            return 1
         else:
-            deps = ''
-
-        config.db.execute('delete from packages where name=? and version=? '
-                          'and architecture=?', (args.package, args.version,
-                                                 args.architecture))
-        config.db.execute('insert into packages (name, version, dependencies, '
-                          'sha1, architecture) values (?, ?, ?, ?, ?)',
-                          (args.package, args.version, deps, package_hash,
-                           args.architecture))
-        config.db.commit()
-
-        print('Package "%s" has been registered.' % package_name)
+            print('Package "%s" has been registered.' % package_name)

@@ -81,18 +81,6 @@ class SyncCommand(base.PupCommand):
             new_database = target_database
 
             config = util.load_config(args)
-            config.schema.upgrade()
-
-        # Verify the database is correct.
-        conn = sqlite3.connect(new_database)
-        cursor = conn.execute('PRAGMA user_version')
-        db_vers = cursor.fetchone()[0]
-        if db_vers != config.schema.version():
-            print('Downloaded database schema version mismatch %d vs %d.' % (
-                  db_vers, config.schema.version()))
-            os.unlink(new_database)
-            return 1
-        conn.close()
 
         # Drop in place if we had a database previously, we've now verified
         # the new database.

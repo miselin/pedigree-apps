@@ -21,7 +21,6 @@ import argparse
 import logging
 
 from pedigree_updater.commands import base
-from pedigree_updater.lib import schema
 from pedigree_updater.lib import util
 
 
@@ -52,11 +51,6 @@ def main():
         exit(1)
 
     config = util.load_config(args)
-
-    # Perform schema upgrade if needed.
-    if config.db:
-        pup_schema = schema.PupSchema(config.db)
-        pup_schema.upgrade()
 
     cmd = cmds[args.which]
     if cmd.run(args, config):

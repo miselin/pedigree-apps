@@ -53,7 +53,10 @@ class PackageIndex(webapp2.RequestHandler):
 </head>
 <body>
 <h1>The Pedigree UPdater Master Repository</h1>
-<ul>''')
+<ul>
+<li>
+    <a href="/packages.pupdb">packages.pupdb</a>
+</li>''')
 
         # TODO(miselin): add information for human readability.
         for package in Package.query().iter():

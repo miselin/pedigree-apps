@@ -4,11 +4,14 @@ import os
 import sqlite3
 
 try:
+    import simplejson as json
+except ImportError:
+    import json
+
+try:
     from ConfigParser import SafeConfigParser
 except ImportError:
     from configparser import SafeConfigParser
-
-from . import schema
 
 
 log = logging.getLogger(__name__)
@@ -20,17 +23,20 @@ def SqliteDictFactory(cursor, row):
 
 class PupConfig(object):
 
-    def __init__(self, repo_urls, local_cache, install_root, architecture):
+    def __init__(self, repo_urls, local_cache, install_root, architecture,
+                 upload_url):
         self.repo_urls = repo_urls
+        self.upload_url = upload_url
         self.local_cache = local_cache
         self.install_root = install_root
         self.architecture = architecture
+        self.db = {}
         self.db_path = os.path.join(self.local_cache, 'packages.pupdb')
         if os.path.exists(self.db_path):
             log.debug('loading database from %s', self.db_path)
             self.created = False
         else:
-            log.info('creating new database at %s', self.db_path)
+            log.info('database does not yet exist at %s', self.db_path)
             self.created = True
 
             # Make sure the intermediate directories exist first.
@@ -38,9 +44,16 @@ class PupConfig(object):
             if not os.path.isdir(parent_dir):
                 os.makedirs(parent_dir)
 
-        self.db = sqlite3.connect(self.db_path)
-        self.db.row_factory = SqliteDictFactory
-        self.schema = schema.PupSchema(self.db)
+            # Write an empty JSON file.
+            with open(self.db_path, 'w') as f:
+                f.write('{}')
+
+        try:
+            with open(self.db_path) as f:
+                self.db = json.load(f)
+        except ValueError:
+            log.warning('failed to load database, you should sync')
+            self.db = {}
 
         if not os.path.isdir(self.local_cache):
             os.makedirs(self.local_cache)
@@ -58,9 +71,12 @@ def load_config(args):
     parser.read(pup_config)
 
     if parser.has_section('remotes'):
-        repos = [server[1] for server in parser.items('remotes')]
+        repos = [server[1] for server in parser.items('remotes')
+                 if server[0] == 'server']
+        upload_url = parser.get('remotes', 'upload')
     else:
         repos = []
+        upload_url = ''
 
     if parser.has_section('paths'):
         local_cache = parser.get('paths', 'localdb')
@@ -78,5 +94,6 @@ def load_config(args):
         repos,
         local_cache,
         install_root,
-        architecture
+        architecture,
+        upload_url,
     )
