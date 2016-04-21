@@ -26,7 +26,7 @@ else
     ./standalone.sh
 
     # Build the specified package.
-    ./buildPackages.sh "$TARGET" --only "$PACKAGE"
+    ./buildPackages.sh "$TARGET" --only-depends "$PACKAGE"
 
     # Show all logs.
     for f in packages/builds/logs/*.log; do
