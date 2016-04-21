@@ -1,35 +1,215 @@
-sudo: false
-language: python
-# python:
-#   - "2.7"
-#   - "3.2"
-#   - "3.3"
-#   - "3.4"
-matrix:
-  include:
-  - os: linux
-    sudo: true
-    compiler: gcc
-    python: "2.7"
-    env: PACKAGE=libtool TARGET=amd64
-install: "pip install -r requirements.txt"
-script: ./travis.sh
-notifications:
-  email: false
-  # irc:
-  #   channels:
-  #   - chat.freenode.net#pedigree
-  #   template:
-  #   - ! '%{repository}/%{branch} (%{commit} - %{author}): %{message}'
-  #   - ! 'Build details: %{build_url}'
-  #   on_success: change
-  #   on_failure: always
-  # slack:
-  #   secure: T9GJHictl8hUOgGh5RRVmRMExqlWJByssoSYdgnFuHA8ugLXyvHyYaVjLPVcFE9yv7w+sQgki0ZIzCyUH/Hg6/UPwRaH8W4Cm57vQwhE+TUvfy6eRRvYT118X/9X3xkYwhNUks+uydP6oI9YTnvr1XrzB6L4htA7Ma/YKBDhLhg=
 addons:
   apt:
     packages:
-      - fakechroot
+    - fakechroot
 cache:
   directories:
   - standalone
+install: pip install -r requirements.txt
+language: python
+matrix:
+  include:
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=inetutils
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=sqlite
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=pth
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=vttest
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=pedigree-base
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=vim
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=sed
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=mtools
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=netsurf
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=perl
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=mesa
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=bsdtar
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=pedigree-devel
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=git
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=nano
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=lua
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=less
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=coreutils
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=python26
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=gnumake
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=grep
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=python27
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=m4
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=gawk
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=gcc
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=dropbear
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=prboom
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=wget
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=bash
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=dosbox
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=grub2
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=atk
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=pango
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=bind
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=e2fsprogs
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=lynx
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=diffutils
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=apache2
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=binutils
+    os: linux
+    python: '2.7'
+    sudo: true
+  - compiler: gcc
+    env: TARGET=amd64 PACKAGE=nasm
+    os: linux
+    python: '2.7'
+    sudo: true
+notifications:
+  email: false
+script: ./travis.sh
+sudo: false
