@@ -1,0 +1,9 @@
+application: the-pedigree-project
+version: r001
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /.*
+  script: pup_http.wsgi.app
