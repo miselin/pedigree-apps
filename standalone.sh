@@ -46,6 +46,14 @@ fi
 cd pedigree
 git pull
 rm -f .easy_os  # Make sure we retry downloading packages.
+
+# Don't do custom behaviour on travis for the standalone build.
+if [ "x$TRAVIS" != "x" ]; then
+    cat <<EOF >./build-etc/travis.sh
+#!/bin/bash
+TRAVIS_OPTIONS="forcemtools=1"
+EOF
+fi
 ./easy_build_$EASY_BUILD_TARGET.sh noconfirm debian build_images=0
 cd ..
 
