@@ -374,5 +374,20 @@ matrix:
     sudo: true
 notifications:
   email: false
+  irc:
+    channels:
+    - chat.freenode.net#pedigree
+    on_failure: always
+    on_success: change
+    template:
+    - '%{repository}/%{branch} (%{commit} - %{author}): %{message}'
+    - 'Build details: %{build_url}'
+  slack:
+    secure: T9GJHictl8hUOgGh5RRVmRMExqlWJByssoSYdgnFuHA8ugLXyvHyYaVjLPVcFE9yv7w+sQgki0ZIzCyUH/Hg6/UPwRaH8W4Cm57vQwhE+TUvfy6eRRvYT118X/9X3xkYwhNUks+uydP6oI9YTnvr1XrzB6L4htA7Ma/YKBDhLhg=
+python:
+- '2.7'
+- '3.2'
+- '3.3'
+- '3.4'
 script: ./travis.sh
 sudo: false
