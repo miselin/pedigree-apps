@@ -1,6 +1,5 @@
 
 import base64
-import lib.cloudstorage as gcs
 import hashlib
 import webapp2
 
@@ -12,33 +11,20 @@ except ImportError:
 from models import Package, Authorisation, PupModel
 
 from google.appengine.api import app_identity
+from google.appengine.ext import blobstore
+from google.appengine.ext.webapp import blobstore_handlers
 
 
-retry_params = gcs.RetryParams(initial_delay=0.2,
-                               max_delay=5.0,
-                               backoff_factor=2,
-                               max_retry_period=15)
-gcs.set_default_retry_params(retry_params)
-
-
-class PackageIndex(webapp2.RequestHandler):
-
-    def readPackage(self, name):
-        filename = '/%s/%s' % (app_identity.get_default_gcs_bucket_name(),
-                               name)
-        gcs_file = gcs.open(filename)
-        result = gcs_file.read()
-        gcs_file.close()
-        return result
+class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
 
     def doPackage(self):
         requested_package = self.request.path.strip('/')
 
         package = Package.query(Package.fullname == requested_package).get()
 
-        if package:
+        if package and blobstore.get(package.blob):
             self.response.headers['Content-Type'] = 'application/octet-stream'
-            self.response.write(self.readPackage(package.fullname))
+            self.send_blob(package.blob)
         else:
             self.error(404)
             self.response.write('That package does not exist.')
@@ -95,27 +81,64 @@ class PackageIndex(webapp2.RequestHandler):
             self.doPackage()
 
 
-class PackageUpload(webapp2.RequestHandler):
-
-    def packageToGcs(self, name, contents):
-        filename = '/%s/%s' % (app_identity.get_default_gcs_bucket_name(),
-                               name)
-        write_retry_params = gcs.RetryParams(backoff_factor=1.1)
-        gcs_file = gcs.open(filename, 'w',
-                            content_type='application/octet-stream',
-                            retry_params=write_retry_params)
-        gcs_file.write(contents)
-        gcs_file.close()
-
-    def noauth(self):
-        self.error(403)
-        self.response.write('Invalid credentials.')
+class PackageUploadBlobstore(blobstore_handlers.BlobstoreUploadHandler):
 
     def badrequest(self):
         self.error(400)
         self.response.write('Incorrect parameters.')
 
     def post(self):
+        # OK, we can process the rest now.
+        name = self.request.get('name')
+        arch = self.request.get('arch')
+        vers = self.request.get('vers')
+        sha1 = self.request.get('sha1')
+        if not (name and arch and vers and sha1):
+            self.badrequest()
+            return
+
+        try:
+            uploaded = self.get_uploads()[0]
+            uploaded_key = uploaded.key()
+        except:
+            self.badrequest()
+            return
+
+        fullname = '%s-%s-%s.pup' % (name, vers, arch)
+
+        # Do we already know of a package like this?
+        known_package = Package.query(Package.fullname == fullname).get()
+        not_same = True
+        if known_package:
+            if known_package.sha1 == sha1:
+                not_same = False
+
+        if not_same:
+            # Now create the record.
+            package = Package(fullname=fullname, package_name=name,
+                              architecture=arch, version=vers, sha1=sha1,
+                              blob=uploaded_key)
+            package.put()
+        else:
+            # Wipe out the created item in blobstore, we don't need it.
+            item = blobstore.get(uploaded_key)
+            item.delete()
+
+            self.response.headers['Content-Type'] = 'text/plain'
+            self.response.write('this binary package is already registered')
+            return
+
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.write('ok')
+
+
+class PackageUpload(webapp2.RequestHandler):
+
+    def noauth(self):
+        self.error(403)
+        self.response.write('Invalid credentials.')
+
+    def get(self):
         # Does the user have the right credential?
         cred_name = self.request.get('key')
         cred_value = self.request.get('key_value')
@@ -137,46 +160,9 @@ class PackageUpload(webapp2.RequestHandler):
             self.noauth()
             return
 
-        # OK, we can process the rest now.
-        name = self.request.get('name')
-        arch = self.request.get('arch')
-        vers = self.request.get('vers')
-        if not (name and arch and vers):
-            self.badrequest()
-            return
-
-        # Load contents.
-        blob = self.request.get('blob')
-        if not blob:
-            self.badrequest()
-            return
-
-        blob = base64.b64decode(blob)
-
-        hasher = hashlib.sha1()
-        hasher.update(blob)
-        sha1 = hasher.hexdigest()
-
-        fullname = '%s-%s-%s.pup' % (name, vers, arch)
-
-        # Do we already know of a package like this?
-        known_package = Package.query(Package.fullname == fullname).get()
-        not_same = True
-        if known_package:
-            if known_package.sha1 == sha1:
-                not_same = False
-
-        if not_same:
-            # Write to GCS first.
-            self.packageToGcs(fullname, blob)
-
-            # Now create the record.
-            package = Package(fullname=fullname, package_name=name,
-                              architecture=arch, version=vers, sha1=sha1)
-            package.put()
-
+        # Get URL for blobstore upload.
         self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('ok')
+        self.response.write(blobstore.create_upload_url('/blobstore'))
 
 
 class Pup(webapp2.RequestHandler):
