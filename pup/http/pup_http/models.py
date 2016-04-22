@@ -9,7 +9,6 @@ class Package(ndb.Model):
     architecture = ndb.StringProperty(indexed=False)
     version = ndb.StringProperty(indexed=False)
     sha1 = ndb.StringProperty(indexed=False)
-    contents = ndb.BlobProperty(indexed=False, compressed=True)
 
 
 class Authorisation(ndb.Model):

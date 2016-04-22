@@ -1,5 +1,6 @@
 
 import base64
+import lib.cloudstorage as gcs
 import hashlib
 import webapp2
 
@@ -10,8 +11,25 @@ except ImportError:
 
 from models import Package, Authorisation, PupModel
 
+from google.appengine.api import app_identity
+
+
+retry_params = gcs.RetryParams(initial_delay=0.2,
+                               max_delay=5.0,
+                               backoff_factor=2,
+                               max_retry_period=15)
+gcs.set_default_retry_params(retry_params)
+
 
 class PackageIndex(webapp2.RequestHandler):
+
+    def readPackage(self, name):
+        filename = '/%s/%s' % (app_identity.get_default_gcs_bucket_name(),
+                               name)
+        gcs_file = gcs.open(filename)
+        result = gcs_file.read()
+        gcs_file.close()
+        return result
 
     def doPackage(self):
         requested_package = self.request.path.strip('/')
@@ -20,7 +38,7 @@ class PackageIndex(webapp2.RequestHandler):
 
         if package:
             self.response.headers['Content-Type'] = 'application/octet-stream'
-            self.response.write(package.contents)
+            self.response.write(self.readPackage(package.fullname))
         else:
             self.error(404)
             self.response.write('That package does not exist.')
@@ -78,6 +96,16 @@ class PackageIndex(webapp2.RequestHandler):
 
 
 class PackageUpload(webapp2.RequestHandler):
+
+    def packageToGcs(self, name, contents):
+        filename = '/%s/%s' % (app_identity.get_default_gcs_bucket_name(),
+                               name)
+        write_retry_params = gcs.RetryParams(backoff_factor=1.1)
+        gcs_file = gcs.open(filename, 'w',
+                            content_type='application/octet-stream',
+                            retry_params=write_retry_params)
+        gcs_file.write(contents)
+        gcs_file.close()
 
     def noauth(self):
         self.error(403)
@@ -139,9 +167,12 @@ class PackageUpload(webapp2.RequestHandler):
                 not_same = False
 
         if not_same:
+            # Write to GCS first.
+            self.packageToGcs(fullname, blob)
+
+            # Now create the record.
             package = Package(fullname=fullname, package_name=name,
-                              architecture=arch, version=vers, sha1=sha1,
-                              contents=blob)
+                              architecture=arch, version=vers, sha1=sha1)
             package.put()
 
         self.response.headers['Content-Type'] = 'text/plain'
