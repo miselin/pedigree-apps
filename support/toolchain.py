@@ -129,7 +129,7 @@ localdb=%(repo)s
 arch=%(arch)s
 
 [remotes]
-server=http://pup.pedigree-project.org/pup
+server=http://the-pedigree-project.appspot.com
 upload=http://the-pedigree-project.appspot.com
 ''' % {
                 'repo': env['PACKMAN_REPO'],
