@@ -130,6 +130,7 @@ arch=%(arch)s
 
 [remotes]
 server=http://pup.pedigree-project.org/pup
+upload=http://the-pedigree-project.appspot.com
 ''' % {
                 'repo': env['PACKMAN_REPO'],
                 'arch': env['PACKMAN_TARGET_ARCH']
