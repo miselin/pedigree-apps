@@ -9,9 +9,9 @@ except ImportError:
     import json
 
 try:
-    from ConfigParser import SafeConfigParser
+    from ConfigParser import SafeConfigParser, NoOptionError
 except ImportError:
-    from configparser import SafeConfigParser
+    from configparser import SafeConfigParser, NoOptionError
 
 
 log = logging.getLogger(__name__)
@@ -73,7 +73,10 @@ def load_config(args):
     if parser.has_section('remotes'):
         repos = [server[1] for server in parser.items('remotes')
                  if server[0] == 'server']
-        upload_url = parser.get('remotes', 'upload')
+        try:
+            upload_url = parser.get('remotes', 'upload')
+        except NoOptionError:
+            upload_url = ''
     else:
         repos = []
         upload_url = ''
