@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import base64
 import sys
 import urllib
@@ -26,7 +28,7 @@ def main():
     response = urllib.urlopen(url, postdata)
     result = response.read()
 
-    print result
+    print(result)
 
 
 if __name__ == '__main__':

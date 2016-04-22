@@ -21,7 +21,6 @@ import logging
 import os
 import urllib
 import shutil
-import sqlite3
 
 from . import base
 from pedigree_updater.lib import util

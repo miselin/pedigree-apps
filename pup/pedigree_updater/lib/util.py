@@ -1,7 +1,6 @@
 
 import logging
 import os
-import sqlite3
 
 try:
     import simplejson as json

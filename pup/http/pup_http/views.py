@@ -1,6 +1,5 @@
 
 import base64
-import hashlib
 import webapp2
 
 try:
@@ -10,7 +9,6 @@ except ImportError:
 
 from models import Package, Authorisation, PupModel
 
-from google.appengine.api import app_identity
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 

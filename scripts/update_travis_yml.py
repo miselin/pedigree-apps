@@ -45,8 +45,9 @@ def main():
             'CC=clang',
             'CXX=clang++',
             {'secure': 'W9NNuKNiJf+vx1QR3K4Cyt3yBgRKRO2Raqt8szG5uryyRX777uqD7+'
-            'mxekWJEsTdR7gQHStKXEZwA9tNnCQusN09gd8VG7j1RxxlyrjM3HNt0qwyFbZNr'
-            'bIMKxBV2K2Y6lSljLm3DQd7yO9799rnlo9q6jygg/zhyMbfLlIshgA='},
+                       'mxekWJEsTdR7gQHStKXEZwA9tNnCQusN09gd8VG7j1RxxlyrjM3HNt'
+                       '0qwyFbZNrbIMKxBV2K2Y6lSljLm3DQd7yO9799rnlo9q6jygg/zhyM'
+                       'bfLlIshgA='},
         ],
     }
 
