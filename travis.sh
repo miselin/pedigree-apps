@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -x
+set -e
 
 if [ "x$PACKAGE" = "x" ]; then
     ./runtests.sh
