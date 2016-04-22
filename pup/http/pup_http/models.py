@@ -17,3 +17,9 @@ class Authorisation(ndb.Model):
     key_name = ndb.StringProperty(indexed=True)
     key_value = ndb.StringProperty(indexed=False)
     allowed = ndb.BooleanProperty(indexed=False, default=True)
+
+
+class PupModel(ndb.Model):
+    """This is entirely the wrong way to do this."""
+    pup_version = ndb.IntegerProperty(indexed=True)
+    pup_contents = ndb.BlobProperty(indexed=False, compressed=True)

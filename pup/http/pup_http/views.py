@@ -8,7 +8,7 @@ try:
 except ImportError:
     import json
 
-from models import Package, Authorisation
+from models import Package, Authorisation, PupModel
 
 
 class PackageIndex(webapp2.RequestHandler):
@@ -56,6 +56,9 @@ class PackageIndex(webapp2.RequestHandler):
 <ul>
 <li>
     <a href="/packages.pupdb">packages.pupdb</a>
+</li>
+<li>
+    <a href="/pup.whl">pup.whl</a>
 </li>''')
 
         # TODO(miselin): add information for human readability.
@@ -66,7 +69,7 @@ class PackageIndex(webapp2.RequestHandler):
 
     def get(self):
         path = self.request.path
-        if path == '/':
+        if path == '/' or path.startswith('/index.'):
             self.doIndex()
         elif path == '/packages.pupdb':
             self.doDatabase()
@@ -142,4 +145,71 @@ class PackageUpload(webapp2.RequestHandler):
             package.put()
 
         self.response.headers['Content-Type'] = 'text/plain'
+        self.response.write('ok')
+
+
+class Pup(webapp2.RequestHandler):
+
+    def noauth(self):
+        self.error(403)
+        self.response.write('Invalid credentials.')
+
+    def badrequest(self):
+        self.error(400)
+        self.response.write('Incorrect parameters.')
+
+    def get(self):
+        pup = PupModel.query().order(-PupModel.pup_version).get()
+        if not pup:
+            self.error(404)
+            self.response.write('pup is not present')
+        else:
+            if self.request.path == '/pup-version':
+                self.response.headers['Content-Type'] = 'text/plain'
+                self.response.write(pup.pup_version)
+            else:
+                content_type = 'application/octet-stream'
+                self.response.headers['Content-Type'] = content_type
+                self.response.write(pup.pup_contents)
+
+    def post(self):
+        # Does the user have the right credential?
+        cred_name = self.request.get('key')
+        cred_value = self.request.get('key_value')
+        if not (cred_name and cred_value):
+            self.noauth()
+            return
+
+        query = Authorisation.query(Authorisation.key_name == cred_name)
+        credential = query.get()
+        if not credential:
+            self.noauth()
+            return
+
+        if credential.key_value != cred_value:
+            self.noauth()
+            return
+
+        if not credential.allowed:
+            self.noauth()
+            return
+
+        version = int(self.request.get('version'))
+
+        # Load contents.
+        blob = self.request.get('blob')
+        if not blob:
+            self.badrequest()
+            return
+
+        blob = base64.b64decode(blob)
+
+        known_pup = PupModel.query(PupModel.pup_version == version).get()
+        if known_pup:
+            self.error(400)
+            self.response.write('Version already exists.')
+            return
+
+        PupModel(pup_version=version, pup_contents=blob).put()
+
         self.response.write('ok')
