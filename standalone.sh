@@ -39,11 +39,15 @@ if [ ! -e "pedigree" ]; then
     git clone --depth 1 https://github.com/miselin/pedigree.git
 fi
 
+set +e
+
 # Go ahead and build it.
 cd pedigree
 git pull
 ./easy_build_$EASY_BUILD_TARGET.sh noconfirm debian build_images=0
 cd ..
+
+set -e
 
 # Create our local configuration, ready to ship.
 cd ..

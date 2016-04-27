@@ -69,7 +69,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     # local_environment.modify_environment function if it exists.
     env['PEDIGREE_BASE'] = _expand('$HOME/src/pedigree')
     env['APPS_BASE'] = _expand('$HOME/src/pedigree-apps')
-    env['CROSS_BASE'] = _expand('$PEDIGREE_BASE/pedigree-compiler')
+    env['CROSS_BASE'] = _expand('$PEDIGREE_BASE/compilers/dir')
     env['OUTPUT_BASE'] = _expand('$APPS_BASE/newpacks/$ARCH_TARGET')
     env['SOURCE_BASE'] = _expand('$APPS_BASE/packages')
     env['DOWNLOAD_TEMP'] = _expand('$APPS_BASE/downloads')
