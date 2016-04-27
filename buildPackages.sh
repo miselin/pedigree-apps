@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# Standalone build creates its own virtualenv.
-if [ -e "./standalone/venv" ]; then
-    source ./standalone/venv/bin/activate
-fi
-
+# Check for a Python virtualenv for installing our dependencies and tools into.
 if [ "x$VIRTUAL_ENV" = "x" ]; then
-    echo "Please run buildPackages.sh inside a Python virtualenv." >&2
-    exit 1
+    # Standalone build creates its own virtualenv.
+    if [ -e "./standalone/venv" ]; then
+        source ./standalone/venv/bin/activate
+    else
+        echo "Please run buildPackages.sh inside a Python virtualenv." >&2
+        exit 1
+    fi
 fi
 
 # Path to prepareChroot.py

@@ -30,8 +30,11 @@ fi
 mkdir -p standalone && cd standalone
 
 # Create a Python virtual environment if one doesn't exist yet.
-if [ ! -e "venv" ]; then
-    virtualenv --system-site-packages venv
+# NOTE: if we're already in one, don't bother (no need).
+if [ "x$VIRTUAL_ENV" = "x" ]; then
+    if [ ! -e "venv" ]; then
+        virtualenv --system-site-packages venv
+    fi
 fi
 
 # Grab Pedigree first.
