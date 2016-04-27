@@ -30,3 +30,6 @@ addons:
   apt:
     packages:
       - fakechroot
+cache:
+  directories:
+  - standalone

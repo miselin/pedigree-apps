@@ -84,6 +84,11 @@ def build_all(args, packages, env):
     for package in notbuilt_failed:
         log.error('package "%s" failed to build.', package)
 
+    if notbuilt_deps or notbuilt_failed:
+        return 1
+    else:
+        return 0
+
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Build ports for Pedigree.')
@@ -175,12 +180,12 @@ def main(argv):
         packages = tuple(reversed(actual_packages))
 
     # Build packages.
-    build_all(args, packages, env)
+    result = build_all(args, packages, env)
 
     # All done with logging.
     logging.shutdown()
 
-    return 0
+    return result
 
 
 if __name__ == '__main__':
