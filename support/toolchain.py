@@ -154,7 +154,7 @@ def chroot_spec(env):
         cc = os.path.join(env['CROSS_BASE'], 'bin', env['CROSS_CC'])
 
     if not os.path.exists(cc):
-        log.error('$CC is useless')
+        log.error('$CC (%s) is useless', cc)
         return
 
     # Get the existing specs.

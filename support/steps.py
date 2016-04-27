@@ -167,6 +167,34 @@ def create_package(package, deploydir, env):
          '--architecture', package_arch], cwd=deploydir)
 
 
+def split_paths(path):
+    result = [path]
+    head = path
+    while True:
+        head, tail = os.path.split(head)
+        if not tail:
+            break
+
+        result.insert(0, head)
+
+    return result
+
+
+def makedirs_and_chown(path, env):
+    elevated = os.getuid() == 0
+
+    if os.path.exists(path):
+        return
+
+    for p in split_paths(path):
+        if not os.path.exists(p):
+            os.mkdir(p)
+            # Provide correct access while elevated.
+            if elevated:
+                os.chown(p, int(env['UNPRIVILEGED_UID']),
+                         int(env['UNPRIVILEGED_GID']))
+
+
 def create_chroot(env):
     """Create chroot if it doesn't exist yet and clean it out ready to build.
 
@@ -175,14 +203,12 @@ def create_chroot(env):
     """
     elevated = os.getuid() == 0
 
+    # Create chroot directory if it doesn't yet exist.
     chroot_base = env['CHROOT_BASE']
-    if not os.path.exists(chroot_base):
-        os.makedirs(chroot_base)
+    makedirs_and_chown(chroot_base, env)
 
-    # Provide correct access while elevated.
-    if elevated:
-        os.chown(env['CHROOT_BASE'], int(env['UNPRIVILEGED_UID']),
-                 int(env['UNPRIVILEGED_GID']))
+    # Create downloads directory so it can be mounted in the chroot.
+    makedirs_and_chown(env['DOWNLOAD_TEMP'], env)
 
     # Host filesystem layout.
     bind_mounts = {
