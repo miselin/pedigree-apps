@@ -108,12 +108,8 @@ class PackageUploadBlobstore(blobstore_handlers.BlobstoreUploadHandler):
 
         # Do we already know of a package like this?
         known_package = Package.query(Package.fullname == fullname).get()
-        not_same = True
-        if known_package:
-            if known_package.sha1 == sha1:
-                not_same = False
 
-        if not_same:
+        if not known_package:
             # Now create the record.
             package = Package(fullname=fullname, package_name=name,
                               architecture=arch, version=vers, sha1=sha1,
@@ -121,12 +117,13 @@ class PackageUploadBlobstore(blobstore_handlers.BlobstoreUploadHandler):
             package.put()
         else:
             # Wipe out the created item in blobstore, we don't need it.
-            item = blobstore.get(uploaded_key)
+            item = blobstore.get(known_package.blob)
             item.delete()
 
-            self.response.headers['Content-Type'] = 'text/plain'
-            self.response.write('this binary package is already registered')
-            return
+            # Update the package contents.
+            known_package.sha1 = sha1
+            known_package.blob = uploaded_key
+            known_package.put()
 
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write('ok')
