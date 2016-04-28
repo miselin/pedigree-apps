@@ -21,7 +21,7 @@ import base64
 import hashlib
 import logging
 import os
-import urllib
+import requests
 
 from . import base
 
@@ -61,27 +61,40 @@ class RegisterPackageCommand(base.PupCommand):
 
         log.info('register package %s [%s]', package_name, package_file)
 
-        with open(package_file, 'rb') as f:
-            contents = f.read()
+        url = '%s/upload' % (config.upload_url,)
+        if not config.upload_url:
+            print('No upload URL is configured in the config file.')
+            return 1
 
+        h = hashlib.sha1()
+        with open(package_file, 'rb') as f:
+            h.update(f.read())
+        digest = h.hexdigest()
+
+        get_params = {
+            'key': 'upload',
+            'key_value': args.key,
+        }
+
+        # Obtain an upload URL.
+        r = requests.get(url, params=get_params)
+        if r.status_code != 200:
+            print('Failed to get upload URL.')
+            return 1
+
+        upload_url = r.text
+
+        # Upload the package to the given upload URL.
         postdata = {
             'name': args.package,
             'vers': args.version,
             'arch': args.architecture,
-            'blob': base64.b64encode(contents),
-            'key': 'upload',
-            'key_value': args.key,
+            'sha1': digest,
         }
-        postdata = urllib.urlencode(postdata)
+        with open(package_file, 'rb') as f:
+            r = requests.post(upload_url, data=postdata, files={'file': f})
 
-        url = '%s/upload' % (config.upload_url,)
-        if not url:
-            print('No upload URL is configured in the config file.')
-            return 1
-
-        response = urllib.urlopen(url, postdata)
-
-        result = response.read()
+        result = r.text
         if result != 'ok':
             print('Registering package "%s" failed: %s' % (package_name,
                                                            result))
