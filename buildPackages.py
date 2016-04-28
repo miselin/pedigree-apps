@@ -111,7 +111,7 @@ def main(argv):
                         'this is not provided.')
     parser.add_argument('--logformat', type=str, default=LOGGING_FORMAT,
                         help='Log entry format.')
-    parser.add_argument('--debug', action='store_true',
+    parser.add_argument('--debug', action='store_true', default=False,
                         help='Whether to enable debug logging.')
     args = parser.parse_args()
 
