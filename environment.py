@@ -120,6 +120,10 @@ def generate_environment(target_arch, env=None, recurse=True):
     env['TAR'] = '/bin/tar'
     env['CCACHE'] = '/usr/bin/ccache'
 
+    # Pull in pup's upload key if it's in the environment.
+    if 'UPLOAD_KEY' in os.environ:
+        env['UPLOAD_KEY'] = os.environ['UPLOAD_KEY']
+
     # Pull in any local changes that the local system requires.
     if recurse:
         try:
