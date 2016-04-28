@@ -46,6 +46,11 @@ def main():
 
     logging.basicConfig(level=logging.DEBUG)
 
+    # Remove informational logging from requests & urllib3, which leaks more
+    # data than is desirable.
+    logging.getLogger('requests').setLevel(logging.WARNING)
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
+
     if not args.which:
         parser.print_help()
         exit(1)
