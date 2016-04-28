@@ -22,15 +22,9 @@ else
     sudo chown -R "$ME" /home/travis/build/miselin/pedigree/pedigree-compiler
 
     # Build the standalone Pedigree needed for package building.
-    # NOTE: this also creates a virtualenv.
+    # NOTE: this also creates a virtualenv if we aren't already in one.
     ./standalone.sh
 
     # Build the specified package.
     ./buildPackages.sh "$TARGET" --only-depends "$PACKAGE"
-
-    # Show all logs.
-    for f in packages/builds/logs/*.log; do
-      echo "Logfile $f:"
-      cat $f
-    done
 fi
