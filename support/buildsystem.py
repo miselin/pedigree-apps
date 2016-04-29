@@ -109,9 +109,13 @@ class Package(object):
         """Performs steps needed after deployment completes."""
         raise OptionalError()
 
-    def repository(self, env, srcdir, deploydir):
+    def repository_prep(self, env, srcdir, deploydir):
         """Creates a package from the deploydir."""
         steps.create_package(self, deploydir, env)
+
+    def repository(self, env, srcdir, deploydir):
+        """Uploads a package from the deploydir."""
+        steps.upload_package(self, deploydir, env)
 
     def links(self, env, deploydir, cross_dir):
         """Performs steps needed to link headers and libraries into the

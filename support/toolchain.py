@@ -78,7 +78,7 @@ def prepare_compiler(env):
             shutil.rmtree(target)
 
         if source:
-            os.symlink(source, target)
+            steps.cmd(['/bin/cp', '-a', source, target])
 
 
 def pedigree_into_chroot(env, chroot_dir):

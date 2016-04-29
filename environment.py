@@ -75,6 +75,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     env['DOWNLOAD_TEMP'] = _expand('$APPS_BASE/downloads')
     env['BUILD_BASE'] = _expand('$SOURCE_BASE/builds')
     env['CHROOT_BASE'] = _expand('$BUILD_BASE/chroot')
+    env['DEPLOY_BASE'] = _expand('$BUILD_BASE/__deploy')
 
     # Package manager.
     env['PACKMAN_TARGET_ARCH'] = target_arch

@@ -1,0 +1,13 @@
+buildbots
+dist
+packages
+pup.egg-info
+downloads
+venv
+newpacks
+.git
+standalone
+pup/build
+pup/dist
+pup/pup.egg-info
+pup/package_repo

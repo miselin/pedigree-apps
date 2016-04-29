@@ -39,9 +39,10 @@ def main():
         'os': 'linux',
         'sudo': True,
         'python': '2.7',
+        'services': ['docker'],
         'env': [
-            'TARGET=amd64',
-            'PACKAGE={}',
+            'TARGET=%(target)s',
+            'PACKAGE=%(package)s',
             'CC=clang',
             'CXX=clang++',
             {'secure': 'W9NNuKNiJf+vx1QR3K4Cyt3yBgRKRO2Raqt8szG5uryyRX777uqD7+'
@@ -62,18 +63,22 @@ def main():
     matrix_allow_failures = data['matrix']['allow_failures']
 
     for package in deps.get_final_packages(packages):
-        copy = base_include.copy()
+        for target in ('amd64', 'arm'):
+            copy = base_include.copy()
 
-        def fix(x):
-            if isinstance(x, str):
-                return x.format(package)
-            else:
-                return x
+            def fix(x):
+                if isinstance(x, str):
+                    return x % {
+                        'package': package,
+                        'target': target,
+                    }
+                else:
+                    return x
 
-        copy['env'] = [fix(x) for x in copy['env']]
+            copy['env'] = [fix(x) for x in copy['env']]
 
-        matrix_include.append(copy)
-        matrix_allow_failures.append(copy)
+            matrix_include.append(copy)
+            matrix_allow_failures.append(copy)
 
     with open('.travis.yml', 'w') as f:
         yaml.safe_dump(data, f, default_flow_style=False)

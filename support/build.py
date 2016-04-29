@@ -7,6 +7,9 @@ import sys
 import tarfile
 
 from . import buildsystem
+from . import deps
+from . import steps
+from . import toolchain
 
 
 log = logging.getLogger(__name__)
@@ -20,12 +23,6 @@ def build_package(package, env):
     download_filename = '_%s' % package_id
     download_target = os.path.join(env['DOWNLOAD_TEMP'], download_filename)
     srcdir = os.path.join(env['CHROOT_BASE'], 'src')
-    deploydir = os.path.join(env['CHROOT_BASE'], '__deploy')
-
-    for d in [deploydir, srcdir]:
-        if os.path.isdir(d):
-            shutil.rmtree(d)
-        os.makedirs(d)
 
     pass0_steps = ('download',)
     pass3_steps = ('repository',)
@@ -97,7 +94,7 @@ def build_package(package, env):
             method = getattr(package, step)
 
             try:
-                method(env.copy(), srcdir, deploydir)
+                method(env.copy(), srcdir, None)
                 pass
             except buildsystem.OptionalError:
                 pass
@@ -109,27 +106,31 @@ def build_package(package, env):
     os.dup2(log_fd, sys.stdout.fileno())
     os.dup2(log_fd, sys.stderr.fileno())
 
-    # Remove symlinks and get a full absolute path for the chroot.
-    chroot_base = os.path.realpath(env['CHROOT_BASE'])
-    os.chroot(chroot_base)
+    # Build parameters for the Docker invocation (including volumes to share).
+    args = [
+        '/usr/bin/env', 'docker', 'run',
+    ]
+    args += steps.get_volumes(env)
+    args += [
+        'pedigree-apps:buildroot',
+        '/usr/bin/env', 'python', '/pedigree_apps/buildInChroot.py',
+        '--package=' + package.name(), '--filename=' + download_filename,
+        '--target=' + env['PACKMAN_TARGET_ARCH'],
+    ]
 
-    # Jump straight to the root of the chroot.
-    os.chdir('/')
-
-    # Handle all exceptions inside the chroot build so they don't bubble up
-    # to the parent, which is not meant to be in the chroot.
-    try:
-        in_chroot(env, package, package_id, download_filename)
-    except SystemExit:
-        raise
-    except:
-        log.exception('build failure due to Python exception')
-        exit(2)
+    # Run the in-chroot builder now.
+    os.execv(args[0], args)
 
 
-def in_chroot(env, package, package_id, download_filename):
+def in_chroot(env, packages, package, package_id, download_filename):
+    # Drop in support files from Pedigree build.
+    toolchain.pedigree_into_chroot(env, '/')
+
+    # Install our build_requires packages to the chroot path.
+    deps.install_dependent_packages(dict(packages), package, env)
+
     pass1_steps = ('patch', 'prebuild', 'configure', 'build')
-    pass2_steps = ('deploy', 'postdeploy')
+    pass2_steps = ('deploy', 'postdeploy', 'repository_prep')
 
     download_target = os.path.join('/download', download_filename)
     deploydir = '/__deploy'
@@ -184,4 +185,4 @@ def in_chroot(env, package, package_id, download_filename):
         except buildsystem.OptionalError:
             pass
 
-    exit(0)
+    return 0

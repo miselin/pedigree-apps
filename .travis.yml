@@ -4,17 +4,24 @@ addons:
     - fakechroot
 after_script:
 - for f in packages/builds/logs/*.log; do echo "Logfile $f:"; cat $f; done
+before_cache:
+- rm -f standalone/pedigree-x64/build/hdd.img
+- rm -f standalone/pedigree-x64/build/pedigree.iso
+- rm -f standalone/pedigree-arm/build/hdd.img
+- rm -f standalone/pedigree-arm/build/pedigree.iso
 cache:
   apt: true
   pip: true
   ccache: true
   directories:
-  - standalone
+  - standalone-x64
+  - standalone-arm
+  pip: true
 install: pip install -r requirements.txt
 language: python
 matrix:
   allow_failures:
-  - &id002
+  - &id003
     env:
     - TARGET=amd64
     - PACKAGE=inetutils
@@ -24,8 +31,21 @@ matrix:
       secure: W9NNuKNiJf+vx1QR3K4Cyt3yBgRKRO2Raqt8szG5uryyRX777uqD7+mxekWJEsTdR7gQHStKXEZwA9tNnCQusN09gd8VG7j1RxxlyrjM3HNt0qwyFbZNrbIMKxBV2K2Y6lSljLm3DQd7yO9799rnlo9q6jygg/zhyMbfLlIshgA=
     os: linux
     python: '2.7'
+    services: &id002
+    - docker
     sudo: true
-  - &id003
+  - &id004
+    env:
+    - TARGET=arm
+    - PACKAGE=inetutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id005
     env:
     - TARGET=amd64
     - PACKAGE=sqlite
@@ -34,8 +54,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id004
+  - &id006
+    env:
+    - TARGET=arm
+    - PACKAGE=sqlite
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id007
     env:
     - TARGET=amd64
     - PACKAGE=bind
@@ -44,8 +76,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id005
+  - &id008
+    env:
+    - TARGET=arm
+    - PACKAGE=bind
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id009
     env:
     - TARGET=amd64
     - PACKAGE=pth
@@ -54,8 +98,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id006
+  - &id010
+    env:
+    - TARGET=arm
+    - PACKAGE=pth
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id011
     env:
     - TARGET=amd64
     - PACKAGE=pedigree-base
@@ -64,8 +120,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id007
+  - &id012
+    env:
+    - TARGET=arm
+    - PACKAGE=pedigree-base
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id013
     env:
     - TARGET=amd64
     - PACKAGE=vim
@@ -74,8 +142,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id008
+  - &id014
+    env:
+    - TARGET=arm
+    - PACKAGE=vim
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id015
     env:
     - TARGET=amd64
     - PACKAGE=sed
@@ -84,8 +164,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id009
+  - &id016
+    env:
+    - TARGET=arm
+    - PACKAGE=sed
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id017
     env:
     - TARGET=amd64
     - PACKAGE=mtools
@@ -94,8 +186,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id010
+  - &id018
+    env:
+    - TARGET=arm
+    - PACKAGE=mtools
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id019
     env:
     - TARGET=amd64
     - PACKAGE=netsurf
@@ -104,8 +208,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id011
+  - &id020
+    env:
+    - TARGET=arm
+    - PACKAGE=netsurf
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id021
     env:
     - TARGET=amd64
     - PACKAGE=perl
@@ -114,8 +230,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id012
+  - &id022
+    env:
+    - TARGET=arm
+    - PACKAGE=perl
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id023
     env:
     - TARGET=amd64
     - PACKAGE=mesa
@@ -124,8 +252,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id013
+  - &id024
+    env:
+    - TARGET=arm
+    - PACKAGE=mesa
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id025
     env:
     - TARGET=amd64
     - PACKAGE=bsdtar
@@ -134,8 +274,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id014
+  - &id026
+    env:
+    - TARGET=arm
+    - PACKAGE=bsdtar
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id027
     env:
     - TARGET=amd64
     - PACKAGE=gnumake
@@ -144,8 +296,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id015
+  - &id028
+    env:
+    - TARGET=arm
+    - PACKAGE=gnumake
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id029
     env:
     - TARGET=amd64
     - PACKAGE=pedigree-devel
@@ -154,8 +318,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id016
+  - &id030
+    env:
+    - TARGET=arm
+    - PACKAGE=pedigree-devel
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id031
     env:
     - TARGET=amd64
     - PACKAGE=git
@@ -164,8 +340,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id017
+  - &id032
+    env:
+    - TARGET=arm
+    - PACKAGE=git
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id033
     env:
     - TARGET=amd64
     - PACKAGE=nano
@@ -174,8 +362,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id018
+  - &id034
+    env:
+    - TARGET=arm
+    - PACKAGE=nano
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id035
     env:
     - TARGET=amd64
     - PACKAGE=grub2
@@ -184,8 +384,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id019
+  - &id036
+    env:
+    - TARGET=arm
+    - PACKAGE=grub2
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id037
     env:
     - TARGET=amd64
     - PACKAGE=less
@@ -194,8 +406,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id020
+  - &id038
+    env:
+    - TARGET=arm
+    - PACKAGE=less
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id039
     env:
     - TARGET=amd64
     - PACKAGE=lua
@@ -204,8 +428,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id021
+  - &id040
+    env:
+    - TARGET=arm
+    - PACKAGE=lua
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id041
     env:
     - TARGET=amd64
     - PACKAGE=python26
@@ -214,8 +450,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id022
+  - &id042
+    env:
+    - TARGET=arm
+    - PACKAGE=python26
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id043
     env:
     - TARGET=amd64
     - PACKAGE=vttest
@@ -224,8 +472,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id023
+  - &id044
+    env:
+    - TARGET=arm
+    - PACKAGE=vttest
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id045
     env:
     - TARGET=amd64
     - PACKAGE=dropbear
@@ -234,8 +494,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id024
+  - &id046
+    env:
+    - TARGET=arm
+    - PACKAGE=dropbear
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id047
     env:
     - TARGET=amd64
     - PACKAGE=grep
@@ -244,8 +516,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id025
+  - &id048
+    env:
+    - TARGET=arm
+    - PACKAGE=grep
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id049
     env:
     - TARGET=amd64
     - PACKAGE=python27
@@ -254,8 +538,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id026
+  - &id050
+    env:
+    - TARGET=arm
+    - PACKAGE=python27
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id051
     env:
     - TARGET=amd64
     - PACKAGE=m4
@@ -264,8 +560,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id027
+  - &id052
+    env:
+    - TARGET=arm
+    - PACKAGE=m4
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id053
     env:
     - TARGET=amd64
     - PACKAGE=gawk
@@ -274,8 +582,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id028
+  - &id054
+    env:
+    - TARGET=arm
+    - PACKAGE=gawk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id055
     env:
     - TARGET=amd64
     - PACKAGE=gcc
@@ -284,8 +604,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id029
+  - &id056
+    env:
+    - TARGET=arm
+    - PACKAGE=gcc
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id057
     env:
     - TARGET=amd64
     - PACKAGE=prboom
@@ -294,8 +626,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id030
+  - &id058
+    env:
+    - TARGET=arm
+    - PACKAGE=prboom
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id059
     env:
     - TARGET=amd64
     - PACKAGE=wget
@@ -304,8 +648,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id031
+  - &id060
+    env:
+    - TARGET=arm
+    - PACKAGE=wget
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id061
     env:
     - TARGET=amd64
     - PACKAGE=bash
@@ -314,8 +670,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id032
+  - &id062
+    env:
+    - TARGET=arm
+    - PACKAGE=bash
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id063
     env:
     - TARGET=amd64
     - PACKAGE=dosbox
@@ -324,8 +692,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id033
+  - &id064
+    env:
+    - TARGET=arm
+    - PACKAGE=dosbox
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id065
     env:
     - TARGET=amd64
     - PACKAGE=atk
@@ -334,8 +714,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id034
+  - &id066
+    env:
+    - TARGET=arm
+    - PACKAGE=atk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id067
     env:
     - TARGET=amd64
     - PACKAGE=pango
@@ -344,8 +736,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id035
+  - &id068
+    env:
+    - TARGET=arm
+    - PACKAGE=pango
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id069
     env:
     - TARGET=amd64
     - PACKAGE=diffutils
@@ -354,8 +758,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id036
+  - &id070
+    env:
+    - TARGET=arm
+    - PACKAGE=diffutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id071
     env:
     - TARGET=amd64
     - PACKAGE=e2fsprogs
@@ -364,8 +780,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id037
+  - &id072
+    env:
+    - TARGET=arm
+    - PACKAGE=e2fsprogs
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id073
     env:
     - TARGET=amd64
     - PACKAGE=coreutils
@@ -374,8 +802,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id038
+  - &id074
+    env:
+    - TARGET=arm
+    - PACKAGE=coreutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id075
     env:
     - TARGET=amd64
     - PACKAGE=lynx
@@ -384,8 +824,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id039
+  - &id076
+    env:
+    - TARGET=arm
+    - PACKAGE=lynx
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id077
     env:
     - TARGET=amd64
     - PACKAGE=apache2
@@ -394,8 +846,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id040
+  - &id078
+    env:
+    - TARGET=arm
+    - PACKAGE=apache2
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id079
     env:
     - TARGET=amd64
     - PACKAGE=binutils
@@ -404,8 +868,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
     sudo: true
-  - &id041
+  - &id080
+    env:
+    - TARGET=arm
+    - PACKAGE=binutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id081
     env:
     - TARGET=amd64
     - PACKAGE=nasm
@@ -414,9 +890,20 @@ matrix:
     - *id001
     os: linux
     python: '2.7'
+    services: *id002
+    sudo: true
+  - &id082
+    env:
+    - TARGET=arm
+    - PACKAGE=nasm
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
     sudo: true
   include:
-  - *id002
   - *id003
   - *id004
   - *id005
@@ -456,6 +943,47 @@ matrix:
   - *id039
   - *id040
   - *id041
+  - *id042
+  - *id043
+  - *id044
+  - *id045
+  - *id046
+  - *id047
+  - *id048
+  - *id049
+  - *id050
+  - *id051
+  - *id052
+  - *id053
+  - *id054
+  - *id055
+  - *id056
+  - *id057
+  - *id058
+  - *id059
+  - *id060
+  - *id061
+  - *id062
+  - *id063
+  - *id064
+  - *id065
+  - *id066
+  - *id067
+  - *id068
+  - *id069
+  - *id070
+  - *id071
+  - *id072
+  - *id073
+  - *id074
+  - *id075
+  - *id076
+  - *id077
+  - *id078
+  - *id079
+  - *id080
+  - *id081
+  - *id082
 notifications:
   email: false
   irc:

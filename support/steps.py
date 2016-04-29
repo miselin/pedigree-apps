@@ -146,27 +146,40 @@ def symlinks(deploydir, cross_dir, bins=(), libs=(), headers=()):
         os.symlink(source, target)
 
 
-def create_package(package, deploydir, env):
-    config_file = os.path.join(env['APPS_BASE'], 'pup.conf')
+def pup_package(package, deploydir, env, upload=False):
+    # Chroot?
+    if os.path.exists('/pedigree_apps'):
+        config_file = '/pedigree_apps/pup/pup-docker.conf'
+    else:
+        config_file = os.path.join(env['APPS_BASE'], 'pup.conf')
 
     package_name = package.name()
     package_version = package.version()
     package_arch = env['PACKMAN_TARGET_ARCH']
 
     env = env.copy()
-
     env['PYTHONPATH'] = env['PACKMAN_PATH']
 
-    key = env['UPLOAD_KEY']
-
     # TODO(miselin): add dependency information.
-    cmd([env['PACKMAN_SCRIPT'], '--config=%s' % config_file, 'create',
-         '--path', deploydir, '--package', package_name,
-         '--version', package_version, '--architecture', package_arch],
-        cwd=deploydir)
-    cmd([env['PACKMAN_SCRIPT'], '--config=%s' % config_file, 'register',
-         '--package', package_name, '--version', package_version,
-         '--architecture', package_arch, '--key', key], cwd=deploydir)
+    if upload:
+        key = env['UPLOAD_KEY']
+        cmd([env['PACKMAN_SCRIPT'], '--config=%s' % config_file, 'register',
+             '--package', package_name, '--version', package_version,
+             '--architecture', package_arch, '--key', key])
+    else:
+        log.info('config file is %r', config_file)
+        cmd([env['PACKMAN_SCRIPT'], '--config=%s' % config_file, 'create',
+             '--path', deploydir, '--package', package_name,
+             '--version', package_version, '--architecture', package_arch],
+            cwd=deploydir)
+
+
+def create_package(package, deploydir, env):
+    pup_package(package, deploydir, env, upload=False)
+
+
+def upload_package(package, deploydir, env):
+    pup_package(package, deploydir, env, upload=True)
 
 
 def split_paths(path):
@@ -197,73 +210,47 @@ def makedirs_and_chown(path, env):
                          int(env['UNPRIVILEGED_GID']))
 
 
+def get_volumes(env):
+    # Create needed directories to start with.
+    makedirs_and_chown(env['CHROOT_BASE'], env)
+    makedirs_and_chown(env['DOWNLOAD_TEMP'], env)
+    makedirs_and_chown(env['DEPLOY_BASE'], env)
+
+    def envify(s, env):
+        return s % env
+
+    # Pass volume parameters.
+    return [
+        '-v', envify('%(CROSS_BASE)s:/cross:ro', env),
+        '-v', envify('%(PEDIGREE_BASE)s:/pedigree_src:ro', env),
+        '-v', envify('%(APPS_BASE)s:/pedigree_apps:ro', env),
+        '-v', envify('%(DOWNLOAD_TEMP)s:/download', env),
+        '-v', envify('%(CHROOT_BASE)s/patches:/patches', env),
+        '-v', envify('%(PACKMAN_REPO)s:/package_repo', env),
+    ]
+
+
 def create_chroot(env):
     """Create chroot if it doesn't exist yet and clean it out ready to build.
 
     Args:
         env: environment to use and modify to use the chroot.
     """
-    elevated = os.getuid() == 0
 
-    # Create chroot directory if it doesn't yet exist.
-    chroot_base = env['CHROOT_BASE']
-    makedirs_and_chown(chroot_base, env)
+    # Make sure we have enough support directories in place.
+    makedirs_and_chown(os.path.join(env['CHROOT_BASE'], 'patches'), env)
 
-    # Create downloads directory so it can be mounted in the chroot.
-    makedirs_and_chown(env['DOWNLOAD_TEMP'], env)
+    # Build Docker image for this system.
+    log.info('base is %s', env['APPS_BASE'])
+    subprocess.check_call(['/usr/bin/env', 'docker', 'build', '-t',
+                           'pedigree-apps:buildroot', '-f',
+                           os.path.join(env['APPS_BASE'], 'docker',
+                                        'Dockerfile'), '.'],
+                          cwd=env['APPS_BASE'])
 
-    # Host filesystem layout.
-    bind_mounts = {
-        'bin': '/bin',
-        'sbin': '/sbin',
-        'usr': '/usr',
-        'lib': '/lib',
-        'var': '/var',
-        'proc': '/proc',
-        'dev': '/dev',
-        'etc': '/etc',
-        'lib64': '/lib64',
-        'sys': '/sys',
-        'opt': '/opt',
-        'cross': env['CROSS_BASE'],
-        'pedigree_src': env['PEDIGREE_BASE'],
-        'ccache': (True, env['CCACHE_TARGET_DIR']),
-        'download': (True, env['DOWNLOAD_TEMP']),
-    }
-    pedigree_structure = ['applications', 'libraries', 'include', 'support',
-                          'system', 'config', 'doc']
-    support_structure = ['tmp', 'run', 'patches', 'root', '__deploy']
 
-    extra_unprivileged_paths = ['ccache', 'download']
-
-    # Start by clearing out the chroot tree of anything not in our mounts.
-    for entry in os.listdir(chroot_base):
-        if entry in bind_mounts:
-            continue
-
-        entry_path = os.path.join(chroot_base, entry)
-        if os.path.isdir(entry_path):
-            shutil.rmtree(entry_path)
-        else:
-            os.unlink(entry_path)
-
-    # Create necessary Pedigree structure.
-    created_dirs = pedigree_structure + support_structure
-    if elevated:
-        created_dirs.extend(bind_mounts.keys())
-
-    for entry in created_dirs:
-        entry_target = os.path.join(chroot_base, entry)
-        if not os.path.isdir(entry_target):
-            os.makedirs(entry_target)
-
-        if elevated:
-            if ((entry in extra_unprivileged_paths) or
-                    (entry not in bind_mounts.keys())):
-                os.chown(entry_target, int(env['UNPRIVILEGED_UID']),
-                         int(env['UNPRIVILEGED_GID']))
-
-    # Update the environment.
+def chroot_environment_update(env):
+    """Update the given environment's $PATH as needed for the chroot."""
     for k, v in env.items():
         if v.startswith(env['CROSS_BASE']):
             v = v.replace(env['CROSS_BASE'], '/cross')
@@ -272,28 +259,3 @@ def create_chroot(env):
         env['PATH'] = util.expand(env, '/cross/bin:$PATH')
     if not util.path_in_colon_list('/cross/bin2', env['PATH']):
         env['PATH'] = util.expand(env, '/cross/bin2:$PATH')
-
-    # Done, unless we need to verify mounts.
-    if not elevated:
-        return
-
-    # Mount.
-    for path, target in bind_mounts.items():
-        rw = False
-        if isinstance(target, tuple):
-            rw, target = target
-
-        path = os.path.join(chroot_base, path)
-        if not os.path.exists(target):
-            # eg, no /lib64 present. This is OK.
-            log.error('chroot target %r does not exist', target)
-            continue
-
-        if not os.listdir(path):
-            # Nothing here, we need to create the mount.
-            # We remount read-only so that the host filesystem cannot be easily
-            # wiped out by accident.
-            cmd([env['MOUNT'], '--bind', target, path], env=env)
-            if not rw:
-                cmd([env['MOUNT'], '--bind', '-o', 'remount,ro', target, path],
-                    env=env)

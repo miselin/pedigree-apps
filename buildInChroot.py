@@ -14,10 +14,7 @@ from support import deps
 from support import steps
 from support import toolchain
 
-
-VALID_ARCH_TARGETS = ('amd64', 'arm')
-LOGGING_FORMAT = ('%(asctime)s %(module)-15s %(funcName)-20s %(levelname)-10s '
-                  '%(message)s')
+from buildPackages import VALID_ARCH_TARGETS, LOGGING_FORMAT
 
 
 log = logging.getLogger()
@@ -54,6 +51,12 @@ def build_all(args, packages, env):
             # Prepare chroot for building this package.
             steps.create_chroot(env)
 
+            # Drop in support files from Pedigree build.
+            toolchain.pedigree_into_chroot(env, env['CHROOT_BASE'])
+
+            # Install our build_requires packages to the chroot path.
+            deps.install_dependent_packages(dict(packages), package, env)
+
             # Build!
             build.build_package(package, env)
         except SystemExit:
@@ -85,21 +88,14 @@ def build_all(args, packages, env):
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(description='Build ports for Pedigree.')
+    parser = argparse.ArgumentParser(description='Build a specific port while '
+                                                 'in the build chroot.')
     parser.add_argument('--target', type=str, choices=VALID_ARCH_TARGETS,
                         required=True, help='Architecture target for builds')
-    parser.add_argument('--dryrun', action='store_true',
-                        help='Do a dry run: only print the packages that '
-                        'would be built')
-    parser.add_argument('--only', type=str, nargs='+', required=False,
-                        help='Only build the given packages. Build-depends '
-                        'will not be built so if this may not create stable '
-                        'or successful builds.')
-    parser.add_argument('--only-depends', type=str, nargs='+', required=False,
-                        help='Only build the given packages and their '
-                        'dependencies.')
-    parser.add_argument('--nodeps', action='store_true',
-                        help='Ignore missing build dependencies.')
+    parser.add_argument('--package', type=str, required=True,
+                        help='Package to build.')
+    parser.add_argument('--filename', type=str, required=True,
+                        help='Downloaded filename to extract.')
     parser.add_argument('--logfile', type=str, required=False,
                         help='File to write logs to. stdout will be used if '
                         'this is not provided.')
@@ -130,51 +126,39 @@ def main(argv):
     kwargs['format'] = args.logformat
     logging.basicConfig(**kwargs)
 
+    # Verify we're actually in the chroot.
+    if not os.path.exists('/pedigree_apps'):
+        # Not in chroot.
+        log.fatal('buildInChroot.py must be run in the build chroot')
+        return 1
+
     # Load up an environment ready for building.
     env = environment.generate_environment(args.target)
-    # Drop privileges ASAP if we got run as root.
-    if not os.getuid():
-        # Release privileges.
-        os.setgroups([])
-        os.setgid(int(env['UNPRIVILEGED_GID']))
-        os.setuid(int(env['UNPRIVILEGED_UID']))
+    env.track()
+    env['CHROOT_BASE'] = '/'
+    env['APPS_BASE'] = '/pedigree_apps'
+    env['PEDIGREE_BASE'] = '/pedigree_src'
+    env['PACKMAN_SCRIPT'] = 'pup'  # Installed via pip.
+    env['PACKMAN_REPO'] = '/package_repo'
+    env.track(tracking=False)
+    env = environment.generate_environment(args.target, env=env, recurse=False)
 
-    if not args.dryrun:
-        # Make sure we have a sane toolchain with a useful chroot spec file.
-        toolchain.chroot_spec(env)
-
-        # Set up our local pup config.
-        toolchain.prepare_package_manager(env)
-
-        # Prepare our chroot in which building will happen.
-        # Don't let this modify our environment just yet.
-        steps.create_chroot(env.copy())
-
-        # Prepare the cross-toolchain for building. This includes preparing the
-        # correct location for libc/libm, libpedigree, etc
-        toolchain.prepare_compiler(env)
-    else:
-        log.info('not touching filesystem, dry run')
-
-    # Get packages to build.
+    # Collect the package to run.
     packages = buildsystem.load_packages(env)
+    package_id = args.package
+    package = packages[args.package]
 
-    # Sort dependencies so the build is performed correctly.
-    packages = deps.sort_dependencies(packages)
+    # Update for the chroot we're presented with (in particular, $PATH).
+    steps.chroot_environment_update(env)
 
-    # Filter based on only/only-depends.
-    if args.only_depends:
-        actual_packages = []
-        wanted_depends = set()
-        for name, package in reversed(packages):
-            if name in args.only_depends or name in wanted_depends:
-                actual_packages.append((name, package))
-                wanted_depends.update(package.build_requires())
-
-        packages = tuple(reversed(actual_packages))
-
-    # Build packages.
-    result = build_all(args, packages, env)
+    # Build!
+    try:
+        os.chdir('/')
+        result = build.in_chroot(env, packages, package, package_id,
+                                 args.filename)
+    except:
+        log.exception('failed to build package "%s"', package_id)
+        result = 1
 
     # All done with logging.
     logging.shutdown()

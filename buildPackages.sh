@@ -11,9 +11,6 @@ if [ "x$VIRTUAL_ENV" = "x" ]; then
     fi
 fi
 
-# Path to prepareChroot.py
-if [ "x$PATH_TO_CHROOT_SCRIPT" = "x" ]; then PATH_TO_CHROOT_SCRIPT=.; fi
-
 set -e
 
 # Install needed packages.
@@ -30,6 +27,4 @@ pup -h >/dev/null
 target_arch="$1"
 shift
 
-sudo PYTHONPATH="$PWD:$PYTHONPATH" "$PATH_TO_CHROOT_SCRIPT/prepareChroot.py" "$target_arch"
-
-LD_PRELOAD=libfakechroot.so python ./buildPackages.py --target=$target_arch $*
+python ./buildPackages.py --target=$target_arch $*
