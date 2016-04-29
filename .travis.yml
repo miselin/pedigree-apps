@@ -5,6 +5,9 @@ addons:
 after_script:
 - for f in packages/builds/logs/*.log; do echo "Logfile $f:"; cat $f; done
 cache:
+  apt: true
+  pip: true
+  ccache: true
   directories:
   - standalone
 install: pip install -r requirements.txt
