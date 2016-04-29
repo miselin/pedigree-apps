@@ -52,12 +52,14 @@ def main():
     }
 
     if 'matrix' not in data:
-        data['matrix'] = {'include': []}
+        data['matrix'] = {}
 
     # Wipe out existing data so we can correctly fill our packages.
     data['matrix']['include'] = []
+    data['matrix']['allow_failures'] = []
 
     matrix_include = data['matrix']['include']
+    matrix_allow_failures = data['matrix']['allow_failures']
 
     for package in deps.get_final_packages(packages):
         copy = base_include.copy()
@@ -71,6 +73,7 @@ def main():
         copy['env'] = [fix(x) for x in copy['env']]
 
         matrix_include.append(copy)
+        matrix_allow_failures.append(copy)
 
     with open('.travis.yml', 'w') as f:
         yaml.safe_dump(data, f, default_flow_style=False)

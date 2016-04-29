@@ -10,10 +10,11 @@ cache:
 install: pip install -r requirements.txt
 language: python
 matrix:
-  include:
-  - env:
+  allow_failures:
+  - &id002
+    env:
     - TARGET=amd64
-    - PACKAGE=libtool
+    - PACKAGE=inetutils
     - CC=clang
     - CXX=clang++
     - &id001
@@ -21,6 +22,437 @@ matrix:
     os: linux
     python: '2.7'
     sudo: true
+  - &id003
+    env:
+    - TARGET=amd64
+    - PACKAGE=sqlite
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id004
+    env:
+    - TARGET=amd64
+    - PACKAGE=bind
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id005
+    env:
+    - TARGET=amd64
+    - PACKAGE=pth
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id006
+    env:
+    - TARGET=amd64
+    - PACKAGE=pedigree-base
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id007
+    env:
+    - TARGET=amd64
+    - PACKAGE=vim
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id008
+    env:
+    - TARGET=amd64
+    - PACKAGE=sed
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id009
+    env:
+    - TARGET=amd64
+    - PACKAGE=mtools
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id010
+    env:
+    - TARGET=amd64
+    - PACKAGE=netsurf
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id011
+    env:
+    - TARGET=amd64
+    - PACKAGE=perl
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id012
+    env:
+    - TARGET=amd64
+    - PACKAGE=mesa
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id013
+    env:
+    - TARGET=amd64
+    - PACKAGE=bsdtar
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id014
+    env:
+    - TARGET=amd64
+    - PACKAGE=gnumake
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id015
+    env:
+    - TARGET=amd64
+    - PACKAGE=pedigree-devel
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id016
+    env:
+    - TARGET=amd64
+    - PACKAGE=git
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id017
+    env:
+    - TARGET=amd64
+    - PACKAGE=nano
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id018
+    env:
+    - TARGET=amd64
+    - PACKAGE=grub2
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id019
+    env:
+    - TARGET=amd64
+    - PACKAGE=less
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id020
+    env:
+    - TARGET=amd64
+    - PACKAGE=lua
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id021
+    env:
+    - TARGET=amd64
+    - PACKAGE=python26
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id022
+    env:
+    - TARGET=amd64
+    - PACKAGE=vttest
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id023
+    env:
+    - TARGET=amd64
+    - PACKAGE=dropbear
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id024
+    env:
+    - TARGET=amd64
+    - PACKAGE=grep
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id025
+    env:
+    - TARGET=amd64
+    - PACKAGE=python27
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id026
+    env:
+    - TARGET=amd64
+    - PACKAGE=m4
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id027
+    env:
+    - TARGET=amd64
+    - PACKAGE=gawk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id028
+    env:
+    - TARGET=amd64
+    - PACKAGE=gcc
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id029
+    env:
+    - TARGET=amd64
+    - PACKAGE=prboom
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id030
+    env:
+    - TARGET=amd64
+    - PACKAGE=wget
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id031
+    env:
+    - TARGET=amd64
+    - PACKAGE=bash
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id032
+    env:
+    - TARGET=amd64
+    - PACKAGE=dosbox
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id033
+    env:
+    - TARGET=amd64
+    - PACKAGE=atk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id034
+    env:
+    - TARGET=amd64
+    - PACKAGE=pango
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id035
+    env:
+    - TARGET=amd64
+    - PACKAGE=diffutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id036
+    env:
+    - TARGET=amd64
+    - PACKAGE=e2fsprogs
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id037
+    env:
+    - TARGET=amd64
+    - PACKAGE=coreutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id038
+    env:
+    - TARGET=amd64
+    - PACKAGE=lynx
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id039
+    env:
+    - TARGET=amd64
+    - PACKAGE=apache2
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id040
+    env:
+    - TARGET=amd64
+    - PACKAGE=binutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  - &id041
+    env:
+    - TARGET=amd64
+    - PACKAGE=nasm
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    sudo: true
+  include:
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  - *id040
+  - *id041
 notifications:
   email: false
   irc:
