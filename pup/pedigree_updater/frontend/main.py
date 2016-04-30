@@ -56,6 +56,8 @@ def main():
         exit(1)
 
     config = util.load_config(args)
+    if not config:
+        exit(1)
 
     cmd = cmds[args.which]
     if cmd.run(args, config):

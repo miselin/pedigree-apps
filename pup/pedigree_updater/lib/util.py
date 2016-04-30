@@ -65,6 +65,11 @@ def load_config(args):
     if pup_config is None:
         pup_config = '/support/pup/pup.conf'
 
+    # Does it exist?
+    if not os.path.exists(pup_config):
+        log.fatal('Config file "%s" does not exist.', pup_config)
+        return None
+
     # Slurp the config file.
     parser = SafeConfigParser()
     parser.read(pup_config)
