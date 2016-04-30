@@ -162,7 +162,11 @@ def pup_package(package, deploydir, env, upload=False):
 
     # TODO(miselin): add dependency information.
     if upload:
-        key = env['UPLOAD_KEY']
+        try:
+            key = env['UPLOAD_KEY']
+        except KeyError:
+            log.info('no upload key is present, skipping upload')
+            return
         cmd([env['PACKMAN_SCRIPT'], '--config=%s' % config_file, 'register',
              '--package', package_name, '--version', package_version,
              '--architecture', package_arch, '--key', key])
@@ -241,7 +245,6 @@ def create_chroot(env):
     makedirs_and_chown(os.path.join(env['CHROOT_BASE'], 'patches'), env)
 
     # Build Docker image for this system.
-    log.info('base is %s', env['APPS_BASE'])
     subprocess.check_call(['/usr/bin/env', 'docker', 'build', '-t',
                            'pedigree-apps:buildroot', '-f',
                            os.path.join(env['APPS_BASE'], 'docker',
