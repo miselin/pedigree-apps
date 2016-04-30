@@ -219,6 +219,7 @@ def get_volumes(env):
     makedirs_and_chown(env['CHROOT_BASE'], env)
     makedirs_and_chown(env['DOWNLOAD_TEMP'], env)
     makedirs_and_chown(env['DEPLOY_BASE'], env)
+    makedirs_and_chown(env['PACKMAN_REPO'], env)
 
     def envify(s, env):
         return s % env
