@@ -49,9 +49,9 @@
        psos*)
  	;;
 +      pedigree*)
-+	_LT_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
-+	_LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
-+	_LT_TAGVAR(lt_prog_compiler_static, $1)='-static'
++        _LT_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
++        _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
++        _LT_TAGVAR(lt_prog_compiler_static, $1)='-static'
 +        ;;
        solaris*)
  	case $cc_basename in
@@ -94,9 +94,9 @@
          ;;
  
 +      pedigree*)
-+	_LT_TAGVAR(hardcode_direct, $1)=no
-+	_LT_TAGVAR(hardcode_shlibpath_var, $1)=no
-+	_LT_TAGVAR(hardcode_direct_absolute, $1)=no
++        _LT_TAGVAR(hardcode_direct, $1)=no
++        _LT_TAGVAR(hardcode_shlibpath_var, $1)=no
++        _LT_TAGVAR(hardcode_direct_absolute, $1)=no
 +        ;;
 +
        psos*)
