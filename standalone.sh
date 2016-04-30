@@ -44,13 +44,26 @@ if [ "x$VIRTUAL_ENV" = "x" ]; then
 fi
 
 # Grab Pedigree first.
+FORCE_BUILD=
 if [ ! -e "pedigree" ]; then
     git clone --depth 1 https://github.com/miselin/pedigree.git
+    FORCE_BUILD="y"
 fi
 
 # Go ahead and build it.
 cd pedigree
-git pull
+git fetch
+if [ $(git rev-parse HEAD) == $(git rev-parse @{u}) ]; then
+    # If we aren't meant to force build (due to this being the first checkout),
+    # and pulling from the upstream won't cause any changes, we can ensure
+    # travis doesn't update the cache with our mostly-unchanged files.
+    if [ "x$FORCE_BUILD" == "x" ]; then
+        rm -f $CASHER_DIR/mtime.yml
+    fi
+else
+    git pull
+fi
+
 rm -f .easy_os  # Make sure we retry downloading packages.
 
 # Don't do custom behaviour on travis for the standalone build.
