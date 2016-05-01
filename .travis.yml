@@ -3,7 +3,7 @@ addons:
     packages:
     - graphviz
 after_script:
-- for f in packages/builds/logs/*.log; do echo "Logfile $f:"; cat $f; done; fi
+- for f in packages/builds/logs/*.log; do echo "Logfile $f:"; cat $f; done
 before_cache:
 - rm -f standalone/pedigree-x64/build/hdd.img
 - rm -f standalone/pedigree-x64/build/pedigree.iso
