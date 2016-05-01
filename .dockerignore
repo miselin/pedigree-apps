@@ -7,6 +7,7 @@ venv
 newpacks
 .git
 standalone
+standalone-*
 pup/build
 pup/dist
 pup/pup.egg-info
