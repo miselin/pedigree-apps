@@ -35,10 +35,10 @@ def main():
         data = yaml.safe_load(f)
 
     secure = {
-        'secure': 'W9NNuKNiJf+vx1QR3K4Cyt3yBgRKRO2Raqt8szG5uryyRX777uqD7+'
-                  'mxekWJEsTdR7gQHStKXEZwA9tNnCQusN09gd8VG7j1RxxlyrjM3HNt'
-                  '0qwyFbZNrbIMKxBV2K2Y6lSljLm3DQd7yO9799rnlo9q6jygg/zhyM'
-                  'bfLlIshgA=',
+        'secure': 'ZiZk/cKj4PXaxpOt0AxJ2raY5tB43NBDGPO92pTsXO01rJvn/'
+                  '1T7sUkrT3DUWjsCH7itfqdGJCau5IGZdD8Vdsji0PcH4va1koaYW/'
+                  '4lLBT5cq2GxaQdkminSP2aEXBSrLV9/PdsP7wdcgL7PqW0/'
+                  'OeDaM0tF+gxOcWNmBz3dKg=',
     }
 
     # Update the includes section.
@@ -87,6 +87,8 @@ def main():
     # Add the dependency upload builds.
     for target in ('amd64', 'arm'):
         build = {
+            'os': 'linux',
+            'python': '2.7',
             'env': [
                 'DEPS_ONLY=y',
                 'TARGET=' + target,

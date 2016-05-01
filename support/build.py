@@ -112,7 +112,7 @@ def build_package(package, env):
     ]
     args += steps.get_volumes(env)
     args += [
-        'pedigree-apps:buildroot',
+        'miselin/pedigree:latest',
         '/usr/bin/env', 'python', '/pedigree_apps/buildInChroot.py',
         '--package=' + package.name(), '--filename=' + download_filename,
         '--target=' + env['PACKMAN_TARGET_ARCH'],

@@ -26,6 +26,11 @@ else
 
     OPTS="--only-depends $PACKAGE"
     if [ "x$DEPS_ONLY" != "x" ]; then
+        # Make sure the build system can find the packages directory.
+        cat >local_environment.py <<EOF
+def modify_environment(env):
+    env['APPS_BASE'] = '$PWD'
+EOF
         OPTS="--dryrun"
     fi
 
@@ -34,6 +39,8 @@ else
 
     if [ "x$DEPS_ONLY" != "x" ]; then
         dot -Tsvg dependencies.dot -o ./deps.svg
+        set +x
         python scripts/upload_deps.py $UPLOAD_KEY ./deps.svg $TARGET
+        set -x
     fi
 fi

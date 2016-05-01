@@ -235,7 +235,7 @@ def get_volumes(env):
     ]
 
 
-def create_chroot(env):
+def create_chroot(env, build=False):
     """Create chroot if it doesn't exist yet and clean it out ready to build.
 
     Args:
@@ -245,9 +245,15 @@ def create_chroot(env):
     # Make sure we have enough support directories in place.
     makedirs_and_chown(os.path.join(env['CHROOT_BASE'], 'patches'), env)
 
+    if not build:
+        subprocess.check_call(['/usr/bin/env', 'docker', 'run', '-t',
+                               'miselin/pedigree:latest'],
+                              cwd=env['APPS_BASE'])
+        return
+
     # Build Docker image for this system.
     subprocess.check_call(['/usr/bin/env', 'docker', 'build', '-t',
-                           'pedigree-apps:buildroot', '-f',
+                           'miselin/pedigree:latest', '-f',
                            os.path.join(env['APPS_BASE'], 'docker',
                                         'Dockerfile'), '.'],
                           cwd=env['APPS_BASE'])

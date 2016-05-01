@@ -52,7 +52,8 @@ def build_all(args, packages, env):
             env = env.copy()
 
             # Prepare chroot for building this package.
-            steps.create_chroot(env)
+            # Don't re-build the image.
+            steps.create_chroot(env, False)
 
             # Build!
             build.build_package(package, env)
@@ -107,6 +108,9 @@ def main(argv):
                         help='Log entry format.')
     parser.add_argument('--debug', action='store_true', default=False,
                         help='Whether to enable debug logging.')
+    parser.add_argument('--buildimages', action='store_true', default=False,
+                        help='Whether to build Docker images, or just run '
+                             'them.')
     args = parser.parse_args()
 
     # Set up the root logger.
@@ -148,7 +152,7 @@ def main(argv):
 
         # Prepare our chroot in which building will happen.
         # Don't let this modify our environment just yet.
-        steps.create_chroot(env.copy())
+        steps.create_chroot(env.copy(), args.buildimages)
 
         # Prepare the cross-toolchain for building. This includes preparing the
         # correct location for libc/libm, libpedigree, etc

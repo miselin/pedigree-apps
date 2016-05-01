@@ -64,7 +64,9 @@ else
     git pull
 fi
 
-rm -f .easy_os  # Make sure we retry downloading packages.
+# Install any needed dependencies; if .easy_os is present in the build cache
+# this just makes sure the compilers still work.
+$LOCALDIR/scripts/install_deps.sh
 
 # Don't do custom behaviour on travis for the standalone build.
 if [ "x$TRAVIS" != "x" ]; then
