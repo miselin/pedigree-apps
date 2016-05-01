@@ -136,6 +136,9 @@ def in_chroot(env, packages, package, package_id, download_filename):
     deploydir = '/__deploy'
     srcdir = '/src'
 
+    if not os.path.isdir(srcdir):
+        os.makedirs(srcdir)
+
     # Extract the given tarball.
     if os.path.exists(download_target):
         # tar --strip=1
