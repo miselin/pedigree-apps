@@ -14,7 +14,6 @@ before_cache:
 - rm -f standalone/pedigree-arm/build/pedigree.iso
 cache:
   apt: true
-  pip: true
   ccache: true
   directories:
   - standalone-x64
@@ -987,6 +986,14 @@ matrix:
   - *id080
   - *id081
   - *id082
+  - env:
+    - DEPS_ONLY=y
+    - TARGET=amd64
+    - *id001
+  - env:
+    - DEPS_ONLY=y
+    - TARGET=arm
+    - *id001
 notifications:
   email: false
   irc:

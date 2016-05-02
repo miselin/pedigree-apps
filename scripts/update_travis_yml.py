@@ -34,6 +34,13 @@ def main():
     with open('.travis.yml') as f:
         data = yaml.safe_load(f)
 
+    secure = {
+        'secure': 'W9NNuKNiJf+vx1QR3K4Cyt3yBgRKRO2Raqt8szG5uryyRX777uqD7+'
+                  'mxekWJEsTdR7gQHStKXEZwA9tNnCQusN09gd8VG7j1RxxlyrjM3HNt'
+                  '0qwyFbZNrbIMKxBV2K2Y6lSljLm3DQd7yO9799rnlo9q6jygg/zhyM'
+                  'bfLlIshgA=',
+    }
+
     # Update the includes section.
     base_include = {
         'os': 'linux',
@@ -45,10 +52,7 @@ def main():
             'PACKAGE=%(package)s',
             'CC=clang',
             'CXX=clang++',
-            {'secure': 'W9NNuKNiJf+vx1QR3K4Cyt3yBgRKRO2Raqt8szG5uryyRX777uqD7+'
-                       'mxekWJEsTdR7gQHStKXEZwA9tNnCQusN09gd8VG7j1RxxlyrjM3HNt'
-                       '0qwyFbZNrbIMKxBV2K2Y6lSljLm3DQd7yO9799rnlo9q6jygg/zhyM'
-                       'bfLlIshgA='},
+            secure,
         ],
     }
 
@@ -79,6 +83,17 @@ def main():
 
             matrix_include.append(copy)
             matrix_allow_failures.append(copy)
+
+    # Add the dependency upload builds.
+    for target in ('amd64', 'arm'):
+        build = {
+            'env': [
+                'DEPS_ONLY=y',
+                'TARGET=' + target,
+                secure,
+            ]
+        }
+        matrix_include.append(build)
 
     with open('.travis.yml', 'w') as f:
         yaml.safe_dump(data, f, default_flow_style=False)

@@ -3,7 +3,7 @@
 set -x
 set -e
 
-if [ "x$PACKAGE" = "x" ]; then
+if [ "x$DEPS_ONLY$PACKAGE" = "x" ]; then
     ./runtests.sh
 else
     if [ "x$TARGET" = "x" ]; then
@@ -20,8 +20,20 @@ else
 
     # Build the standalone Pedigree needed for package building.
     # NOTE: this also creates a virtualenv if we aren't already in one.
-    ./standalone.sh $EASY_BUILD_TARGET
+    if [ "x$DEPS_ONLY" = "x" ]; then
+        ./standalone.sh $EASY_BUILD_TARGET
+    fi
+
+    OPTS="--only-depends $PACKAGE"
+    if [ "x$DEPS_ONLY" != "x" ]; then
+        OPTS="--dryrun"
+    fi
 
     # Build the specified package.
-    ./buildPackages.sh "$TARGET" --only-depends "$PACKAGE"
+    ./buildPackages.sh "$TARGET" $OPTS
+
+    if [ "x$DEPS_ONLY" != "x" ]; then
+        dot -Tsvg dependencies.dot -o ./deps.svg
+        python scripts/upload_deps.py $UPLOAD_KEY ./deps.svg $TARGET
+    fi
 fi
