@@ -1,9 +1,27 @@
 application: the-pedigree-project
-version: r001
+version: r002
 runtime: python27
 api_version: 1
 threadsafe: true
 
 handlers:
+- url: /css
+  static_dir: pup_http/resources/css
+  mime_type: text/css
+- url: /js
+  static_dir: pup_http/resources/js
+  mime_type: application/javascript
+- url: /fonts
+  static_dir: pup_http/resources/fonts
+  mime_type: application/x-font-opentype
+- url: /static
+  static_dir: pup_http/resources/static
+  mime_type: text/plain
 - url: /.*
   script: pup_http.wsgi.app
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest

@@ -10,6 +10,7 @@ class Package(ndb.Model):
     version = ndb.StringProperty(indexed=False)
     sha1 = ndb.StringProperty(indexed=False)
     blob = ndb.BlobKeyProperty()
+    uploaded_at = ndb.DateTimeProperty(auto_now=True, auto_now_add=True)
 
 
 class Authorisation(ndb.Model):

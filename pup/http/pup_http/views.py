@@ -1,5 +1,7 @@
 
 import base64
+import jinja2
+import os
 import webapp2
 
 try:
@@ -11,6 +13,12 @@ from models import Package, Authorisation, PupModel
 
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
+
+
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=True)
 
 
 class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
@@ -48,6 +56,20 @@ class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
 
     def doIndex(self):
         self.response.headers['Content-Type'] = 'text/html'
+
+        template_data = {
+            # TODO(miselin): this should be figured out from datastore.
+            'archs': ('amd64', 'arm'),
+            'packages': Package.query().fetch(None),
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('templates/index.html')
+        self.response.write(template.render(template_data))
+
+        return
+
+
+
         self.response.write('''<!DOCTYPE html>
 <html>
 <head>

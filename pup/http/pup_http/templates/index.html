@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Pedigree UPdater</title>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>The Pedigree UPdater</h1>
+        <p class="lead">The package manager for the <a href="https://www.pedigree-project.org">Pedigree Operating System</a>.</p>
+      </div>
+
+      <div class="row">
+        <h3>Support Files</h3>
+        <p>
+          <ul>
+            <li><a href="/packages.pupdb">packages.pupdb</a></li>
+            <li><a href="/pup.whl">pup.whl</a>, the Pedigree UPdater binary itself.</li>
+            <li><a href="/pup-version">pup-version</a>, indicating the latest version of the Pedigree UPdater.</li>
+          </ul>
+        </p>
+        <p>
+          To add new packages to the repository, please raise a Github pull request at <a href="https://github.com/miselin/pedigree-apps">https://github.com/miselin/pedigree-apps</a>.
+        </p>
+      </div>
+
+      {% for arch in archs %}
+      <div class="row">
+        <h3>Packages for the {{ arch }} Architecture</h3>
+        {% for package in packages %}
+          {% if package.architecture == arch %}
+          <div class="col-xs-4">
+            <h4>
+              <a href="/{{ package.fullname }}">{{ package.package_name }}</a>
+            </h4>
+            <p>
+              Version {{ package.version }}.
+              <a href="https://github.com/miselin/pedigree-apps/tree/master/packages/{{ package.package_name }}/package.py">Definition</a>.
+            </p>
+            {% if package.uploaded_at %}
+              <p>Uploaded at {{ package.uploaded_at.strftime('%Y-%m-%d %T') }} UTC.</p>
+            {% endif %}
+            <p>
+            </p>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div class="row">
+        <h3>Example Configuration</h3>
+        <p>
+          <pre>[paths]
+installroot=/
+localdb=/support/pup/db
+
+[settings]
+arch=amd64
+
+[remotes]
+server=http://the-pedigree-project.appspot.com
+upload=http://the-pedigree-project.appspot.com</pre>
+        </p>
+        <p>
+          This example <a href="/static/pup.conf">pup.conf</a> can also be downloaded.
+        </p>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
+</html>
