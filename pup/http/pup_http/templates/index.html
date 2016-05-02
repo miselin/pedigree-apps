@@ -52,6 +52,17 @@
           {% endif %}
         {% endfor %}
       </div>
+
+      {% if graphs.get(arch) %}
+      <div class="row">
+        <h4>Build Dependency Graph</h4>
+        <img src="/deps-{{ arch }}.svg" class="img-responsive" alt="Dependency graph for architecture {{ arch }}." />
+        <br />
+        <p class="text-center">
+          <a href="/deps-{{ arch }}.svg">View Full-size Graph (SVG)</a>.
+        </p>
+      </div>
+      {% endif %}
       {% endfor %}
 
       <div class="row">

@@ -6,7 +6,7 @@ class Package(ndb.Model):
     """Model representing a package in the system."""
     fullname = ndb.StringProperty(indexed=True)
     package_name = ndb.StringProperty(indexed=False)
-    architecture = ndb.StringProperty(indexed=False)
+    architecture = ndb.StringProperty(indexed=True)
     version = ndb.StringProperty(indexed=False)
     sha1 = ndb.StringProperty(indexed=False)
     blob = ndb.BlobKeyProperty()
@@ -24,3 +24,10 @@ class PupModel(ndb.Model):
     """This is entirely the wrong way to do this."""
     pup_version = ndb.IntegerProperty(indexed=True)
     pup_contents = ndb.BlobProperty(indexed=False, compressed=True)
+
+
+class DepsModel(ndb.Model):
+    """This is ALSO entirely the wrong way to do this."""
+    deps_arch = ndb.StringProperty(indexed=True)
+    # SVG.
+    deps_contents = ndb.BlobProperty(indexed=False, compressed=True)

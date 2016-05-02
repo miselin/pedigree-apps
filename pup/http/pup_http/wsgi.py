@@ -1,7 +1,7 @@
 
 import webapp2
 
-from views import PackageIndex, PackageUpload, Pup, PackageUploadBlobstore
+from views import PackageIndex, PackageUpload, Pup, PackageUploadBlobstore, Svg
 
 
 app = webapp2.WSGIApplication([
@@ -13,4 +13,5 @@ app = webapp2.WSGIApplication([
     ('/.*\.pup', PackageIndex),
     ('/.*\.pupdb', PackageIndex),
     ('/.*\.whl', PackageIndex),
+    ('/.*\.svg', Svg),
 ])

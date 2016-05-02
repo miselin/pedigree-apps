@@ -9,7 +9,7 @@ try:
 except ImportError:
     import json
 
-from models import Package, Authorisation, PupModel
+from models import Package, Authorisation, PupModel, DepsModel
 
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
@@ -57,39 +57,23 @@ class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
     def doIndex(self):
         self.response.headers['Content-Type'] = 'text/html'
 
+        query = Package.query(projection=['architecture'], distinct=True)
+        archs = [x.architecture for x in query]
+
+        # Load graphs.
+        graphs = {}
+        for dep in DepsModel.query().iter():
+            graphs[dep.deps_arch] = True
+
         template_data = {
             # TODO(miselin): this should be figured out from datastore.
-            'archs': ('amd64', 'arm'),
+            'archs': archs,
             'packages': Package.query().fetch(None),
+            'graphs': graphs,
         }
 
         template = JINJA_ENVIRONMENT.get_template('templates/index.html')
         self.response.write(template.render(template_data))
-
-        return
-
-
-
-        self.response.write('''<!DOCTYPE html>
-<html>
-<head>
-    <title>pup</title>
-</head>
-<body>
-<h1>The Pedigree UPdater Master Repository</h1>
-<ul>
-<li>
-    <a href="/packages.pupdb">packages.pupdb</a>
-</li>
-<li>
-    <a href="/pup.whl">pup.whl</a>
-</li>''')
-
-        # TODO(miselin): add information for human readability.
-        for package in Package.query().iter():
-            self.response.write('''<li>
-    <a href="/%s">%s</a>
-</li>''' % (package.fullname, package.fullname))
 
     def get(self):
         path = self.request.path
@@ -245,5 +229,67 @@ class Pup(webapp2.RequestHandler):
             return
 
         PupModel(pup_version=version, pup_contents=blob).put()
+
+        self.response.write('ok')
+
+
+class Svg(webapp2.RequestHandler):
+
+    def noauth(self):
+        self.error(403)
+        self.response.write('Invalid credentials.')
+
+    def badrequest(self):
+        self.error(400)
+        self.response.write('Incorrect parameters.')
+
+    def get(self):
+        path = self.request.path
+        arch = path.replace('.svg', '').split('-', 1)[1]
+
+        deps = DepsModel.query(DepsModel.deps_arch == arch).get()
+        if not deps:
+            self.error(404)
+            self.response.write('invalid path')
+        else:
+            self.response.headers['Content-Type'] = 'image/svg+xml'
+            self.response.write(deps.deps_contents)
+
+    def post(self):
+        # Does the user have the right credential?
+        cred_name = self.request.get('key')
+        cred_value = self.request.get('key_value')
+        if not (cred_name and cred_value):
+            self.noauth()
+            return
+
+        query = Authorisation.query(Authorisation.key_name == cred_name)
+        credential = query.get()
+        if not credential:
+            self.noauth()
+            return
+
+        if credential.key_value != cred_value:
+            self.noauth()
+            return
+
+        if not credential.allowed:
+            self.noauth()
+            return
+
+        arch = self.request.get('arch')
+
+        # Load contents.
+        blob = self.request.get('blob').encode('utf-8')
+        if not (blob and arch):
+            self.badrequest()
+            return
+
+        entry = DepsModel.query(DepsModel.deps_arch == arch).get()
+        if entry:
+            entry.deps_contents = blob
+            entry.put()
+        else:
+            DepsModel(deps_arch=arch, deps_contents=blob).put()
 
         self.response.write('ok')
