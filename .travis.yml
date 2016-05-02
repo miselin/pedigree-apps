@@ -1003,7 +1003,7 @@ notifications:
   email: false
   irc:
     channels:
-    - chat.freenode.net#pedigree
+    - chat.freenode.net#pedigree-commits
     on_failure: always
     on_success: change
     template:
