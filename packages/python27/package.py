@@ -5,6 +5,9 @@ from support import buildsystem
 from support import steps
 
 
+raise Exception('python27 needs to be properly ported into package.py')
+
+
 class Python27Package(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):

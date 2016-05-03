@@ -38,7 +38,8 @@ class BindPackage(buildsystem.Package):
         steps.libtoolize(srcdir, env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env,
+                            extra_config=('--with-randomdev=/dev/urandom',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

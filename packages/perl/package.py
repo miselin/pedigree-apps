@@ -5,6 +5,9 @@ from support import buildsystem
 from support import steps
 
 
+raise Exception('perl needs to be properly ported into package.py')
+
+
 class PerlPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):

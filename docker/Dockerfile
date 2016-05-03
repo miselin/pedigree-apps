@@ -14,7 +14,7 @@ ADD install_deps_debian.sh /tmp/install_deps_debian.sh
 ADD pup /tmp/pup
 
 RUN pip install -r ./requirements.txt
-RUN bash ./install_deps_debian.sh
+RUN DEBIAN_FRONTEND=noninteractive ./install_deps_debian.sh
 
 RUN pip install -q --upgrade /tmp/pup
 
