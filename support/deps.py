@@ -38,7 +38,7 @@ def _pup(env, *args):
     env['PYTHONPATH'] = env['PACKMAN_PATH']
 
     subprocess.check_call([env['PACKMAN_SCRIPT'], '--config=' + config_file] +
-                          args)
+                          list(args))
 
 
 def install_dependent_packages(all_packages, package, env):
