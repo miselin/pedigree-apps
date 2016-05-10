@@ -46,11 +46,11 @@ def install_dependent_packages(all_packages, package, env):
     depends = collect_dependences(all_packages, package)
 
     # Sync pup in case we need to download anything.
-    _pup('sync')
+    _pup(env, 'sync')
 
     # Now, install the dependent packages.
     for package in depends:
-        _pup('install', package.name())
+        _pup(env, 'install', package.name())
 
 
 def build_package_graph(packages):
