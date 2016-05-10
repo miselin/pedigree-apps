@@ -66,7 +66,7 @@ def main():
     matrix_include = data['matrix']['include']
     matrix_allow_failures = data['matrix']['allow_failures']
 
-    for package in deps.get_final_packages(packages):
+    for package, _ in deps.sort_dependencies(packages):
         for target in ('amd64', 'arm'):
             copy = base_include.copy()
 

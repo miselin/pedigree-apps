@@ -27,7 +27,7 @@ matrix:
   - &id003
     env:
     - TARGET=amd64
-    - PACKAGE=inetutils
+    - PACKAGE=libtool
     - CC=clang
     - CXX=clang++
     - &id001
@@ -40,7 +40,7 @@ matrix:
   - &id004
     env:
     - TARGET=arm
-    - PACKAGE=inetutils
+    - PACKAGE=libtool
     - CC=clang
     - CXX=clang++
     - *id001
@@ -51,7 +51,7 @@ matrix:
   - &id005
     env:
     - TARGET=amd64
-    - PACKAGE=sqlite
+    - PACKAGE=libbind
     - CC=clang
     - CXX=clang++
     - *id001
@@ -62,7 +62,7 @@ matrix:
   - &id006
     env:
     - TARGET=arm
-    - PACKAGE=sqlite
+    - PACKAGE=libbind
     - CC=clang
     - CXX=clang++
     - *id001
@@ -73,7 +73,7 @@ matrix:
   - &id007
     env:
     - TARGET=amd64
-    - PACKAGE=pth
+    - PACKAGE=libiconv
     - CC=clang
     - CXX=clang++
     - *id001
@@ -84,7 +84,7 @@ matrix:
   - &id008
     env:
     - TARGET=arm
-    - PACKAGE=pth
+    - PACKAGE=libiconv
     - CC=clang
     - CXX=clang++
     - *id001
@@ -95,7 +95,7 @@ matrix:
   - &id009
     env:
     - TARGET=amd64
-    - PACKAGE=vttest
+    - PACKAGE=gettext
     - CC=clang
     - CXX=clang++
     - *id001
@@ -106,7 +106,7 @@ matrix:
   - &id010
     env:
     - TARGET=arm
-    - PACKAGE=vttest
+    - PACKAGE=gettext
     - CC=clang
     - CXX=clang++
     - *id001
@@ -117,7 +117,7 @@ matrix:
   - &id011
     env:
     - TARGET=amd64
-    - PACKAGE=pedigree-base
+    - PACKAGE=zlib
     - CC=clang
     - CXX=clang++
     - *id001
@@ -128,7 +128,7 @@ matrix:
   - &id012
     env:
     - TARGET=arm
-    - PACKAGE=pedigree-base
+    - PACKAGE=zlib
     - CC=clang
     - CXX=clang++
     - *id001
@@ -139,7 +139,7 @@ matrix:
   - &id013
     env:
     - TARGET=amd64
-    - PACKAGE=vim
+    - PACKAGE=libffi
     - CC=clang
     - CXX=clang++
     - *id001
@@ -150,7 +150,7 @@ matrix:
   - &id014
     env:
     - TARGET=arm
-    - PACKAGE=vim
+    - PACKAGE=libffi
     - CC=clang
     - CXX=clang++
     - *id001
@@ -161,7 +161,7 @@ matrix:
   - &id015
     env:
     - TARGET=amd64
-    - PACKAGE=sed
+    - PACKAGE=glib
     - CC=clang
     - CXX=clang++
     - *id001
@@ -172,7 +172,7 @@ matrix:
   - &id016
     env:
     - TARGET=arm
-    - PACKAGE=sed
+    - PACKAGE=glib
     - CC=clang
     - CXX=clang++
     - *id001
@@ -183,7 +183,7 @@ matrix:
   - &id017
     env:
     - TARGET=amd64
-    - PACKAGE=mtools
+    - PACKAGE=ncurses
     - CC=clang
     - CXX=clang++
     - *id001
@@ -194,7 +194,7 @@ matrix:
   - &id018
     env:
     - TARGET=arm
-    - PACKAGE=mtools
+    - PACKAGE=ncurses
     - CC=clang
     - CXX=clang++
     - *id001
@@ -205,7 +205,7 @@ matrix:
   - &id019
     env:
     - TARGET=amd64
-    - PACKAGE=netsurf
+    - PACKAGE=vttest
     - CC=clang
     - CXX=clang++
     - *id001
@@ -216,7 +216,7 @@ matrix:
   - &id020
     env:
     - TARGET=arm
-    - PACKAGE=netsurf
+    - PACKAGE=vttest
     - CC=clang
     - CXX=clang++
     - *id001
@@ -227,7 +227,7 @@ matrix:
   - &id021
     env:
     - TARGET=amd64
-    - PACKAGE=perl
+    - PACKAGE=sqlite
     - CC=clang
     - CXX=clang++
     - *id001
@@ -238,7 +238,7 @@ matrix:
   - &id022
     env:
     - TARGET=arm
-    - PACKAGE=perl
+    - PACKAGE=sqlite
     - CC=clang
     - CXX=clang++
     - *id001
@@ -249,7 +249,7 @@ matrix:
   - &id023
     env:
     - TARGET=amd64
-    - PACKAGE=mesa
+    - PACKAGE=less
     - CC=clang
     - CXX=clang++
     - *id001
@@ -260,7 +260,7 @@ matrix:
   - &id024
     env:
     - TARGET=arm
-    - PACKAGE=mesa
+    - PACKAGE=less
     - CC=clang
     - CXX=clang++
     - *id001
@@ -271,7 +271,7 @@ matrix:
   - &id025
     env:
     - TARGET=amd64
-    - PACKAGE=bsdtar
+    - PACKAGE=pixman
     - CC=clang
     - CXX=clang++
     - *id001
@@ -282,7 +282,7 @@ matrix:
   - &id026
     env:
     - TARGET=arm
-    - PACKAGE=bsdtar
+    - PACKAGE=pixman
     - CC=clang
     - CXX=clang++
     - *id001
@@ -293,7 +293,7 @@ matrix:
   - &id027
     env:
     - TARGET=amd64
-    - PACKAGE=pedigree-devel
+    - PACKAGE=libpng
     - CC=clang
     - CXX=clang++
     - *id001
@@ -304,7 +304,7 @@ matrix:
   - &id028
     env:
     - TARGET=arm
-    - PACKAGE=pedigree-devel
+    - PACKAGE=libpng
     - CC=clang
     - CXX=clang++
     - *id001
@@ -315,7 +315,7 @@ matrix:
   - &id029
     env:
     - TARGET=amd64
-    - PACKAGE=git
+    - PACKAGE=expat
     - CC=clang
     - CXX=clang++
     - *id001
@@ -326,7 +326,7 @@ matrix:
   - &id030
     env:
     - TARGET=arm
-    - PACKAGE=git
+    - PACKAGE=expat
     - CC=clang
     - CXX=clang++
     - *id001
@@ -337,7 +337,7 @@ matrix:
   - &id031
     env:
     - TARGET=amd64
-    - PACKAGE=nano
+    - PACKAGE=libfreetype
     - CC=clang
     - CXX=clang++
     - *id001
@@ -348,7 +348,7 @@ matrix:
   - &id032
     env:
     - TARGET=arm
-    - PACKAGE=nano
+    - PACKAGE=libfreetype
     - CC=clang
     - CXX=clang++
     - *id001
@@ -359,7 +359,7 @@ matrix:
   - &id033
     env:
     - TARGET=amd64
-    - PACKAGE=lua
+    - PACKAGE=fontconfig
     - CC=clang
     - CXX=clang++
     - *id001
@@ -370,7 +370,7 @@ matrix:
   - &id034
     env:
     - TARGET=arm
-    - PACKAGE=lua
+    - PACKAGE=fontconfig
     - CC=clang
     - CXX=clang++
     - *id001
@@ -381,7 +381,7 @@ matrix:
   - &id035
     env:
     - TARGET=amd64
-    - PACKAGE=less
+    - PACKAGE=cairo
     - CC=clang
     - CXX=clang++
     - *id001
@@ -392,7 +392,7 @@ matrix:
   - &id036
     env:
     - TARGET=arm
-    - PACKAGE=less
+    - PACKAGE=cairo
     - CC=clang
     - CXX=clang++
     - *id001
@@ -403,7 +403,7 @@ matrix:
   - &id037
     env:
     - TARGET=amd64
-    - PACKAGE=coreutils
+    - PACKAGE=harfbuzz
     - CC=clang
     - CXX=clang++
     - *id001
@@ -414,7 +414,7 @@ matrix:
   - &id038
     env:
     - TARGET=arm
-    - PACKAGE=coreutils
+    - PACKAGE=harfbuzz
     - CC=clang
     - CXX=clang++
     - *id001
@@ -425,7 +425,7 @@ matrix:
   - &id039
     env:
     - TARGET=amd64
-    - PACKAGE=python26
+    - PACKAGE=vim
     - CC=clang
     - CXX=clang++
     - *id001
@@ -436,7 +436,7 @@ matrix:
   - &id040
     env:
     - TARGET=arm
-    - PACKAGE=python26
+    - PACKAGE=vim
     - CC=clang
     - CXX=clang++
     - *id001
@@ -447,7 +447,7 @@ matrix:
   - &id041
     env:
     - TARGET=amd64
-    - PACKAGE=gnumake
+    - PACKAGE=sed
     - CC=clang
     - CXX=clang++
     - *id001
@@ -458,7 +458,7 @@ matrix:
   - &id042
     env:
     - TARGET=arm
-    - PACKAGE=gnumake
+    - PACKAGE=sed
     - CC=clang
     - CXX=clang++
     - *id001
@@ -469,7 +469,7 @@ matrix:
   - &id043
     env:
     - TARGET=amd64
-    - PACKAGE=grep
+    - PACKAGE=mtools
     - CC=clang
     - CXX=clang++
     - *id001
@@ -480,7 +480,7 @@ matrix:
   - &id044
     env:
     - TARGET=arm
-    - PACKAGE=grep
+    - PACKAGE=mtools
     - CC=clang
     - CXX=clang++
     - *id001
@@ -491,7 +491,7 @@ matrix:
   - &id045
     env:
     - TARGET=amd64
-    - PACKAGE=python27
+    - PACKAGE=libgmp
     - CC=clang
     - CXX=clang++
     - *id001
@@ -502,7 +502,7 @@ matrix:
   - &id046
     env:
     - TARGET=arm
-    - PACKAGE=python27
+    - PACKAGE=libgmp
     - CC=clang
     - CXX=clang++
     - *id001
@@ -513,7 +513,7 @@ matrix:
   - &id047
     env:
     - TARGET=amd64
-    - PACKAGE=m4
+    - PACKAGE=openssl
     - CC=clang
     - CXX=clang++
     - *id001
@@ -524,7 +524,7 @@ matrix:
   - &id048
     env:
     - TARGET=arm
-    - PACKAGE=m4
+    - PACKAGE=openssl
     - CC=clang
     - CXX=clang++
     - *id001
@@ -535,7 +535,7 @@ matrix:
   - &id049
     env:
     - TARGET=amd64
-    - PACKAGE=gawk
+    - PACKAGE=curl
     - CC=clang
     - CXX=clang++
     - *id001
@@ -546,7 +546,7 @@ matrix:
   - &id050
     env:
     - TARGET=arm
-    - PACKAGE=gawk
+    - PACKAGE=curl
     - CC=clang
     - CXX=clang++
     - *id001
@@ -557,7 +557,7 @@ matrix:
   - &id051
     env:
     - TARGET=amd64
-    - PACKAGE=gcc
+    - PACKAGE=apache2
     - CC=clang
     - CXX=clang++
     - *id001
@@ -568,7 +568,7 @@ matrix:
   - &id052
     env:
     - TARGET=arm
-    - PACKAGE=gcc
+    - PACKAGE=apache2
     - CC=clang
     - CXX=clang++
     - *id001
@@ -579,7 +579,7 @@ matrix:
   - &id053
     env:
     - TARGET=amd64
-    - PACKAGE=dropbear
+    - PACKAGE=pango
     - CC=clang
     - CXX=clang++
     - *id001
@@ -590,7 +590,7 @@ matrix:
   - &id054
     env:
     - TARGET=arm
-    - PACKAGE=dropbear
+    - PACKAGE=pango
     - CC=clang
     - CXX=clang++
     - *id001
@@ -601,7 +601,7 @@ matrix:
   - &id055
     env:
     - TARGET=amd64
-    - PACKAGE=prboom
+    - PACKAGE=bsdtar
     - CC=clang
     - CXX=clang++
     - *id001
@@ -612,7 +612,7 @@ matrix:
   - &id056
     env:
     - TARGET=arm
-    - PACKAGE=prboom
+    - PACKAGE=bsdtar
     - CC=clang
     - CXX=clang++
     - *id001
@@ -623,7 +623,7 @@ matrix:
   - &id057
     env:
     - TARGET=amd64
-    - PACKAGE=wget
+    - PACKAGE=mesa
     - CC=clang
     - CXX=clang++
     - *id001
@@ -634,7 +634,7 @@ matrix:
   - &id058
     env:
     - TARGET=arm
-    - PACKAGE=wget
+    - PACKAGE=mesa
     - CC=clang
     - CXX=clang++
     - *id001
@@ -645,7 +645,7 @@ matrix:
   - &id059
     env:
     - TARGET=amd64
-    - PACKAGE=bash
+    - PACKAGE=libmpfr
     - CC=clang
     - CXX=clang++
     - *id001
@@ -656,7 +656,7 @@ matrix:
   - &id060
     env:
     - TARGET=arm
-    - PACKAGE=bash
+    - PACKAGE=libmpfr
     - CC=clang
     - CXX=clang++
     - *id001
@@ -667,7 +667,7 @@ matrix:
   - &id061
     env:
     - TARGET=amd64
-    - PACKAGE=dosbox
+    - PACKAGE=libmpc
     - CC=clang
     - CXX=clang++
     - *id001
@@ -678,7 +678,7 @@ matrix:
   - &id062
     env:
     - TARGET=arm
-    - PACKAGE=dosbox
+    - PACKAGE=libmpc
     - CC=clang
     - CXX=clang++
     - *id001
@@ -689,7 +689,7 @@ matrix:
   - &id063
     env:
     - TARGET=amd64
-    - PACKAGE=grub2
+    - PACKAGE=gcc
     - CC=clang
     - CXX=clang++
     - *id001
@@ -700,7 +700,7 @@ matrix:
   - &id064
     env:
     - TARGET=arm
-    - PACKAGE=grub2
+    - PACKAGE=gcc
     - CC=clang
     - CXX=clang++
     - *id001
@@ -711,7 +711,7 @@ matrix:
   - &id065
     env:
     - TARGET=amd64
-    - PACKAGE=atk
+    - PACKAGE=git
     - CC=clang
     - CXX=clang++
     - *id001
@@ -722,7 +722,7 @@ matrix:
   - &id066
     env:
     - TARGET=arm
-    - PACKAGE=atk
+    - PACKAGE=git
     - CC=clang
     - CXX=clang++
     - *id001
@@ -733,7 +733,7 @@ matrix:
   - &id067
     env:
     - TARGET=amd64
-    - PACKAGE=pango
+    - PACKAGE=nano
     - CC=clang
     - CXX=clang++
     - *id001
@@ -744,7 +744,7 @@ matrix:
   - &id068
     env:
     - TARGET=arm
-    - PACKAGE=pango
+    - PACKAGE=nano
     - CC=clang
     - CXX=clang++
     - *id001
@@ -755,7 +755,7 @@ matrix:
   - &id069
     env:
     - TARGET=amd64
-    - PACKAGE=bind
+    - PACKAGE=dropbear
     - CC=clang
     - CXX=clang++
     - *id001
@@ -766,7 +766,7 @@ matrix:
   - &id070
     env:
     - TARGET=arm
-    - PACKAGE=bind
+    - PACKAGE=dropbear
     - CC=clang
     - CXX=clang++
     - *id001
@@ -777,7 +777,7 @@ matrix:
   - &id071
     env:
     - TARGET=amd64
-    - PACKAGE=e2fsprogs
+    - PACKAGE=pth
     - CC=clang
     - CXX=clang++
     - *id001
@@ -788,7 +788,7 @@ matrix:
   - &id072
     env:
     - TARGET=arm
-    - PACKAGE=e2fsprogs
+    - PACKAGE=pth
     - CC=clang
     - CXX=clang++
     - *id001
@@ -799,7 +799,7 @@ matrix:
   - &id073
     env:
     - TARGET=amd64
-    - PACKAGE=lynx
+    - PACKAGE=coreutils
     - CC=clang
     - CXX=clang++
     - *id001
@@ -810,7 +810,7 @@ matrix:
   - &id074
     env:
     - TARGET=arm
-    - PACKAGE=lynx
+    - PACKAGE=coreutils
     - CC=clang
     - CXX=clang++
     - *id001
@@ -821,7 +821,7 @@ matrix:
   - &id075
     env:
     - TARGET=amd64
-    - PACKAGE=diffutils
+    - PACKAGE=pedigree-base
     - CC=clang
     - CXX=clang++
     - *id001
@@ -832,7 +832,7 @@ matrix:
   - &id076
     env:
     - TARGET=arm
-    - PACKAGE=diffutils
+    - PACKAGE=pedigree-base
     - CC=clang
     - CXX=clang++
     - *id001
@@ -843,7 +843,7 @@ matrix:
   - &id077
     env:
     - TARGET=amd64
-    - PACKAGE=apache2
+    - PACKAGE=readline
     - CC=clang
     - CXX=clang++
     - *id001
@@ -854,7 +854,7 @@ matrix:
   - &id078
     env:
     - TARGET=arm
-    - PACKAGE=apache2
+    - PACKAGE=readline
     - CC=clang
     - CXX=clang++
     - *id001
@@ -865,7 +865,7 @@ matrix:
   - &id079
     env:
     - TARGET=amd64
-    - PACKAGE=binutils
+    - PACKAGE=inetutils
     - CC=clang
     - CXX=clang++
     - *id001
@@ -876,7 +876,7 @@ matrix:
   - &id080
     env:
     - TARGET=arm
-    - PACKAGE=binutils
+    - PACKAGE=inetutils
     - CC=clang
     - CXX=clang++
     - *id001
@@ -887,7 +887,7 @@ matrix:
   - &id081
     env:
     - TARGET=amd64
-    - PACKAGE=nasm
+    - PACKAGE=gnumake
     - CC=clang
     - CXX=clang++
     - *id001
@@ -896,6 +896,402 @@ matrix:
     services: *id002
     sudo: true
   - &id082
+    env:
+    - TARGET=arm
+    - PACKAGE=gnumake
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id083
+    env:
+    - TARGET=amd64
+    - PACKAGE=m4
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id084
+    env:
+    - TARGET=arm
+    - PACKAGE=m4
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id085
+    env:
+    - TARGET=amd64
+    - PACKAGE=gawk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id086
+    env:
+    - TARGET=arm
+    - PACKAGE=gawk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id087
+    env:
+    - TARGET=amd64
+    - PACKAGE=wget
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id088
+    env:
+    - TARGET=arm
+    - PACKAGE=wget
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id089
+    env:
+    - TARGET=amd64
+    - PACKAGE=diffutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id090
+    env:
+    - TARGET=arm
+    - PACKAGE=diffutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id091
+    env:
+    - TARGET=amd64
+    - PACKAGE=bash
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id092
+    env:
+    - TARGET=arm
+    - PACKAGE=bash
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id093
+    env:
+    - TARGET=amd64
+    - PACKAGE=dosbox
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id094
+    env:
+    - TARGET=arm
+    - PACKAGE=dosbox
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id095
+    env:
+    - TARGET=amd64
+    - PACKAGE=grub2
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id096
+    env:
+    - TARGET=arm
+    - PACKAGE=grub2
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id097
+    env:
+    - TARGET=amd64
+    - PACKAGE=pedigree-devel
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id098
+    env:
+    - TARGET=arm
+    - PACKAGE=pedigree-devel
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id099
+    env:
+    - TARGET=amd64
+    - PACKAGE=atk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id100
+    env:
+    - TARGET=arm
+    - PACKAGE=atk
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id101
+    env:
+    - TARGET=amd64
+    - PACKAGE=grep
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id102
+    env:
+    - TARGET=arm
+    - PACKAGE=grep
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id103
+    env:
+    - TARGET=amd64
+    - PACKAGE=bind
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id104
+    env:
+    - TARGET=arm
+    - PACKAGE=bind
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id105
+    env:
+    - TARGET=amd64
+    - PACKAGE=e2fsprogs
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id106
+    env:
+    - TARGET=arm
+    - PACKAGE=e2fsprogs
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id107
+    env:
+    - TARGET=amd64
+    - PACKAGE=gzip
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id108
+    env:
+    - TARGET=arm
+    - PACKAGE=gzip
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id109
+    env:
+    - TARGET=amd64
+    - PACKAGE=lynx
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id110
+    env:
+    - TARGET=arm
+    - PACKAGE=lynx
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id111
+    env:
+    - TARGET=amd64
+    - PACKAGE=prboom
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id112
+    env:
+    - TARGET=arm
+    - PACKAGE=prboom
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id113
+    env:
+    - TARGET=amd64
+    - PACKAGE=lua
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id114
+    env:
+    - TARGET=arm
+    - PACKAGE=lua
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id115
+    env:
+    - TARGET=amd64
+    - PACKAGE=binutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id116
+    env:
+    - TARGET=arm
+    - PACKAGE=binutils
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id117
+    env:
+    - TARGET=amd64
+    - PACKAGE=nasm
+    - CC=clang
+    - CXX=clang++
+    - *id001
+    os: linux
+    python: '2.7'
+    services: *id002
+    sudo: true
+  - &id118
     env:
     - TARGET=arm
     - PACKAGE=nasm
@@ -987,6 +1383,42 @@ matrix:
   - *id080
   - *id081
   - *id082
+  - *id083
+  - *id084
+  - *id085
+  - *id086
+  - *id087
+  - *id088
+  - *id089
+  - *id090
+  - *id091
+  - *id092
+  - *id093
+  - *id094
+  - *id095
+  - *id096
+  - *id097
+  - *id098
+  - *id099
+  - *id100
+  - *id101
+  - *id102
+  - *id103
+  - *id104
+  - *id105
+  - *id106
+  - *id107
+  - *id108
+  - *id109
+  - *id110
+  - *id111
+  - *id112
+  - *id113
+  - *id114
+  - *id115
+  - *id116
+  - *id117
+  - *id118
   - env:
     - DEPS_ONLY=y
     - TARGET=amd64

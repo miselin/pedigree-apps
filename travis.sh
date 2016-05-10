@@ -24,7 +24,7 @@ else
         ./standalone.sh $EASY_BUILD_TARGET
     fi
 
-    OPTS="--only-depends $PACKAGE"
+    OPTS="--only=$PACKAGE"
     if [ "x$DEPS_ONLY" != "x" ]; then
         # Make sure the build system can find the packages directory.
         cat >local_environment.py <<EOF
