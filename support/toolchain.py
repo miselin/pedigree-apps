@@ -122,19 +122,16 @@ def prepare_package_manager(env):
     with open(os.path.join(env['APPS_BASE'], 'pup.conf'), 'w') as f:
         f.write('''
 [paths]
-installroot=/
-localdb=%(repo)s
+installroot=%(CHROOT_BASE)s
+localdb=%(PACKMAN_REPO)s
 
 [settings]
-arch=%(arch)s
+arch=%(PACKMAN_TARGET_ARCH)s
 
 [remotes]
 server=http://the-pedigree-project.appspot.com
 upload=http://the-pedigree-project.appspot.com
-''' % {
-                'repo': env['PACKMAN_REPO'],
-                'arch': env['PACKMAN_TARGET_ARCH']
-                })
+''' % env)
 
 
 def chroot_spec(env):

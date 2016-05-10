@@ -1,6 +1,7 @@
 
 import os
 import networkx
+import subprocess
 import tarfile
 
 
@@ -26,19 +27,30 @@ def collect_dependences(known_packages, package):
     return depends
 
 
+def _pup(env, *args):
+    # Chroot?
+    if os.path.exists('/pedigree_apps'):
+        config_file = '/pedigree_apps/pup/pup-docker.conf'
+    else:
+        config_file = os.path.join(env['APPS_BASE'], 'pup.conf')
+
+    env = env.copy()
+    env['PYTHONPATH'] = env['PACKMAN_PATH']
+
+    subprocess.check_call([env['PACKMAN_SCRIPT'], '--config=' + config_file] +
+                          args)
+
+
 def install_dependent_packages(all_packages, package, env):
     """Installs dependent packages into env['CHROOT_BASE']."""
     depends = collect_dependences(all_packages, package)
 
-    # Now, create all the dependent links.
-    for package in depends:
-        package_filename = '%s-%s-%s.pup' % (package.name(), package.version(),
-                                             env['PACKMAN_TARGET_ARCH'])
-        package_path = os.path.join(env['PACKMAN_REPO'], package_filename)
+    # Sync pup in case we need to download anything.
+    _pup('sync')
 
-        tar = tarfile.open(package_path)
-        tar.extractall(path=env['CHROOT_BASE'])
-        tar.close()
+    # Now, install the dependent packages.
+    for package in depends:
+        _pup('install', package.name())
 
 
 def build_package_graph(packages):
