@@ -2,7 +2,6 @@
 import os
 import networkx
 import subprocess
-import tarfile
 
 
 def collect_dependences(known_packages, package):

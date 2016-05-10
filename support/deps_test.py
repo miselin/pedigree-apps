@@ -113,15 +113,15 @@ class DepsTest(unittest.TestCase):
             'package2': package2,
         }
 
-        with mock.patch('support.deps.tarfile') as mock_tarfile:
-            opened = mock.MagicMock()
-            mock_tarfile.open.return_value = opened
+        deps._pup = mock.MagicMock()
+        deps._pup.return_value = None
 
-            deps.install_dependent_packages(packages, package2, self.env)
+        deps.install_dependent_packages(packages, package2, self.env)
 
-            mock_tarfile.open.assert_called_once_with(
-                os.path.join(self.env['PACKMAN_REPO'], 'package1-1.0-amd64.pup'))
-            opened.extractall.assert_called_once_with(path=self.env['CHROOT_BASE'])
+        deps._pup.assert_has_calls([
+            mock.call(self.env, 'sync'),
+            mock.call(self.env, 'install', 'package1'),
+        ])
 
         sorted_deps = [first for first, _ in deps.sort_dependencies(packages)]
         self.assertEqual(sorted_deps, ['package1', 'package2'])
