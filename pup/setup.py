@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='pup',
-      version='1.0',
+      version='1.1',
       description='Pedigree UPdater',
       author='Matthew Iselin',
       author_email='matthew@theiselins.net',

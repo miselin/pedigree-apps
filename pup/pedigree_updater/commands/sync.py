@@ -60,6 +60,7 @@ class SyncCommand(base.PupCommand):
                     f = urllib.urlopen(remote_url)
                     log.info('%s is OK', remote_url)
                 except:
+                    log.exception('repo failed')
                     banned_repos.add(repo)
                     continue
 
