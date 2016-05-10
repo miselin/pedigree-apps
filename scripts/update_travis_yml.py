@@ -66,6 +66,19 @@ def main():
     matrix_include = data['matrix']['include']
     matrix_allow_failures = data['matrix']['allow_failures']
 
+    # Add the dependency upload builds.
+    for target in ('amd64', 'arm'):
+        build = {
+            'os': 'linux',
+            'python': '2.7',
+            'env': [
+                'DEPS_ONLY=y',
+                'TARGET=' + target,
+                secure,
+            ]
+        }
+        matrix_include.append(build)
+
     for package, _ in deps.sort_dependencies(packages):
         for target in ('amd64', 'arm'):
             copy = base_include.copy()
@@ -83,19 +96,6 @@ def main():
 
             matrix_include.append(copy)
             matrix_allow_failures.append(copy)
-
-    # Add the dependency upload builds.
-    for target in ('amd64', 'arm'):
-        build = {
-            'os': 'linux',
-            'python': '2.7',
-            'env': [
-                'DEPS_ONLY=y',
-                'TARGET=' + target,
-                secure,
-            ]
-        }
-        matrix_include.append(build)
 
     with open('.travis.yml', 'w') as f:
         yaml.safe_dump(data, f, default_flow_style=False)
