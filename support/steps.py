@@ -40,7 +40,7 @@ def get_builddir(srcdir, env, inplace):
 
 def cmd(*args, **kwargs):
     log.debug('cmd: %r %r', args, kwargs)
-    subprocess.check_call(*args, **kwargs)
+    return subprocess.check_output(*args, **kwargs)
 
 
 def libtoolize(srcdir, env, ltdl_dir=None):

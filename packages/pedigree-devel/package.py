@@ -26,6 +26,9 @@ class Pedigree_develPackage(buildsystem.Package):
         pedigree_image = os.path.join(env['PEDIGREE_BASE'], 'images')
         pedigree_build = os.path.join(env['PEDIGREE_BASE'], 'build')
 
+        gcc_vers = steps.cmd([env['CROSS_CC'], '-dumpversion'], env=env)
+        gcc_vers = gcc_vers.strip()
+
         copies = [
             # Libraries
             (os.path.join(pedigree_build, 'libc.so'), libs_dir),
@@ -44,11 +47,11 @@ class Pedigree_develPackage(buildsystem.Package):
             (os.path.join(pedigree_build, 'libs', 'libui.a'), libs_dir),
             # Runtime (not build as part of GCC build)
             (os.path.join(pedigree_build, 'kernel', 'crt0.o'),
-                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], '4.8.2')),
+                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], gcc_vers)),
             (os.path.join(pedigree_build, 'kernel', 'crti.o'),
-                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], '4.8.2')),
+                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], gcc_vers)),
             (os.path.join(pedigree_build, 'kernel', 'crtn.o'),
-                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], '4.8.2')),
+                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], gcc_vers)),
             # Headers
             (os.path.join(env['PEDIGREE_BASE'], 'src', 'subsys', 'posix',
                 'include', '.'), include_dir),

@@ -18,27 +18,15 @@ class Pedigree_basePackage(buildsystem.Package):
     def version(self):
         return '0.1'
 
-    def build_requires(self):
-        return []
-
-    def patches(self, env, srcdir):
-        return []
-
-    def options(self):
-        return self._options
-
-    def download(self, env, target):
-        pass
-
-    def prebuild(self, env, srcdir):
-        pass
-
-    def configure(self, env, srcdir):
-        raise Exception('conversion had no idea how to configure')
-
-    def build(self, env, srcdir):
-        raise Exception('conversion had no idea how to build')
-
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        raise Exception('conversion had no idea how to install')
+        pedigree = os.path.join(env['PEDIGREE_BASE'], 'images')
+
+        copies = [
+            (os.path.join(pedigree, 'base', 'system'), deploydir),
+            (os.path.join(pedigree, 'base', 'config'), deploydir),
+            (os.path.join(pedigree, 'base', '.bashrc'), deploydir),
+            (os.path.join(pedigree, 'base', '.profile'), deploydir),
+        ]
+
+        for source, dest in copies:
+            steps.cmd(['cp', '-ar', source, dest])
