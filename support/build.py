@@ -167,8 +167,6 @@ def in_chroot(env, packages, package, package_id, download_filename):
                 os.unlink(download_target)
 
             raise
-    else:
-        raise Exception('download target %r does not exist!' % download_target)
 
     for step in pass1_steps:
         log.info('== %s %s step ==', package_id, step)
