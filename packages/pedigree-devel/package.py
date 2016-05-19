@@ -18,27 +18,50 @@ class Pedigree_develPackage(buildsystem.Package):
     def version(self):
         return '0.1'
 
-    def build_requires(self):
-        return []
-
-    def patches(self, env, srcdir):
-        return []
-
-    def options(self):
-        return self._options
-
-    def download(self, env, target):
-        pass
-
-    def prebuild(self, env, srcdir):
-        pass
-
-    def configure(self, env, srcdir):
-        raise Exception('conversion had no idea how to configure')
-
-    def build(self, env, srcdir):
-        raise Exception('conversion had no idea how to build')
-
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        raise Exception('conversion had no idea how to install')
+        # Copy from Pedigree to the deployment directory.
+        include_dir = os.path.join(deploydir, 'include')
+        libs_dir = os.path.join(deploydir, 'libraries')
+
+        pedigree_image = os.path.join(env['PEDIGREE_BASE'], 'images')
+        pedigree_build = os.path.join(env['PEDIGREE_BASE'], 'build')
+
+        copies = [
+            # Libraries
+            (os.path.join(pedigree_build, 'libc.so'), libs_dir),
+            (os.path.join(pedigree_build, 'libg.so'), libs_dir),
+            (os.path.join(pedigree_build, 'libm.so'), libs_dir),
+            (os.path.join(pedigree_build, 'libc.a'), libs_dir),
+            (os.path.join(pedigree_build, 'libg.a'), libs_dir),
+            (os.path.join(pedigree_build, 'libm.a'), libs_dir),
+            (os.path.join(pedigree_build, 'libpedigree.so'), libs_dir),
+            (os.path.join(pedigree_build, 'libpedigree.a'), libs_dir),
+            (os.path.join(pedigree_build, 'libpedigree-c.so'), libs_dir),
+            (os.path.join(pedigree_build, 'libpedigree-c.a'), libs_dir),
+            (os.path.join(pedigree_build, 'libSDL.so'), libs_dir),
+            (os.path.join(pedigree_build, 'libSDL.a'), libs_dir),
+            (os.path.join(pedigree_build, 'libs', 'libui.so'), libs_dir),
+            (os.path.join(pedigree_build, 'libs', 'libui.a'), libs_dir),
+            # Runtime (not build as part of GCC build)
+            (os.path.join(pedigree_build, 'kernel', 'crt0.o'),
+                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], '4.8.2')),
+            (os.path.join(pedigree_build, 'kernel', 'crti.o'),
+                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], '4.8.2')),
+            (os.path.join(pedigree_build, 'kernel', 'crtn.o'),
+                os.path.join(libs_dir, 'gcc', env['CROSS_TARGET'], '4.8.2')),
+            # Headers
+            (os.path.join(env['PEDIGREE_BASE'], 'src', 'subsys', 'posix',
+                'include', '.'), include_dir),
+            (os.path.join(env['PEDIGREE_BASE'], 'src', 'subsys', 'native',
+                'include', '.'), os.path.join(include_dir, 'native')),
+        ]
+
+        for source, dest in copies:
+            if not os.path.exists(dest):
+                os.makedirs(dest)
+
+            flags = ['-a']
+            if os.path.isdir(source):
+                flags += ['-r']
+
+            steps.cmd(['cp'] + flags + [source, dest])
