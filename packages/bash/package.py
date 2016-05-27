@@ -38,7 +38,8 @@ class BashPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env, extra_config=(
+            'bash_cv_getcwd_malloc=yes',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
