@@ -22,7 +22,7 @@ class BashPackage(buildsystem.Package):
         return ['readline', 'libiconv', 'gettext']
 
     def patches(self, env, srcdir):
-        return []
+        return ['pedigree-bash.diff']
 
     def options(self):
         return self._options
