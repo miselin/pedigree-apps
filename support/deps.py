@@ -48,8 +48,8 @@ def install_dependent_packages(all_packages, package, env):
     _pup(env, 'sync')
 
     # Now, install the dependent packages.
-    for package in depends:
-        _pup(env, 'install', package.name())
+    for package in set([dep.name() for dep in depends]):
+        _pup(env, 'install', package)
 
 
 def build_package_graph(packages):
