@@ -42,7 +42,6 @@ class CurlPackage(buildsystem.Package):
             '-I', os.path.join(srcdir, 'libltdl', 'm4')))
 
     def configure(self, env, srcdir):
-        env['LIBS'] = '-lbind'
         steps.run_configure(self, srcdir, env, extra_config=(
             '--enable-shared', '--with-random=dev»/urandom'))
 

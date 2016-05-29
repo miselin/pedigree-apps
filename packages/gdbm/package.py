@@ -5,24 +5,24 @@ from support import buildsystem
 from support import steps
 
 
-class BashPackage(buildsystem.Package):
+class GdbmPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(BashPackage, self).__init__(*args, **kwargs)
+        super(GdbmPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
         self.tarfile_format = 'gz'
 
     def name(self):
-        return 'bash'
+        return 'gdbm'
 
     def version(self):
-        return '4.1'
+        return '1.12'
 
     def build_requires(self):
-        return ['readline', 'libiconv', 'gettext', 'libbind']
+        return ['libtool', 'libbind']
 
     def patches(self, env, srcdir):
-        return ['pedigree-bash.diff']
+        return []
 
     def options(self):
         return self._options
@@ -38,12 +38,11 @@ class BashPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, extra_config=(
-            'bash_cv_getcwd_malloc=yes',))
+        steps.run_configure(self, srcdir, env)
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        steps.make(srcdir, env, target='install', extra_opts=(
-            'DESTDIR=%s' % deploydir,))
+        env['DESTDIR'] = deploydir
+        steps.make(srcdir, env, target='install')

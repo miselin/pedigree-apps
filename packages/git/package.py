@@ -16,10 +16,10 @@ class GitPackage(buildsystem.Package):
         return 'git'
 
     def version(self):
-        return '2.0.0'
+        return '2.8.2'
 
     def build_requires(self):
-        return ['zlib', 'libiconv']
+        return ['zlib', 'libiconv', 'libbind', 'curl', 'openssl']
 
     def patches(self, env, srcdir):
         return []
@@ -39,9 +39,9 @@ class GitPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
-            'ac_cv_fread_reads_directories=no',
+            'ac_cv_fread_reads_directories=no', 'ac_cv_func_clock_gettime=no',
             'ac_cv_snprintf_returns_bogus=no', '--without-tcltk',
-            '--without-openssl'))
+            '--with-lib=libraries', '--with-openssl', '--with-curl',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

@@ -1,11 +1,9 @@
 
 import os
+import shutil
 
 from support import buildsystem
 from support import steps
-
-
-raise Exception('python27 needs to be properly ported into package.py')
 
 
 class Python27Package(buildsystem.Package):
@@ -22,7 +20,8 @@ class Python27Package(buildsystem.Package):
         return '2.7.3'
 
     def build_requires(self):
-        return ['libtool', 'gettext', 'libiconv', 'curl', 'openssl', 'glib']
+        return ['libtool', 'gettext', 'libiconv', 'curl', 'openssl', 'glib',
+                'zlib', 'sqlite', 'readline', 'ncurses']
 
     def patches(self, env, srcdir):
         return ['Makefile.pre.in.diff', 'configure.in.diff', 'setup.py.diff']
@@ -41,12 +40,43 @@ class Python27Package(buildsystem.Package):
     def prebuild(self, env, srcdir):
         steps.autoreconf(srcdir, env)
 
+        # Platform-specific modules directory, empty for us.
+        os.makedirs(os.path.join(srcdir, 'Lib', 'plat-pedigree'))
+
+        # Build host pgen and python.
+        steps.run_configure(self, srcdir, env, inplace=False, host=False)
+        steps.make(srcdir, env, target='Parser/pgen', inplace=False)
+        steps.make(srcdir, env, target='python', inplace=False)
+
+        pgen_source = os.path.join(steps.get_builddir(srcdir, env, False), 'Parser', 'pgen')
+        python_source = os.path.join(steps.get_builddir(srcdir, env, False), 'python')
+
+        steps.cmd(['mv', pgen_source, os.path.join(srcdir, 'hostpgen')])
+        steps.cmd(['mv', python_source, os.path.join(srcdir, 'hostpython')])
+
+        # No need for this build directory anymore.
+        shutil.rmtree(steps.get_builddir(srcdir, env, False))
+
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env,
+                            extra_config=('--without-pydebug',))
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        hostpython = os.path.join(srcdir, 'hostpython')
+        hostpgen = os.path.join(srcdir, 'hostpgen')
+
+        steps.make(srcdir, env, extra_opts=(
+            'HOSTPYTHON=' + hostpython, 'HOSTPGEN=' + hostpgen,
+            'CROSS_COMPILING=yes', 'MACHDEP=pedigree',
+            'BLDSHARED=%s -shared' % env['CROSS_CC']))
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        raise Exception('conversion had no idea how to install')
+
+        hostpython = os.path.join(srcdir, 'hostpython')
+        hostpgen = os.path.join(srcdir, 'hostpgen')
+
+        steps.make(srcdir, env, target='install', extra_opts=(
+            'HOSTPYTHON=' + hostpython, 'HOSTPGEN=' + hostpgen,
+            'CROSS_COMPILING=yes', 'MACHDEP=pedigree',
+            'BLDSHARED=%s -shared' % env['CROSS_CC']))
