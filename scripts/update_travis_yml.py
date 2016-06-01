@@ -79,7 +79,8 @@ def main():
         }
         matrix_include.append(build)
 
-    for package, _ in deps.sort_dependencies(packages):
+    # Disabled for now.
+    for package, _ in []:  # deps.sort_dependencies(packages):
         for target in ('amd64', 'arm'):
             copy = base_include.copy()
 
