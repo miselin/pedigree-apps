@@ -80,7 +80,7 @@ def main():
         matrix_include.append(build)
 
     # Disabled for now.
-    for package, _ in []:  # deps.sort_dependencies(packages):
+    for package, _ in deps.sort_dependencies(packages):
         for target in ('amd64', 'arm'):
             copy = base_include.copy()
 
@@ -97,6 +97,10 @@ def main():
 
             matrix_include.append(copy)
             matrix_allow_failures.append(copy)
+
+    # For now, don't build anything on travis.
+    matrix_include = []
+    matrix_allow_failures = []
 
     with open('.travis.yml', 'w') as f:
         yaml.safe_dump(data, f, default_flow_style=False)
