@@ -55,7 +55,13 @@ def libtoolize(srcdir, env, ltdl_dir=None):
 
 def autoreconf(srcdir, env, extra_flags=()):
     """autoreconf's the target."""
+    preserved_libtoolize = env.get('LIBTOOLIZE')
+    env['LIBTOOLIZE'] = '/applications/libtoolize'
     cmd([env['AUTORECONF'], '-ifs'] + list(extra_flags), cwd=srcdir, env=env)
+    if preserved_libtoolize:
+        env['LIBTOOLIZE'] = preserved_libtoolize
+    else:
+        del env['LIBTOOLIZE']
 
 
 def autoconf(srcdir, env, aclocal_flags=(), only_aclocal=False):
