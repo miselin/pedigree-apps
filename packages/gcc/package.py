@@ -1,4 +1,6 @@
 
+from __future__ import print_function
+
 import os
 
 from support import buildsystem
@@ -27,8 +29,7 @@ class GccPackage(buildsystem.Package):
         # available on build but not host.
         # https://git.yoctoproject.org/cgit.cgi/poky/plain/meta/recipes-devtools/gcc/gcc-4.8/0044-gengtypes.patch
         # TODO(miselin): we should also patch fixheaders
-        return ['4.8.2/pedigree-gcc.diff', 'override.m4.diff',
-                '0044-gengtypes.patch']
+        return ['4.8.2/pedigree-gcc.diff', '0044-gengtypes.patch']
 
     def options(self):
         return self._options
@@ -41,15 +42,32 @@ class GccPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        for subdir in ['', 'libbacktrace', 'libssp', 'libstdc++-v3']:
-            steps.libtoolize(os.path.join(srcdir, subdir), env)
+        # Required versions of autoconf/automake for gcc
+        env['AUTORECONF'] = 'autoreconf2.64'
+        env['AUTOCONF'] = 'autoconf2.64'
+        env['AUTOMAKE'] = 'automake-1.11'
+        env['ACLOCAL'] = 'aclocal-1.11'
+
+        # certain directories should never have autoreconf run in them (they
+        # don't need it at all), so we blacklist them
+        CONFIG_DIRECTORY_BLACKLIST = ('gcc', 'libcpp')
+
+        for subdir in [''] + os.listdir(srcdir):  # ['', 'libbacktrace', 'libssp', 'libstdc++-v3']:
+            if not os.path.isdir(os.path.join(srcdir, subdir)):
+                continue
+
+            if subdir in CONFIG_DIRECTORY_BLACKLIST:
+                continue
+
+            print('Running autoreconf in %r...' % subdir)
+
+            # if not subdir:
+            #     steps.libtoolize(os.path.join(srcdir, subdir), env)
+
             if os.path.isfile(os.path.join(srcdir, subdir, 'configure.ac')):
-                steps.autoreconf(os.path.join(srcdir, subdir), env,
-                                 extra_flags=(
-                                    '-I', os.path.join(srcdir, subdir,
-                                                       'libltdl'),
-                                    '-I', os.path.join(srcdir, subdir,
-                                                       'libltdl', 'm4')))
+                steps.autoreconf(os.path.join(srcdir, subdir), env)
+
+        print('GCC tree successfully reconfigured.')
 
     def configure(self, env, srcdir):
         # Note: --target MUST be specified as well as --host. This is necessary
@@ -59,8 +77,9 @@ class GccPackage(buildsystem.Package):
         steps.run_configure(self, srcdir, env, inplace=False, extra_config=(
             '--disable-sjlj-exceptions', '--enable-shared',
             '--with-system-zlib', '--enable-languages=c,c++',
-            '--disable-libstdcxx-pch', '--with-newlib', '--disable-multilib',
-            '--target=%s' % env['CROSS_TARGET']))
+            '--disable-libstdcxx-pch', '--without-newlib',
+            '--disable-multilib', '--target=%s' % env['CROSS_TARGET'],
+            '--disable-werror'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env, inplace=False)

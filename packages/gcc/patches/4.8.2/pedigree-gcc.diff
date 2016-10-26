@@ -220,7 +220,7 @@ index 943ea67..11c46b6 100644
      ;;
 +  *-pedigree*)
 +    AC_CHECK_HEADERS([sys/types.h locale.h float.h])
-+    GLIBCXX_CHECK_COMPLEX_MATH_SUPPORT
++    GLIBCXX_CHECK_MATH_SUPPORT
 +    ;;
    *-qnx6.1* | *-qnx6.2*)
      SECTION_FLAGS='-ffunction-sections -fdata-sections'
@@ -240,6 +240,20 @@ index 8a14e2b..e94d1a0 100644
    _LT_CMD_STRIPLIB
  
    # Report which library types will actually be built
+diff -rup gcc-4.8.2.old/libstdc++-v3/configure.host gcc-4.8.2/libstdc++-v3/configure.host
+--- gcc-4.8.2.old/libstdc++-v3/configure.host 2013-06-19 11:18:38.000000000 +1000
++++ gcc-4.8.2/libstdc++-v3/configure.host 2016-06-04 17:51:31.536698800 +1000
+@@ -294,6 +294,10 @@ case "${host_os}" in
+   openbsd*)
+     os_include_dir="os/bsd/openbsd"
+     ;;
++  pedigree*)
++    # Uses musl
++    os_include_dir="os/generic"
++    ;;
+   qnx6.[12]*)
+     os_include_dir="os/qnx/qnx6.1"
+     c_model=c
 -- 
 1.9.1.423.g4596e3a
 
