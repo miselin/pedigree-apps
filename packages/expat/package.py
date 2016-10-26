@@ -35,8 +35,7 @@ class ExpatPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoconf(srcdir, env)
+        steps.libtoolize(os.path.join(srcdir, 'conftools'), env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, not_paths=('docdir',))
