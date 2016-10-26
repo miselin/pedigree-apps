@@ -39,7 +39,8 @@ class BindPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env,
-                            extra_config=('--with-randomdev=/dev/urandom',))
+                            extra_config=('--with-randomdev=/dev/urandom',
+                                          '--without-openssl'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
