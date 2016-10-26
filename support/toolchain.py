@@ -21,13 +21,7 @@ def prepare_compiler(env):
 
     links = (
         # Source -> Target
-        ('$PEDIGREE_BASE/build/kernel/crt0.o',
-            '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/kernel/crti.o',
-            '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/kernel/crtn.o',
-            '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libpthread.so',
+        ('$PEDIGREE_BASE/build/musl/lib/libc.so',
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
         ('$PEDIGREE_BASE/build/libpedigree.so',
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
@@ -35,11 +29,23 @@ def prepare_compiler(env):
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
         ('$PEDIGREE_BASE/build/libpedigree.so',
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libc.so',
-            '$CROSS_BASE/$CROSS_TARGET/lib/'),
-        ('$PEDIGREE_BASE/build/libm.so',
-            '$CROSS_BASE/$CROSS_TARGET/lib/'),
         ('$PEDIGREE_BASE/build/libs/libui.so',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+
+        # Dummy libs for musl (everything is in libc).
+        ('$PEDIGREE_BASE/build/musl/lib/libdl.a',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/musl/lib/libm.a',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/musl/lib/libpthread.a',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/musl/lib/libresolv.a',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/musl/lib/librt.a',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/musl/lib/libutil.a',
+            '$CROSS_BASE/$CROSS_TARGET/lib/'),
+        ('$PEDIGREE_BASE/build/musl/lib/libxnet.a',
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
 
         # NO $CROSS_TARGET include directory - use /include!!
@@ -88,7 +94,7 @@ def pedigree_into_chroot(env, chroot_dir):
     """
 
     copy_paths = (
-        ('$PEDIGREE_BASE/src/subsys/posix/include', 'include/'),
+        ('$PEDIGREE_BASE/build/musl/include', 'include/'),
         ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include', 'include/SDL'),
         ('$PEDIGREE_BASE/build/libSDL.so', 'libraries/'),
         ('$PEDIGREE_BASE/build/libpedigree.so', 'libraries/'),
