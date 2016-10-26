@@ -20,7 +20,7 @@ class CurlPackage(buildsystem.Package):
         return '7.21.1'
 
     def build_requires(self):
-        return ['libtool', 'libbind', 'zlib', 'openssl']
+        return ['libtool', 'zlib', 'openssl']
 
     def patches(self, env, srcdir):
         return []

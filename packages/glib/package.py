@@ -19,7 +19,7 @@ class GlibPackage(buildsystem.Package):
         return '2.40.0'
 
     def build_requires(self):
-        return ['libiconv', 'gettext', 'libbind', 'libffi', 'zlib']
+        return ['libiconv', 'gettext', 'libffi', 'zlib']
 
     def options(self):
         return self._options

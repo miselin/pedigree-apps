@@ -19,7 +19,7 @@ class GitPackage(buildsystem.Package):
         return '2.8.2'
 
     def build_requires(self):
-        return ['zlib', 'libiconv', 'libbind', 'curl', 'openssl']
+        return ['zlib', 'libiconv', 'curl', 'openssl']
 
     def patches(self, env, srcdir):
         return []

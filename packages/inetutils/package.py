@@ -19,7 +19,7 @@ class InetutilsPackage(buildsystem.Package):
         return '1.8'
 
     def build_requires(self):
-        return ['libtool', 'libbind', 'readline']
+        return ['libtool', 'readline']
 
     def patches(self, env, srcdir):
         return []

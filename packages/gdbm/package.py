@@ -19,7 +19,7 @@ class GdbmPackage(buildsystem.Package):
         return '1.12'
 
     def build_requires(self):
-        return ['libtool', 'libbind']
+        return ['libtool']
 
     def patches(self, env, srcdir):
         return []

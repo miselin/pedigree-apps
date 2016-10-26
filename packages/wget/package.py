@@ -19,7 +19,7 @@ class WgetPackage(buildsystem.Package):
         return '1.15'
 
     def build_requires(self):
-        return ['libbind', 'openssl']
+        return ['openssl']
 
     def patches(self, env, srcdir):
         return []
