@@ -16,7 +16,7 @@ class BsdtarPackage(buildsystem.Package):
         return 'bsdtar'
 
     def version(self):
-        return '2.8.4'
+        return '3.2.1'
 
     def build_requires(self):
         return []
@@ -28,7 +28,7 @@ class BsdtarPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://libarchive.googlecode.com/files/libarchive-%(version)s.tar.gz' % {
+        url = 'http://www.libarchive.org/downloads/libarchive-%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }
