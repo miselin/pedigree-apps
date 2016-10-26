@@ -10,13 +10,13 @@ class CoreutilsPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(CoreutilsPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self.tarfile_format = 'xz'
 
     def name(self):
         return 'coreutils'
 
     def version(self):
-        return '8.6'
+        return '8.25'
 
     def build_requires(self):
         return ['gettext', 'libgmp']
@@ -28,7 +28,7 @@ class CoreutilsPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.gnu.org/gnu/%(package)s/%(package)s-%(version)s.tar.gz' % {
+        url = 'http://ftp.gnu.org/gnu/%(package)s/%(package)s-%(version)s.tar.xz' % {
             'package': self.name(),
             'version': self.version(),
         }
@@ -38,7 +38,10 @@ class CoreutilsPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        # don't accidentally detect inotify when it doesn't really exist on
+        # Pedigree...
+        steps.run_configure(self, srcdir, env, extra_config=(
+            'ac_cv_func_inotify_init=no',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
