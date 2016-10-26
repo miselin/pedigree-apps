@@ -17,7 +17,7 @@ class LibmpfrPackage(buildsystem.Package):
         return 'libmpfr'
 
     def version(self):
-        return '3.1.4'
+        return '3.1.5'
 
     def build_requires(self):
         return ['libtool', 'libgmp']
