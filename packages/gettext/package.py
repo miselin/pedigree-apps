@@ -19,7 +19,7 @@ class GettextPackage(buildsystem.Package):
         return '0.18.1'
 
     def build_requires(self):
-        return ['libtool', 'libiconv']
+        return ['libtool']
 
     def options(self):
         return self._options
@@ -37,7 +37,8 @@ class GettextPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
-            'gl_cv_have_weak=no', '--disable-threads', '--without-git'))
+            'gl_cv_have_weak=no', '--disable-threads', '--without-git',
+            '--disable-libasprintf'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
