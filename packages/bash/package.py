@@ -19,7 +19,7 @@ class BashPackage(buildsystem.Package):
         return '4.1'
 
     def build_requires(self):
-        return ['readline', 'libiconv', 'gettext', 'libbind']
+        return ['readline', 'libiconv', 'gettext']
 
     def patches(self, env, srcdir):
         return ['pedigree-bash.diff']
@@ -39,7 +39,7 @@ class BashPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
-            'bash_cv_getcwd_malloc=yes',))
+            '--without-bash-malloc', 'bash_cv_getcwd_malloc=yes',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
