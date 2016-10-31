@@ -40,24 +40,41 @@ def get_builddir(srcdir, env, inplace):
 
 def cmd(*args, **kwargs):
     log.debug('cmd: %r %r', args, kwargs)
+    return subprocess.check_call(*args, **kwargs)
+
+
+def cmd_output(*args, **kwargs):
+    log.debug('cmd: %r %r', args, kwargs)
     return subprocess.check_output(*args, **kwargs)
 
 
 def libtoolize(srcdir, env, ltdl_dir=None):
     """libtoolize's the target."""
     libtoolize = '/applications/libtoolize'
+    cmd_args = [libtoolize, '-i', '-v', '-f']
     if ltdl_dir:
-        ltdl_dir = '=%s' % ltdl_dir
+        cmd_args.append('--ltdl=%s' % ltdl_dir)
     else:
-        ltdl_dir = ''
-    cmd([libtoolize, '-i', '-f', '--ltdl%s' % ltdl_dir], cwd=srcdir, env=env)
+        cmd_args.append('--ltdl')
+    cmd(cmd_args, cwd=srcdir, env=env)
 
 
 def autoreconf(srcdir, env, extra_flags=()):
     """autoreconf's the target."""
+    all_extra_flags = list(extra_flags)
+
     preserved_libtoolize = env.get('LIBTOOLIZE')
     env['LIBTOOLIZE'] = '/applications/libtoolize'
-    cmd([env['AUTORECONF'], '-ifs'] + list(extra_flags), cwd=srcdir, env=env)
+
+    if os.path.isdir(os.path.join(srcdir, 'm4')):
+        all_extra_flags.append('-Im4')
+    if os.path.isdir(os.path.join(srcdir, 'libltdl', 'm4')):
+        all_extra_flags.append('-Ilibltdl/m4')
+
+    # We ignore warnings which could otherwise become errors in autoreconf as
+    # we're not the authors of any of these build files.
+    cmd([env['AUTORECONF'], '-ifs', '-W', 'none'] + all_extra_flags, cwd=srcdir,
+        env=env)
     if preserved_libtoolize:
         env['LIBTOOLIZE'] = preserved_libtoolize
     else:
@@ -104,10 +121,12 @@ def run_configure(package, srcdir, env, inplace=True, host=True,
     cmd(opts, cwd=builddir, env=env)
 
 
-def make(srcdir, env, target=None, inplace=True, extra_opts=()):
+def make(srcdir, env, target=None, inplace=True, parallel=True, extra_opts=()):
     """Runs a Makefile."""
     builddir = get_builddir(srcdir, env, inplace)
     opts = [env['MAKE']]
+    if parallel:  # some builds break if parallel, others benefit significantly
+        opts.append('-j')
     if target is not None:
         opts.append(target)
     opts.extend(list(extra_opts))
