@@ -16,13 +16,13 @@ class FontconfigPackage(buildsystem.Package):
         return 'fontconfig'
 
     def version(self):
-        return '2.11.0'
+        return '2.12.1'
 
     def build_requires(self):
         return ['libtool', 'expat', 'libfreetype', 'zlib', 'libpng']
 
     def patches(self, env, srcdir):
-        return []
+        return ['0001-Fixes-for-Pedigree-with-musl-for-libc.patch']
 
     def options(self):
         return self._options

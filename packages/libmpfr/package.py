@@ -38,9 +38,7 @@ class LibmpfrPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-        steps.autoconf(srcdir, env, aclocal_flags=(
-                           '-I', os.path.join(srcdir, 'libltdl'),
-                           '-I', os.path.join('libltdl', 'm4')))
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         build_cc_machine = subprocess.check_output(

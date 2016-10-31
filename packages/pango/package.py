@@ -36,9 +36,7 @@ class PangoPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-
-        env['NOCONFIGURE'] = 'yes'
-        steps.cmd([os.path.join(srcdir, 'autogen.sh')], env=env, cwd=srcdir)
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

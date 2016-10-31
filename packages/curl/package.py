@@ -37,9 +37,7 @@ class CurlPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env, extra_flags=(
-            '-I', os.path.join(srcdir, 'libltdl'),
-            '-I', os.path.join(srcdir, 'libltdl', 'm4')))
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(

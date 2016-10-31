@@ -1,0 +1,34 @@
+From 9872d9887ea76d1cc873d0ed82497ada263b9b6b Mon Sep 17 00:00:00 2001
+From: Matthew Iselin <matthew@theiselins.net>
+Date: Mon, 31 Oct 2016 14:46:00 -0700
+Subject: [PATCH] Fixes for Pedigree with musl for libc
+
+---
+ src/fcstat.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/fcstat.c b/src/fcstat.c
+index 1734fa4..31f501d 100644
+--- a/src/fcstat.c
++++ b/src/fcstat.c
+@@ -352,7 +352,7 @@ FcFStatFs (int fd, FcStatFS *statb)
+ 	p = buf.f_fstypename;
+ #  endif
+     }
+-#elif defined(HAVE_FSTATFS) && (defined(HAVE_STRUCT_STATFS_F_FLAGS) || defined(HAVE_STRUCT_STATFS_F_FSTYPENAME) || defined(__linux__))
++#elif defined(HAVE_FSTATFS) && (defined(HAVE_STRUCT_STATFS_F_FLAGS) || defined(HAVE_STRUCT_STATFS_F_FSTYPENAME) || defined(__linux__) || defined(__pedigree__))
+     struct statfs buf;
+ 
+     memset (statb, 0, sizeof (FcStatFS));
+@@ -379,6 +379,8 @@ FcFStatFs (int fd, FcStatFS *statb)
+ 	}
+ 
+ 	return ret;
++#  elif defined(__pedigree__)
++    return ret;
+ #  else
+ #    error "BUG: No way to figure out with fstatfs()"
+ #  endif
+-- 
+2.8.0.rc3.226.g39d4020
+

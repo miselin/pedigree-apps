@@ -55,8 +55,7 @@ class LibBindPackage(buildsystem.Package):
         with open(os.path.join(srcdir, 'port/unknown/include/Makefile.in'), 'w') as f:
             f.write('all:\n\texit 0\n\n@BIND9_MAKE_RULES@\n')
 
-        steps.libtoolize(srcdir, env)
-        steps.autoconf(srcdir, env, aclocal_flags=('-I', 'libltdl', '-I', 'libltdl/m4'))
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         env['CFLAGS'] = '-fPIC -g -O2'

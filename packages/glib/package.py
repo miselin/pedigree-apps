@@ -16,16 +16,16 @@ class GlibPackage(buildsystem.Package):
         return 'glib'
 
     def version(self):
-        return '2.40.0'
+        return '2.51.0'
 
     def build_requires(self):
-        return ['libiconv', 'gettext', 'libffi', 'zlib']
+        return ['libiconv', 'gettext', 'libffi', 'libpcre', 'zlib']
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        shortversion = '2.40'
+        shortversion = '2.51'
         url = 'http://ftp.gnome.org/pub/gnome/sources/%(package)s/%(shortversion)s/%(package)s-%(version)s.tar.xz' % {
             'package': self.name(), 'version': self.version(),
             'shortversion': shortversion,
@@ -33,10 +33,11 @@ class GlibPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoconf(srcdir, env)
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
+        env['PCRE_CFLAGS'] = '-I/include'
+        env['PCRE_LIBS'] = '-L/libraries -lpcre'
         steps.run_configure(self, srcdir, env, extra_config=(
             'glib_cv_stack_grows=no', 'glib_cv_uscore=no', 'ac_cv_func_posix_getpwuid_r=no',
             'ac_cv_func_posix_getgrgid_r=no', '--with-libiconv'))

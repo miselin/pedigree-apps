@@ -35,11 +35,8 @@ class LibpngPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        libltdl_dir = os.path.join(srcdir, 'libltdl')
         steps.libtoolize(srcdir, env)
-        steps.autoconf(srcdir, env, aclocal_flags=(
-            '-I', libltdl_dir,
-            '-I', os.path.join(libltdl_dir, 'm4')))
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)

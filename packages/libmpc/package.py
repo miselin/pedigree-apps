@@ -36,10 +36,14 @@ class LibmpcPackage(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
+        # need an older autoconf/automake for libmpc
+        env['AUTORECONF'] = 'autoreconf2.64'
+        env['AUTOCONF'] = 'autoconf2.64'
+        env['AUTOMAKE'] = 'automake-1.11'
+        env['ACLOCAL'] = 'aclocal-1.11'
+
         steps.libtoolize(srcdir, env)
-        steps.autoconf(srcdir, env, aclocal_flags=(
-                           '-I', os.path.join(srcdir, 'libltdl'),
-                           '-I', os.path.join('libltdl', 'm4')))
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
