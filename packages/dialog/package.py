@@ -1,5 +1,6 @@
 
 import os
+import stat
 
 from support import buildsystem
 from support import steps
@@ -47,3 +48,11 @@ class DialogPackage(buildsystem.Package):
     def deploy(self, env, srcdir, deploydir):
         steps.make(srcdir, env, target='install',
                    extra_opts=('DESTDIR=' + deploydir,))
+
+    def postdeploy(self, env, srcdir, deploydir):
+        # fix libdialog.so permissions
+        path = os.path.join(deploydir, 'libraries', 'libdialog.so')
+
+        st = os.stat(path)
+        mode = st.st_mode | (stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR)
+        os.chmod(path, mode)

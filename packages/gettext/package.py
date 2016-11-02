@@ -1,5 +1,6 @@
 
 import os
+import stat
 
 from support import buildsystem
 from support import steps
@@ -33,7 +34,7 @@ class GettextPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
-        # steps.autoconf(srcdir, env)
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
@@ -46,6 +47,16 @@ class GettextPackage(buildsystem.Package):
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
         steps.make(srcdir, env, 'install')
+
+    def postdeploy(self, env, srcdir, deploydir):
+        # fix libintl.so permissions
+        # TODO: figure out why this installs with 0644 permissions, or whether
+        # pedigree's permission checking is wrong to want executable bits here
+        path = os.path.join(deploydir, 'libraries', 'libintl.so')
+
+        st = os.stat(path)
+        mode = st.st_mode | (stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR)
+        os.chmod(path, mode)
 
     def links(self, env, deploydir, cross_dir):
         libs = ['libgettextlib.so', 'libgettextpo.a', 'libasprintf.so',

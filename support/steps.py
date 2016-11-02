@@ -66,10 +66,12 @@ def autoreconf(srcdir, env, extra_flags=()):
     preserved_libtoolize = env.get('LIBTOOLIZE')
     env['LIBTOOLIZE'] = '/applications/libtoolize'
 
-    if os.path.isdir(os.path.join(srcdir, 'm4')):
-        all_extra_flags.append('-Im4')
-    if os.path.isdir(os.path.join(srcdir, 'libltdl', 'm4')):
-        all_extra_flags.append('-Ilibltdl/m4')
+    m4_dir = os.path.join(srcdir, 'm4')
+    if os.path.isdir(m4_dir):
+        all_extra_flags.append('-I' + m4_dir)
+    ltdl_m4_dir = os.path.join(srcdir, 'libltdl', 'm4')
+    if os.path.isdir(ltdl_m4_dir):
+        all_extra_flags.append('-I' + ltdl_m4_dir)
 
     # We ignore warnings which could otherwise become errors in autoreconf as
     # we're not the authors of any of these build files.
