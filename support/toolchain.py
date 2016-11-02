@@ -11,6 +11,19 @@ from . import util
 log = logging.getLogger(__name__)
 
 
+def get_cc(env):
+    """Get $CC while checking that it is valid."""
+    cc = env['CROSS_CC']
+    if not os.path.exists(cc):
+        cc = os.path.join(env['CROSS_BASE'], 'bin', env['CROSS_CC'])
+
+    if not os.path.exists(cc):
+        log.error('$CC (%s) is useless', cc)
+        return None
+
+    return cc
+
+
 def prepare_compiler(env):
     """Carries across changes from a Pedigree build into the cross-toolchain.
 
@@ -18,6 +31,12 @@ def prepare_compiler(env):
     other Pedigree-specific libraries.
     """
     log.info('== Preparing Compiler ==')
+
+    cc = get_cc(env)
+    if not cc:
+        raise Exception('could not find the C compiler')
+
+    vers = subprocess.check_output([cc, '-dumpversion']).strip()
 
     links = (
         # Source -> Target
@@ -47,6 +66,18 @@ def prepare_compiler(env):
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
         ('$PEDIGREE_BASE/build/musl/lib/libxnet.a',
             '$CROSS_BASE/$CROSS_TARGET/lib/'),
+
+        # crt
+        ('$PEDIGREE_BASE/build/musl/lib/crt1.o',
+            '$CROSS_BASE//lib/gcc/$CROSS_TARGET/%s/crt1.o' % vers),
+        ('$PEDIGREE_BASE/build/musl/lib/rcrt1.o',
+            '$CROSS_BASE//lib/gcc/$CROSS_TARGET/%s/rcrt1.o' % vers),
+        ('$PEDIGREE_BASE/build/musl/lib/Scrt1.o',
+            '$CROSS_BASE//lib/gcc/$CROSS_TARGET/%s/Scrt1.o' % vers),
+        ('$PEDIGREE_BASE/build/musl/lib/crti.o',
+            '$CROSS_BASE//lib/gcc/$CROSS_TARGET/%s/crti.o' % vers),
+        ('$PEDIGREE_BASE/build/musl/lib/crtn.o',
+            '$CROSS_BASE//lib/gcc/$CROSS_TARGET/%s/crtn.o' % vers),
 
         # NO $CROSS_TARGET include directory - use /include!!
         (None,
@@ -153,12 +184,8 @@ def chroot_spec(env):
         env: environment to use for the preparation
     """
 
-    cc = env['CROSS_CC']
-    if not os.path.exists(cc):
-        cc = os.path.join(env['CROSS_BASE'], 'bin', env['CROSS_CC'])
-
-    if not os.path.exists(cc):
-        log.error('$CC (%s) is useless', cc)
+    cc = get_cc(env)
+    if not cc:
         return
 
     # Get the existing specs.
