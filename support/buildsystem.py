@@ -2,6 +2,7 @@
 import imp
 import logging
 import os
+import stat
 import subprocess
 import sys
 
@@ -148,6 +149,29 @@ class Package(object):
 
                 log.debug('symlink: %s -> %s', target_pcfile_path, pcfile_path)
                 os.symlink(pcfile_path, target_pcfile_path)
+
+    def check(self, env, srcdir, deploydir):
+        """Performs checks to ensure the package is sane.
+
+        This is the last chance to fail a package build before it gets prepared
+        for uploading to the remote repository."""
+
+        for root, _, files in os.walk(deploydir):
+            for file in files:
+                path = os.path.join(root, file)
+
+                st = os.stat(path)
+
+                if path.endswith('.so'):
+                    # Check for executable permissions.
+                    if (stat.S_IMODE(st.st_mode) & (stat.S_IXOTH |
+                                                    stat.S_IXGRP |
+                                                    stat.S_IXUSR)) == 0:
+                        # Not OK.
+                        raise Exception('file %s should have executable '
+                                        'permissions' % path)
+
+                log.debug('file %s is OK' % path)
 
 
 def load_packages(env):

@@ -130,7 +130,7 @@ def in_chroot(env, packages, package, package_id, download_filename):
     deps.install_dependent_packages(dict(packages), package, env)
 
     pass1_steps = ('patch', 'prebuild', 'configure', 'build')
-    pass2_steps = ('deploy', 'postdeploy', 'repository_prep')
+    pass2_steps = ('deploy', 'postdeploy', 'check', 'repository_prep')
 
     download_target = os.path.join('/download', download_filename)
     deploydir = '/__deploy'
