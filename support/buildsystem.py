@@ -159,6 +159,8 @@ class Package(object):
         for root, _, files in os.walk(deploydir):
             for file in files:
                 path = os.path.join(root, file)
+                if not os.path.isfile(path):
+                    continue  # skip symlinks and non-regular-files
 
                 st = os.stat(path)
 

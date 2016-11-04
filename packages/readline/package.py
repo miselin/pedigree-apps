@@ -1,5 +1,6 @@
 
 import os
+import stat
 
 from support import buildsystem
 from support import steps
@@ -66,3 +67,12 @@ echo SHLIB_DLLVERSION=""
     def deploy(self, env, srcdir, deploydir):
         steps.make(srcdir, env, target='install', extra_opts=(
             'DESTDIR=%s' % deploydir,))
+
+    def postdeploy(self, env, srcdir, deploydir):
+        # fix libreadline.so permissions
+        for lib in ('libreadline.so', 'libhistory.so'):
+            path = os.path.join(deploydir, 'libraries', lib)
+
+            st = os.stat(path)
+            mode = st.st_mode | (stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR)
+            os.chmod(path, mode)

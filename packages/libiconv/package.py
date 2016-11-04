@@ -1,6 +1,7 @@
 
 import os
 import shutil
+import stat
 
 from support import buildsystem
 from support import steps
@@ -59,6 +60,16 @@ class LibiconvPackage(buildsystem.Package):
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
         steps.make(srcdir, env, 'install', inplace=False)
+
+    def postdeploy(self, env, srcdir, deploydir):
+        # fix libiconv.so permissions
+        for lib in ('libiconv.so', 'libcharset.so'):
+            path = os.path.join(deploydir, 'libraries', lib)
+
+            st = os.stat(path)
+            mode = st.st_mode | (stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR)
+            os.chmod(path, mode)
+
 
     def links(self, env, deploydir, cross_dir):
         libs = ['libcharset.a', 'libcharset.so', 'libiconv.so']

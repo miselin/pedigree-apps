@@ -39,7 +39,8 @@ class Grub2Package(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env,
+                            extra_config=('--disable-werror',))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

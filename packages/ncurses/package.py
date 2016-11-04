@@ -16,7 +16,7 @@ class NcursesPackage(buildsystem.Package):
         return 'ncurses'
 
     def version(self):
-        return '5.7'
+        return '6.0'
 
     def build_requires(self):
         return ['libtool']

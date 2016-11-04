@@ -87,7 +87,7 @@ def sort_dependencies(packages):
 
 
 def get_final_packages(packages):
-    """Gets the list of packages that nothing depends upon.
+    """Gets the list of packages that nothing depends upon for building.
 
     Returns:
         An iterable of package name strings.

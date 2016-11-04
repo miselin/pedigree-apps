@@ -46,7 +46,7 @@ class OpensslPackage(buildsystem.Package):
                   cwd=srcdir, env=env)
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
         steps.make(srcdir, env, target='install', extra_opts=(

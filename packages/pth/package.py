@@ -39,8 +39,8 @@ class PthPackage(buildsystem.Package):
         steps.run_configure(self, srcdir, env, not_paths=('docdir,'))
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
         steps.make(srcdir, env, target='install', extra_opts=(
-            'DESTDIR=%s' % deploydir,))
+            'DESTDIR=%s' % deploydir,), parallel=False)

@@ -45,4 +45,4 @@ class MtoolsPackage(buildsystem.Package):
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', parallel=False)
