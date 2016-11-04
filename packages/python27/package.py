@@ -21,10 +21,12 @@ class Python27Package(buildsystem.Package):
 
     def build_requires(self):
         return ['libtool', 'gettext', 'libiconv', 'curl', 'openssl', 'glib',
-                'zlib', 'sqlite', 'readline', 'ncurses']
+                'zlib', 'sqlite', 'readline', 'ncurses', 'gdbm']
 
     def patches(self, env, srcdir):
-        return ['Makefile.pre.in.diff', 'configure.in.diff', 'setup.py.diff']
+        # posix_close patch comes from http://bugs.python.org/issue20594
+        return ['Makefile.pre.in.diff', 'configure.in.diff', 'setup.py.diff',
+                'posix_close.patch']
 
     def options(self):
         return self._options
@@ -68,7 +70,7 @@ class Python27Package(buildsystem.Package):
         steps.make(srcdir, env, extra_opts=(
             'HOSTPYTHON=' + hostpython, 'HOSTPGEN=' + hostpgen,
             'CROSS_COMPILING=yes', 'MACHDEP=pedigree',
-            'BLDSHARED=%s -shared' % env['CROSS_CC']))
+            'BLDSHARED=%s -shared' % env['CROSS_CC']), parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
@@ -79,4 +81,4 @@ class Python27Package(buildsystem.Package):
         steps.make(srcdir, env, target='install', extra_opts=(
             'HOSTPYTHON=' + hostpython, 'HOSTPGEN=' + hostpgen,
             'CROSS_COMPILING=yes', 'MACHDEP=pedigree',
-            'BLDSHARED=%s -shared' % env['CROSS_CC']))
+            'BLDSHARED=%s -shared' % env['CROSS_CC']), parallel=False)
