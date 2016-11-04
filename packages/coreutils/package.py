@@ -22,7 +22,7 @@ class CoreutilsPackage(buildsystem.Package):
         return ['gettext', 'libgmp']
 
     def patches(self, env, srcdir):
-        return []
+        return ['0001-Fix-cross-compile-using-help2man-and-running-target-.patch']
 
     def options(self):
         return self._options

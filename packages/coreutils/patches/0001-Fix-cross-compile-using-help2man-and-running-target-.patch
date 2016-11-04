@@ -1,0 +1,25 @@
+From 4770eee07a99bd1ceba9687a6344619e6a2f1642 Mon Sep 17 00:00:00 2001
+From: Matthew Iselin <matthew@theiselins.net>
+Date: Fri, 4 Nov 2016 12:06:58 -0700
+Subject: [PATCH] Fix cross-compile using help2man and running target binaries.
+
+---
+ Makefile.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 36ffc67..5e04c44 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -5026,7 +5026,7 @@ find_upper_case_var = \
+    END {$$m and (warn "$@: do not use upper case in \@var{...}\n"), exit 1}'
+ 
+ @HAVE_PERL_FALSE@run_help2man = $(SHELL) $(srcdir)/man/dummy-man
+-@HAVE_PERL_TRUE@run_help2man = $(PERL) -- $(srcdir)/man/help2man
++@HAVE_PERL_TRUE@run_help2man = $(SHELL) $(srcdir)/man/dummy-man
+ ALL_MANS = $(man1_MANS) $(EXTRA_MANS)
+ 
+ # Dependencies common to all man pages.  Updated below.
+-- 
+2.8.0.rc3.226.g39d4020
+
