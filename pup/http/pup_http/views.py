@@ -1,5 +1,7 @@
 
 import base64
+import collections
+import itertools
 import jinja2
 import os
 import webapp2
@@ -21,6 +23,53 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
+def pad_list(l, to_length, value=0):
+    if len(l) < to_length:
+        l += [value] * to_length - len(l)
+    return l
+
+
+def version_cmp(vers1, vers2):
+    vers1 = [int(x) for x in vers1.split('.')]
+    vers2 = [int(x) for x in vers2.split('.')]
+
+    desired_len = max(len(vers1), len(vers2))
+
+    vers1 = pad_list(vers1, desired_len)
+    vers2 = pad_list(vers2, desired_len)
+
+    for comp in itertools.izip(vers1, vers2):
+        if vers1 < vers2:
+            return -1
+        elif vers1 > vers2:
+            return 1
+
+    return 0
+
+
+def dedup_packages(packages):
+    """De-duplicate packages in the given list by using the latest version."""
+    all_packages = collections.defaultdict(list)
+    for package in packages:
+        name = package.package_name
+        arch = package.architecture
+
+        all_packages['%s-%s' % (name, arch)].append(package)
+
+    result = []
+    for name, versions in all_packages.iteritems():
+        if len(versions) > 1:
+            versions = sorted(versions,
+                              cmp=lambda x, y: version_cmp(x.version,
+                                                           y.version),
+                              reverse=True)
+
+        result.append(versions[0])
+
+    # Sort resulting packages alphabetically.
+    return sorted(result, key=lambda x: x.package_name)
+
+
 class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
 
     def doPackage(self):
@@ -37,8 +86,10 @@ class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
 
     def doDatabase(self):
         packages = Package.query().iter()
+        all_packages = dedup_packages(packages)
+
         result = {}
-        for package in packages:
+        for package in all_packages:
             name = package.package_name
             arch = package.architecture
             vers = package.version
@@ -65,10 +116,12 @@ class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
         for dep in DepsModel.query().iter():
             graphs[dep.deps_arch] = True
 
+        packages = dedup_packages(Package.query().fetch(None))
+
         template_data = {
             # TODO(miselin): this should be figured out from datastore.
             'archs': archs,
-            'packages': Package.query().fetch(None),
+            'packages': packages,
             'graphs': graphs,
         }
 
