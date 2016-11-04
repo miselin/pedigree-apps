@@ -70,7 +70,7 @@ class Python27Package(buildsystem.Package):
         steps.make(srcdir, env, extra_opts=(
             'HOSTPYTHON=' + hostpython, 'HOSTPGEN=' + hostpgen,
             'CROSS_COMPILING=yes', 'MACHDEP=pedigree',
-            'BLDSHARED=%s -shared' % env['CROSS_CC']), parallel=False)
+            'BLDSHARED=%s -shared' % env['CROSS_CC']))
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
@@ -81,4 +81,4 @@ class Python27Package(buildsystem.Package):
         steps.make(srcdir, env, target='install', extra_opts=(
             'HOSTPYTHON=' + hostpython, 'HOSTPGEN=' + hostpgen,
             'CROSS_COMPILING=yes', 'MACHDEP=pedigree',
-            'BLDSHARED=%s -shared' % env['CROSS_CC']), parallel=False)
+            'BLDSHARED=%s -shared' % env['CROSS_CC']))
