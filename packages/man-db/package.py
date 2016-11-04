@@ -19,7 +19,7 @@ class ManDbPackage(buildsystem.Package):
         return '2.7.5'
 
     def build_requires(self):
-        return ['libpipeline']
+        return ['libpipeline', 'gdbm']
 
     def patches(self, env, srcdir):
         return []
@@ -41,7 +41,7 @@ class ManDbPackage(buildsystem.Package):
         steps.run_configure(self, srcdir, env)
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir

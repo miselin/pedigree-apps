@@ -38,7 +38,6 @@ class InetutilsPackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        env['LIBS'] = '-lbind'
         steps.run_configure(self, srcdir, env, extra_config=(
             '--disable-ifconfig', '--disable-logger', '--disable-rlogin',
             '--disable-rsh', '--disable-rexec', '--disable-rcp',

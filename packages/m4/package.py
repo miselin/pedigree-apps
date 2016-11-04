@@ -16,7 +16,7 @@ class m4Package(buildsystem.Package):
         return 'm4'
 
     def version(self):
-        return '1.4.14'
+        return '1.4.17'
 
     def build_requires(self):
         return ['libtool', 'gettext', 'libiconv']

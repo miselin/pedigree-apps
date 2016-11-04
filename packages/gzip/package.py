@@ -14,7 +14,7 @@ class GzipPackage(buildsystem.Package):
         return 'gzip'
 
     def version(self):
-        return '1.4'
+        return '1.8'
 
     def build_requires(self):
         return []

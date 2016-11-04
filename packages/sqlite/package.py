@@ -19,7 +19,7 @@ class Sqlite(buildsystem.Package):
         return '3090200'
 
     def build_requires(self):
-        return []
+        return ['libtool']
 
     def patches(self, env, srcdir):
         return []
@@ -35,7 +35,8 @@ class Sqlite(buildsystem.Package):
         steps.download(url, target)
 
     def prebuild(self, env, srcdir):
-        pass
+        steps.libtoolize(srcdir, env)
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env)
