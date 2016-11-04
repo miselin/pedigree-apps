@@ -23,16 +23,16 @@ class StepsTest(unittest.TestCase):
 
     def test_libtoolize(self):
         steps.libtoolize('.', {})
-        steps.cmd.assert_called_with(['/applications/libtoolize', '-i', '-f', '--ltdl'], cwd='.', env={})
+        steps.cmd.assert_called_with(['/applications/libtoolize', '-i', '-v', '-f', '--ltdl'], cwd='.', env={})
         steps.libtoolize('.', {}, ltdl_dir='foo')
-        steps.cmd.assert_called_with(['/applications/libtoolize', '-i', '-f', '--ltdl=foo'], cwd='.', env={})
+        steps.cmd.assert_called_with(['/applications/libtoolize', '-i', '-v', '-f', '--ltdl=foo'], cwd='.', env={})
 
     def test_autoreconf(self):
         env = {'AUTORECONF': 'a'}
         steps.autoreconf('.', env)
-        steps.cmd.assert_called_with(['a', '-ifs'], cwd='.', env=env)
+        steps.cmd.assert_called_with(['a', '-ifs', '-W', 'none'], cwd='.', env=env)
         steps.autoreconf('.', env, extra_flags=('foo',))
-        steps.cmd.assert_called_with(['a', '-ifs', 'foo'], cwd='.', env=env)
+        steps.cmd.assert_called_with(['a', '-ifs', '-W', 'none', 'foo'], cwd='.', env=env)
 
 
 if __name__ == '__main__':

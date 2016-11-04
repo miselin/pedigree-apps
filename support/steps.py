@@ -75,8 +75,8 @@ def autoreconf(srcdir, env, extra_flags=()):
 
     # We ignore warnings which could otherwise become errors in autoreconf as
     # we're not the authors of any of these build files.
-    cmd([env['AUTORECONF'], '-ifs', '-W', 'none'] + all_extra_flags, cwd=srcdir,
-        env=env)
+    cmd([env['AUTORECONF'], '-ifs', '-W', 'none'] + all_extra_flags,
+        cwd=srcdir, env=env)
     if preserved_libtoolize:
         env['LIBTOOLIZE'] = preserved_libtoolize
     else:
