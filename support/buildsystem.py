@@ -197,10 +197,15 @@ def load_packages(env):
                 log.exception('%s failed to load, ignoring.', entry)
 
     # Collect subclasses of packages.
-    collected_packages = Package.__subclasses__()
-    for package_cls in collected_packages:
-        package = package_cls(sys.modules[package_cls.__module__].__file__)
-        if package.name():
-            all_packages[package.name()] = package
+    def enumerate_subclasses(root_class):
+        collected_packages = root_class.__subclasses__()
+        for package_cls in collected_packages:
+            package = package_cls(sys.modules[package_cls.__module__].__file__)
+            if package.name():
+                all_packages[package.name()] = package
+
+            enumerate_subclasses(package_cls)
+
+    enumerate_subclasses(Package)
 
     return all_packages
