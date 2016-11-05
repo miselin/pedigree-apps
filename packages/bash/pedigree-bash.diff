@@ -1,0 +1,19 @@
+diff -rup bash-4.1.old/general.h bash-4.1/general.h
+--- bash-4.1.old/general.h	2016-05-27 19:26:33.581751135 +1000
++++ bash-4.1/general.h	2016-05-27 19:36:18.310883065 +1000
+@@ -248,8 +248,13 @@ typedef int QSFUNC ();
+    x == string, c == character */
+ 
+ #if !defined (__CYGWIN__)
+-#  define ABSPATH(x)	((x)[0] == '/')
+-#  define RELPATH(x)	((x)[0] != '/')
++#  if defined (__PEDIGREE__)
++#    define ABSPATH(x)  (strstr(x, "»/") != NULL)
++#    define RELPATH(x)  (!ABSPATH(x))
++#  else
++#    define ABSPATH(x)	((x)[0] == '/')
++#    define RELPATH(x)	((x)[0] != '/')
++#  endif
+ #else /* __CYGWIN__ */
+ #  define ABSPATH(x)	(((x)[0] && ISALPHA((unsigned char)(x)[0]) && (x)[1] == ':') || ISDIRSEP((x)[0]))
+ #  define RELPATH(x)	(ABSPATH(x) == 0)
