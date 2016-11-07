@@ -34,11 +34,11 @@ diff -rupN httpd-2.2.17-old/config.layout httpd-2.2.17/config.layout
 diff -rupN httpd-2.2.17-old/pedigree.cache httpd-2.2.17/pedigree.cache
 --- httpd-2.2.17-old/pedigree.cache	1970-01-01 10:00:00.000000000 +1000
 +++ httpd-2.2.17/pedigree.cache	2010-11-15 17:01:26.713019654 +1000
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,34 @@
 +# Pedigree autoconf cache file for Apache2
 +
-+# No /dev/zero
-+ac_cv_file__dev_zero=no
++# Yes, we have /dev/zero
++ac_cv_file__dev_zero=yes
 +
 +# setpgrp takes no arguments
 +ac_cv_func_setpgrp_void=yes
@@ -63,6 +63,12 @@ diff -rupN httpd-2.2.17-old/pedigree.cache httpd-2.2.17/pedigree.cache
 +
 +# Fix struct rlimit
 +ac_cv_struct_rlimit=yes
++
++# No PROCESS_SHARED locks.
++ac_cv_define_PTHREAD_PROCESS_SHARED=no
++
++# More threads stuff.
++apr_cv_mutex_robust_shared=no
 diff -rupN httpd-2.2.17-old/srclib/pcre/Makefile.in httpd-2.2.17/srclib/pcre/Makefile.in
 --- httpd-2.2.17-old/srclib/pcre/Makefile.in	2005-02-11 22:00:41.000000000 +1000
 +++ httpd-2.2.17/srclib/pcre/Makefile.in	2010-11-15 17:41:30.601949110 +1000
@@ -98,18 +104,20 @@ diff -rupN httpd-2.2.17-old/server/Makefile.in httpd-2.2.17/server/Makefile.in
 
 --- httpd-2.2.27.old/srclib/apr/Makefile.in  2014-05-22 16:19:13.305163313 +1000
 +++ httpd-2.2.27/srclib/apr/Makefile.in      2014-05-22 16:20:52.427576020 +1000
-@@ -133,8 +133,11 @@ OBJECTS_gen_test_char = tools/gen_test_c
+@@ -137,9 +137,12 @@ OBJECTS_gen_test_char = tools/gen_test_c
  tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
     $(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
  
 -include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
+-	$(APR_MKDIR) include/private
 -	tools/gen_test_char@EXEEXT@ > $@
 +tools/host_gen_test_char@EXEEXT@:
 +	gcc -o $@ $(EXTRA_INCLUDES) $(EXTRA_LDFLAGS) $(EXTRA_LIBS) tools/gen_test_char.c
 +
 +include/private/apr_escape_test_char.h: tools/host_gen_test_char@EXEEXT@
++	$(APR_MKDIR) include/private
 +	tools/host_gen_test_char@EXEEXT@ > $@
  
  LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
-        @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
+         @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 

@@ -16,7 +16,7 @@ class LynxPackage(buildsystem.Package):
         return 'lynx'
 
     def version(self):
-        return '2.8.7rel.2'
+        return '2.8.8rel.2'
 
     def build_requires(self):
         return ['curl', 'openssl', 'ncurses', 'gzip']
@@ -28,7 +28,7 @@ class LynxPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://%(package)s.isc.org/current/%(package)s%(version)s.tar.gz' % {
+        url = 'http://invisible-mirror.net/archives/lynx/tarballs/%(package)s%(version)s.tar.gz' % {
             'package': self.name(),
             'version': self.version(),
         }
@@ -44,5 +44,5 @@ class LynxPackage(buildsystem.Package):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install',
+                   extra_opts=('DESTDIR=%s' % deploydir,))

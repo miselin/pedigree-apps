@@ -23,7 +23,7 @@ class DosboxPackage(buildsystem.Package):
                 'expat', 'libfreetype']
 
     def patches(self, env, srcdir):
-        return ['status.h.diff']
+        return ['status.h.diff', '0001-Ensure-offsetof-is-present.patch']
 
     def options(self):
         return self._options
@@ -46,7 +46,7 @@ class DosboxPackage(buildsystem.Package):
             '--enable-fpu-x86', '--disable-unaligned-memory'))
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir

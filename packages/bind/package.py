@@ -36,8 +36,10 @@ class BindPackage(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
+        steps.autoreconf(srcdir, env)
 
     def configure(self, env, srcdir):
+        env['BUILD_CC'] = 'gcc'
         steps.run_configure(self, srcdir, env,
                             extra_config=('--with-randomdev=/dev/urandom',
                                           '--without-openssl'))
@@ -46,5 +48,4 @@ class BindPackage(buildsystem.Package):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', extra_opts=('DESTDIR=%s' % deploydir,))

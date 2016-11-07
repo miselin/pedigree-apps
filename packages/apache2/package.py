@@ -19,7 +19,7 @@ class Apache2Package(buildsystem.Package):
         return '2.2.31'
 
     def build_requires(self):
-        return ['libtool', 'glib']
+        return ['libtool', 'glib', 'expat', 'libpcre', 'libiconv', 'sqlite']
 
     def patches(self, env, srcdir):
         return ['2.2.27/2.2.17.diff']
@@ -37,13 +37,23 @@ class Apache2Package(buildsystem.Package):
 
     def prebuild(self, env, srcdir):
         steps.libtoolize(srcdir, env)
+        steps.libtoolize(os.path.join(srcdir, 'srclib', 'apr'), env)
+        steps.libtoolize(os.path.join(srcdir, 'srclib', 'apr-util'), env)
+
+        steps.autoreconf(srcdir, env)
+        steps.autoreconf(os.path.join(srcdir, 'srclib', 'apr'), env)
+        steps.autoreconf(os.path.join(srcdir, 'srclib', 'apr-util'), env)
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(self, srcdir, env,
+                            extra_config=('--enable-layout=Pedigree',
+                                          '--cache-file=/src/pedigree.cache',
+                                          '--without-sendfile'))
+
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(srcdir, env, target='install', parallel=False)

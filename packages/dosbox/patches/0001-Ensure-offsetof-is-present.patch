@@ -1,0 +1,25 @@
+From 603c1c156dc9216a3b181d35e30320043c92f6c7 Mon Sep 17 00:00:00 2001
+From: Matthew Iselin <matthew@theiselins.net>
+Date: Mon, 7 Nov 2016 14:18:20 -0800
+Subject: [PATCH] Ensure offsetof is present.
+
+---
+ include/dos_inc.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/dos_inc.h b/include/dos_inc.h
+index 290d76b..9222399 100644
+--- a/include/dos_inc.h
++++ b/include/dos_inc.h
+@@ -21,6 +21,8 @@
+ #ifndef DOSBOX_DOS_INC_H
+ #define DOSBOX_DOS_INC_H
+ 
++#include <cstddef>
++
+ #ifndef DOSBOX_DOS_SYSTEM_H
+ #include "dos_system.h"
+ #endif
+-- 
+2.8.0.rc3.226.g39d4020
+
