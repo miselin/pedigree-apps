@@ -29,7 +29,8 @@ class AutoconfBasePackage(buildsystem.Package):
         return ['libtool']
 
     def patches(self, env, srcdir):
-        return []
+        patch_filename = 'doc-%s.patch' % self.version()
+        return [patch_filename]
 
     def options(self):
         return self._options
@@ -55,11 +56,11 @@ class AutoconfBasePackage(buildsystem.Package):
                             extra_config=extra_config)
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env, inplace=False)
+        steps.make(srcdir, env, inplace=False, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install', inplace=False)
+        steps.make(srcdir, env, target='install', inplace=False, parallel=False)
 
 
 extra_types = {}
