@@ -10,7 +10,7 @@ $ELEVATE apt-get install -y \
     build-essential libmpfr4 libgmp10 libmpc3 scons ccache diffutils patch \
     texinfo sqlite3 wget libsdl1.2-dev autoconf automake groff-base \
     gtk-doc-tools python-libxml2 bison flex libmpfr-dev libmpc-dev \
-    libgmp3-dev automake1.11 autoconf2.64 groff help2man
+    libgmp3-dev automake1.11 autoconf2.64 groff help2man gperf
 
 # TODO: libSDL-dev is just for sdl-config, which we should provide somewhere...
 
