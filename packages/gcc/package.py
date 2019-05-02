@@ -18,7 +18,7 @@ class GccPackage(buildsystem.Package):
         return 'gcc'
 
     def version(self):
-        return '4.8.2'
+        return '8.3.0'
 
     def build_requires(self):
         return ['libtool', 'libgmp', 'libmpfr', 'libmpc', 'libffi', 'libiconv',

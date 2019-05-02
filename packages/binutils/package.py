@@ -16,7 +16,7 @@ class BinutilsPackage(buildsystem.Package):
         return 'binutils'
 
     def version(self):
-        return '2.24'
+        return '2.32'
 
     def build_requires(self):
         return ['libtool', 'libiconv', 'gettext']
