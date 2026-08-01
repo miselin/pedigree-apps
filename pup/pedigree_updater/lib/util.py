@@ -7,9 +7,9 @@ except ImportError:
     import json
 
 try:
-    from ConfigParser import NoOptionError, SafeConfigParser
+    from ConfigParser import ConfigParser, NoOptionError
 except ImportError:
-    from configparser import NoOptionError, SafeConfigParser
+    from configparser import ConfigParser, NoOptionError
 
 
 log = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ def SqliteDictFactory(cursor, row):
     return {col[0]: row[i] for i, col in enumerate(cursor.description)}
 
 
-class PupConfig(object):
+class PupConfig:
     def __init__(self, repo_urls, local_cache, install_root, architecture, upload_url):
         self.repo_urls = repo_urls
         self.upload_url = upload_url
@@ -68,7 +68,7 @@ def load_config(args):
         return None
 
     # Slurp the config file.
-    parser = SafeConfigParser()
+    parser = ConfigParser()
     parser.read(pup_config)
 
     if parser.has_section("remotes"):

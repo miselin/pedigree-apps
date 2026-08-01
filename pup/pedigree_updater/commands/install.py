@@ -23,7 +23,9 @@ import hashlib
 import logging
 import os
 import shutil
+import sys
 import tarfile
+from collections import defaultdict
 from pathlib import Path
 
 import requests
@@ -31,6 +33,36 @@ import requests
 from . import base
 
 log = logging.getLogger(__name__)
+
+
+def macos_safe_members(tar, log):
+    """Calculate the list of allowed files to extract that works on a case-insensitive FS"""
+    groups = defaultdict(list)
+
+    for member in tar.getmembers():
+        key = os.path.normpath(member.name).casefold()
+        groups[key].append(member)
+
+    allowed = []
+
+    for members in groups.values():
+        if len(members) == 1:
+            allowed.append(members[0])
+            continue
+
+        # Prefer an actual file/directory over a symlink.
+        chosen = next((m for m in members if not (m.issym() or m.islnk())), members[0])
+        skipped = [m.name for m in members if m is not chosen]
+
+        log.critical(
+            "PACKAGE INSTALL DEGRADED: case-insensitive filesystem collision; "
+            "keeping %r and skipping %r",
+            chosen.name,
+            skipped,
+        )
+        allowed.append(chosen)
+
+    return allowed
 
 
 class InstallCommand(base.PupCommand):
@@ -124,6 +156,10 @@ class InstallCommand(base.PupCommand):
 
             # Install.
             with tarfile.open(package_file) as t:
-                t.extractall(config.install_root)
+                members = (
+                    macos_safe_members(t, log) if sys.platform == "darwin" else None
+                )
+
+                t.extractall(config.install_root, members=members)
 
             print('Package "{}" is now installed.'.format(package["name"]))
