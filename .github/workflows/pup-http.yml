@@ -1,0 +1,27 @@
+name: PUP HTTP
+
+on:
+  push:
+    paths:
+      - ".github/workflows/pup-http.yml"
+      - "pup/http/**"
+  pull_request:
+    paths:
+      - ".github/workflows/pup-http.yml"
+      - "pup/http/**"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pup/http/requirements.txt
+      - run: python -m pip install -r pup/http/requirements.txt
+      - run: python -m unittest discover -s pup/http/tests

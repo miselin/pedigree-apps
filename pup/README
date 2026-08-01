@@ -7,3 +7,35 @@ compilation and installation on Pedigree proper.
 The pup tool allows for package creation, registering of packages with
 repository databases, synchronisation of repository databases to the local host,
 and installation of packages based on the metadata in a repository database.
+
+Building
+--------
+
+Build a wheel from this directory with a PEP 517 frontend. For example:
+
+    uv build --wheel
+
+or:
+
+    python3 -m build --wheel
+
+The resulting wheel is written to `dist/`. The project requires Python 3.8 or
+newer and declares Requests as a runtime dependency.
+
+Releasing
+---------
+
+PUP wheels are published separately from normal packages. The public service
+uses an integer release serial, available from:
+
+    curl https://pup.pedigree-project.org/pup-version
+
+To publish the next serial, authenticate `gcloud` with access to the
+`the-pedigree-project` project and run:
+
+    current_release=$(curl -fsS https://pup.pedigree-project.org/pup-version)
+    python3 dist.py dist/pup-1.2-py3-none-any.whl "$((current_release + 1))"
+
+The script reads the legacy `upload` credential directly from Datastore using
+the active `gcloud` identity. It does not print or save the credential. For an
+environment without `gcloud`, provide it through `PUP_UPLOAD_KEY` instead.

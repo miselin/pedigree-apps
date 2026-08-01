@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pup"
+version = "1.2"
+description = "Pedigree UPdater"
+readme = { file = "README", content-type = "text/plain" }
+requires-python = ">=3.8"
+license = "ISC"
+authors = [
+    { name = "Matthew Iselin", email = "matthew@theiselins.net" },
+]
+dependencies = [
+    "requests>=2.9.1",
+]
+
+[project.urls]
+Homepage = "https://www.pedigree-project.org"
+Repository = "https://github.com/miselin/pedigree-apps"
+
+[project.scripts]
+pup = "pedigree_updater.frontend.main:main"
+
+[tool.setuptools.packages.find]
+include = ["pedigree_updater*"]
+
+[tool.setuptools.data-files]
+config = ["pup.conf.default"]

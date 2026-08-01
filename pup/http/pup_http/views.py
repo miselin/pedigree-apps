@@ -1,348 +1,232 @@
-
 import base64
 import collections
-import itertools
-import jinja2
-import os
-import webapp2
+import hmac
+import json
+from functools import cmp_to_key
+from io import BytesIO
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
-from models import Package, Authorisation, PupModel, DepsModel
-
+from flask import Flask, Response, render_template, request
 from google.appengine.ext import blobstore
-from google.appengine.ext.webapp import blobstore_handlers
+
+from .models import Authorisation, DepsModel, Package, PupModel
+
+flask_app = Flask(__name__, static_folder=None)
 
 
-JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
+def version_cmp(version_one, version_two):
+    parts_one = [int(component) for component in version_one.split(".")]
+    parts_two = [int(component) for component in version_two.split(".")]
+    desired_length = max(len(parts_one), len(parts_two))
 
-
-def pad_list(l, to_length, value=0):
-    if len(l) < to_length:
-        l += [value] * to_length - len(l)
-    return l
-
-
-def version_cmp(vers1, vers2):
-    vers1 = [int(x) for x in vers1.split('.')]
-    vers2 = [int(x) for x in vers2.split('.')]
-
-    desired_len = max(len(vers1), len(vers2))
-
-    vers1 = pad_list(vers1, desired_len)
-    vers2 = pad_list(vers2, desired_len)
-
-    for comp in itertools.izip(vers1, vers2):
-        if vers1 < vers2:
-            return -1
-        elif vers1 > vers2:
-            return 1
-
-    return 0
+    parts_one.extend([0] * (desired_length - len(parts_one)))
+    parts_two.extend([0] * (desired_length - len(parts_two)))
+    return (parts_one > parts_two) - (parts_one < parts_two)
 
 
 def dedup_packages(packages):
-    """De-duplicate packages in the given list by using the latest version."""
+    """De-duplicate packages by name and architecture, keeping the latest."""
     all_packages = collections.defaultdict(list)
     for package in packages:
-        name = package.package_name
-        arch = package.architecture
-
-        all_packages['%s-%s' % (name, arch)].append(package)
+        key = f"{package.package_name}-{package.architecture}"
+        all_packages[key].append(package)
 
     result = []
-    for name, versions in all_packages.iteritems():
-        if len(versions) > 1:
-            versions = sorted(versions,
-                              cmp=lambda x, y: version_cmp(x.version,
-                                                           y.version),
-                              reverse=True)
-
+    for versions in all_packages.values():
+        versions.sort(
+            key=cmp_to_key(
+                lambda left, right: version_cmp(left.version, right.version)
+            ),
+            reverse=True,
+        )
         result.append(versions[0])
 
-    # Sort resulting packages alphabetically.
-    return sorted(result, key=lambda x: x.package_name)
+    return sorted(result, key=lambda package: package.package_name)
 
 
-class PackageIndex(blobstore_handlers.BlobstoreDownloadHandler):
+def text_response(body, status=200, content_type="text/plain"):
+    return Response(body, status=status, content_type=content_type)
 
-    def doPackage(self):
-        requested_package = self.request.path.strip('/')
 
-        package = Package.query(Package.fullname == requested_package).get()
+def request_is_authorised():
+    credential_name = request.values.get("key")
+    credential_value = request.values.get("key_value")
+    if not credential_name or not credential_value:
+        return False
 
-        if package and blobstore.get(package.blob):
-            self.response.headers['Content-Type'] = 'application/octet-stream'
-            self.send_blob(package.blob)
-        else:
-            self.error(404)
-            self.response.write('That package does not exist.')
+    credential = Authorisation.query(Authorisation.key_name == credential_name).get()
+    return bool(
+        credential
+        and credential.allowed
+        and hmac.compare_digest(credential.key_value, credential_value)
+    )
 
-    def doDatabase(self):
-        packages = Package.query().iter()
-        all_packages = dedup_packages(packages)
 
-        result = {}
-        for package in all_packages:
-            name = package.package_name
-            arch = package.architecture
-            vers = package.version
-            sha1 = package.sha1
+def invalid_credentials():
+    return text_response("Invalid credentials.", status=403)
 
-            result['%s-%s' % (name, arch)] = {
-                'architecture': arch,
-                'version': vers,
-                'name': name,
-                'sha1': sha1,
-            }
 
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.write(json.dumps(result))
+def invalid_parameters():
+    return text_response("Incorrect parameters.", status=400)
 
-    def doIndex(self):
-        self.response.headers['Content-Type'] = 'text/html'
 
-        query = Package.query(projection=['architecture'], distinct=True)
-        archs = [x.architecture for x in query]
+@flask_app.get("/")
+@flask_app.get("/index.<extension>")
+def index(extension=None):
+    architecture_query = Package.query(projection=["architecture"], distinct=True)
+    architectures = [package.architecture for package in architecture_query]
+    graphs = {dependency.deps_arch: True for dependency in DepsModel.query().iter()}
+    packages = dedup_packages(Package.query().fetch(None))
+    return render_template(
+        "index.html",
+        archs=architectures,
+        packages=packages,
+        graphs=graphs,
+    )
 
-        # Load graphs.
-        graphs = {}
-        for dep in DepsModel.query().iter():
-            graphs[dep.deps_arch] = True
 
-        packages = dedup_packages(Package.query().fetch(None))
-
-        template_data = {
-            # TODO(miselin): this should be figured out from datastore.
-            'archs': archs,
-            'packages': packages,
-            'graphs': graphs,
+@flask_app.get("/packages.pupdb")
+def package_database():
+    result = {}
+    for package in dedup_packages(Package.query().iter()):
+        key = f"{package.package_name}-{package.architecture}"
+        result[key] = {
+            "architecture": package.architecture,
+            "version": package.version,
+            "name": package.package_name,
+            "sha1": package.sha1,
         }
 
-        template = JINJA_ENVIRONMENT.get_template('templates/index.html')
-        self.response.write(template.render(template_data))
-
-    def get(self):
-        path = self.request.path
-        if path == '/' or path.startswith('/index.'):
-            self.doIndex()
-        elif path == '/packages.pupdb':
-            self.doDatabase()
-        else:
-            self.doPackage()
+    return text_response(json.dumps(result), content_type="application/json")
 
 
-class PackageUploadBlobstore(blobstore_handlers.BlobstoreUploadHandler):
+@flask_app.get("/<path:requested_package>")
+def download_package(requested_package):
+    if not requested_package.endswith((".pup", ".pupdb", ".whl")):
+        return text_response("That package does not exist.", status=404)
 
-    def badrequest(self):
-        self.error(400)
-        self.response.write('Incorrect parameters.')
+    package = Package.query(Package.fullname == requested_package).get()
+    blob_info = blobstore.get(package.blob) if package else None
+    if not blob_info:
+        return text_response("That package does not exist.", status=404)
 
-    def post(self):
-        # OK, we can process the rest now.
-        name = self.request.get('name')
-        arch = self.request.get('arch')
-        vers = self.request.get('vers')
-        sha1 = self.request.get('sha1')
-        if not (name and arch and vers and sha1):
-            self.badrequest()
-            return
-
-        try:
-            uploaded = self.get_uploads()[0]
-            uploaded_key = uploaded.key()
-        except:
-            self.badrequest()
-            return
-
-        fullname = '%s-%s-%s.pup' % (name, vers, arch)
-
-        # Do we already know of a package like this?
-        known_package = Package.query(Package.fullname == fullname).get()
-
-        if not known_package:
-            # Now create the record.
-            package = Package(fullname=fullname, package_name=name,
-                              architecture=arch, version=vers, sha1=sha1,
-                              blob=uploaded_key)
-            package.put()
-        else:
-            # Wipe out the created item in blobstore, we don't need it.
-            item = blobstore.get(known_package.blob)
-            item.delete()
-
-            # Update the package contents.
-            known_package.sha1 = sha1
-            known_package.blob = uploaded_key
-            known_package.put()
-
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('ok')
+    headers = blobstore.BlobstoreDownloadHandler().send_blob(
+        request.environ,
+        blob_info,
+    )
+    headers["Content-Type"] = "application/octet-stream"
+    return "", headers
 
 
-class PackageUpload(webapp2.RequestHandler):
-
-    def noauth(self):
-        self.error(403)
-        self.response.write('Invalid credentials.')
-
-    def get(self):
-        # Does the user have the right credential?
-        cred_name = self.request.get('key')
-        cred_value = self.request.get('key_value')
-        if not (cred_name and cred_value):
-            self.noauth()
-            return
-
-        query = Authorisation.query(Authorisation.key_name == cred_name)
-        credential = query.get()
-        if not credential:
-            self.noauth()
-            return
-
-        if credential.key_value != cred_value:
-            self.noauth()
-            return
-
-        if not credential.allowed:
-            self.noauth()
-            return
-
-        # Get URL for blobstore upload.
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write(blobstore.create_upload_url('/blobstore'))
+@flask_app.get("/upload")
+def package_upload_url():
+    if not request_is_authorised():
+        return invalid_credentials()
+    return text_response(blobstore.create_upload_url("/blobstore"))
 
 
-class Pup(webapp2.RequestHandler):
+@flask_app.post("/blobstore")
+def package_upload_blobstore():
+    request_body = request.get_data(cache=True)
+    name = request.form.get("name")
+    architecture = request.form.get("arch")
+    version = request.form.get("vers")
+    sha1 = request.form.get("sha1")
+    if not all((name, architecture, version, sha1)):
+        return invalid_parameters()
 
-    def noauth(self):
-        self.error(403)
-        self.response.write('Invalid credentials.')
+    request.environ["wsgi.input"] = BytesIO(request_body)
+    try:
+        uploads = blobstore.BlobstoreUploadHandler().get_uploads(request.environ)
+    except blobstore.BlobInfoParseError:
+        return invalid_parameters()
+    if not uploads:
+        return invalid_parameters()
+    uploaded_key = uploads[0].key()
 
-    def badrequest(self):
-        self.error(400)
-        self.response.write('Incorrect parameters.')
+    fullname = f"{name}-{version}-{architecture}.pup"
+    known_package = Package.query(Package.fullname == fullname).get()
+    if known_package:
+        previous_blob = blobstore.get(known_package.blob)
+        if previous_blob:
+            previous_blob.delete()
+        known_package.sha1 = sha1
+        known_package.blob = uploaded_key
+        known_package.put()
+    else:
+        Package(
+            fullname=fullname,
+            package_name=name,
+            architecture=architecture,
+            version=version,
+            sha1=sha1,
+            blob=uploaded_key,
+        ).put()
 
-    def get(self):
-        pup = PupModel.query().order(-PupModel.pup_version).get()
-        if not pup:
-            self.error(404)
-            self.response.write('pup is not present')
-        else:
-            if self.request.path == '/pup-version':
-                self.response.headers['Content-Type'] = 'text/plain'
-                self.response.write(pup.pup_version)
-            else:
-                content_type = 'application/octet-stream'
-                self.response.headers['Content-Type'] = content_type
-                self.response.write(pup.pup_contents)
-
-    def post(self):
-        # Does the user have the right credential?
-        cred_name = self.request.get('key')
-        cred_value = self.request.get('key_value')
-        if not (cred_name and cred_value):
-            self.noauth()
-            return
-
-        query = Authorisation.query(Authorisation.key_name == cred_name)
-        credential = query.get()
-        if not credential:
-            self.noauth()
-            return
-
-        if credential.key_value != cred_value:
-            self.noauth()
-            return
-
-        if not credential.allowed:
-            self.noauth()
-            return
-
-        version = int(self.request.get('version'))
-
-        # Load contents.
-        blob = self.request.get('blob')
-        if not blob:
-            self.badrequest()
-            return
-
-        blob = base64.b64decode(blob)
-
-        known_pup = PupModel.query(PupModel.pup_version == version).get()
-        if known_pup:
-            self.error(400)
-            self.response.write('Version already exists.')
-            return
-
-        PupModel(pup_version=version, pup_contents=blob).put()
-
-        self.response.write('ok')
+    return text_response("ok")
 
 
-class Svg(webapp2.RequestHandler):
+@flask_app.route("/pup.whl", methods=["GET", "POST"])
+@flask_app.route("/pup-version", methods=["GET", "POST"])
+def pup():
+    if request.method == "GET":
+        latest_pup = PupModel.query().order(-PupModel.pup_version).get()
+        if not latest_pup:
+            return text_response("pup is not present", status=404)
+        if request.path == "/pup-version":
+            return text_response(str(latest_pup.pup_version))
+        return text_response(
+            latest_pup.pup_contents,
+            content_type="application/octet-stream",
+        )
 
-    def noauth(self):
-        self.error(403)
-        self.response.write('Invalid credentials.')
+    if not request_is_authorised():
+        return invalid_credentials()
 
-    def badrequest(self):
-        self.error(400)
-        self.response.write('Incorrect parameters.')
+    try:
+        version = int(request.form.get("version", ""))
+        contents = base64.b64decode(request.form.get("blob", ""), validate=True)
+    except ValueError, TypeError:
+        return invalid_parameters()
+    if not contents:
+        return invalid_parameters()
 
-    def get(self):
-        path = self.request.path
-        arch = path.replace('.svg', '').split('-', 1)[1]
+    known_pup = PupModel.query(PupModel.pup_version == version).get()
+    if known_pup:
+        return text_response("Version already exists.", status=400)
 
-        deps = DepsModel.query(DepsModel.deps_arch == arch).get()
-        if not deps:
-            self.error(404)
-            self.response.write('invalid path')
-        else:
-            self.response.headers['Content-Type'] = 'image/svg+xml'
-            self.response.write(deps.deps_contents)
+    PupModel(pup_version=version, pup_contents=contents).put()
+    return text_response("ok")
 
-    def post(self):
-        # Does the user have the right credential?
-        cred_name = self.request.get('key')
-        cred_value = self.request.get('key_value')
-        if not (cred_name and cred_value):
-            self.noauth()
-            return
 
-        query = Authorisation.query(Authorisation.key_name == cred_name)
-        credential = query.get()
-        if not credential:
-            self.noauth()
-            return
+@flask_app.route("/<path:dependency_graph>.svg", methods=["GET", "POST"])
+def dependency_graph(dependency_graph):
+    try:
+        architecture = dependency_graph.split("-", 1)[1]
+    except IndexError:
+        return text_response("invalid path", status=404)
 
-        if credential.key_value != cred_value:
-            self.noauth()
-            return
+    if request.method == "GET":
+        dependency = DepsModel.query(DepsModel.deps_arch == architecture).get()
+        if not dependency:
+            return text_response("invalid path", status=404)
+        return text_response(dependency.deps_contents, content_type="image/svg+xml")
 
-        if not credential.allowed:
-            self.noauth()
-            return
+    if not request_is_authorised():
+        return invalid_credentials()
 
-        arch = self.request.get('arch')
+    posted_architecture = request.form.get("arch")
+    contents = request.form.get("blob", "").encode("utf-8")
+    if not contents or not posted_architecture:
+        return invalid_parameters()
 
-        # Load contents.
-        blob = self.request.get('blob').encode('utf-8')
-        if not (blob and arch):
-            self.badrequest()
-            return
+    entry = DepsModel.query(DepsModel.deps_arch == posted_architecture).get()
+    if entry:
+        entry.deps_contents = contents
+        entry.put()
+    else:
+        DepsModel(
+            deps_arch=posted_architecture,
+            deps_contents=contents,
+        ).put()
 
-        entry = DepsModel.query(DepsModel.deps_arch == arch).get()
-        if entry:
-            entry.deps_contents = blob
-            entry.put()
-        else:
-            DepsModel(deps_arch=arch, deps_contents=blob).put()
-
-        self.response.write('ok')
+    return text_response("ok")

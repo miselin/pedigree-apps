@@ -1,6 +1,9 @@
-runtime: python27
-api_version: 1
-threadsafe: true
+runtime: python314
+app_engine_apis: true
+entrypoint: gunicorn -b :$PORT -w 2 pup_http.wsgi:app
+
+automatic_scaling:
+  max_instances: 2
 
 handlers:
 - url: /css
@@ -16,10 +19,4 @@ handlers:
   static_dir: pup_http/resources/static
   mime_type: text/plain
 - url: /.*
-  script: pup_http.wsgi.app
-
-libraries:
-- name: webapp2
-  version: latest
-- name: jinja2
-  version: latest
+  script: auto
