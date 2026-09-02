@@ -1,0 +1,10 @@
+--- a/gl/lib/pselect.c
++++ b/gl/lib/pselect.c
+@@ -24,6 +24,7 @@
+ #include <sys/select.h>
+ 
+ #include <errno.h>
++#include <stddef.h>
+ #include <signal.h>
+ 
+ /* Examine the size-NFDS file descriptor sets in RFDS, WFDS, and XFDS

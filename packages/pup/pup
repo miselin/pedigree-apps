@@ -1,0 +1,6 @@
+#!/usr/bin/python3
+
+from pedigree_updater.frontend.main import main
+
+
+raise SystemExit(main())

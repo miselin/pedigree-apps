@@ -1,0 +1,44 @@
+diff --git a/gcc/cp/module.cc b/gcc/cp/module.cc
+--- a/gcc/cp/module.cc
++++ b/gcc/cp/module.cc
+@@ -1693,12 +1693,16 @@ elf_in::defrost (const char *name)
+ 	  char *mapping = reinterpret_cast<char *>
+ 	    (mmap (NULL, hdr.pos, PROT_READ, MAP_SHARED, fd, 0));
+	  if (mapping == MAP_FAILED)
+-	  fail:
+-	      set_error (errno);
++	    set_error (errno);
+ 	  else
+ 	    {
++#if defined (HAVE_MADVISE)
+ 	      if (madvise (mapping, hdr.pos, MADV_RANDOM))
+-		goto fail;
++		{
++		  set_error (errno);
++		  return false;
++		}
++#endif
+ 
+ 	      /* These buffers are never NULL in this case.  */
+ 	      strtab.buffer = mapping + strtab.pos;
+@@ -1802,14 +1806,18 @@ elf_in::begin (location_t loc)
+   void *mapping = mmap (NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+   if (mapping == MAP_FAILED)
+     {
+-    fail:
+       set_error (errno);
+       return false;
+     }
++#if defined (HAVE_MADVISE)
+   /* We'll be hopping over this randomly.  Some systems declare the
+      first parm as char *, and other declare it as void *.  */
+   if (madvise (reinterpret_cast <char *> (mapping), size, MADV_RANDOM))
+-    goto fail;
++    {
++      set_error (errno);
++      return false;
++    }
++#endif
+ 
+   hdr.buffer = (char *)mapping;
+ #else

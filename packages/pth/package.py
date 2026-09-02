@@ -2,12 +2,13 @@ from support import buildsystem
 from support import steps
 
 
+UPSTREAM_VERSION = "2.0.7"
+
 DISABLED_REASON = (
-    "GNU Pth 2.0.7 requires sigpending() and sigsuspend() for scheduler "
-    "signal bookkeeping and signal-stack context creation. Pedigree does "
-    "not implement either syscall, and no active port depends on Pth. "
-    "Revive it only with target signal support or a validated replacement "
-    "backend."
+    "GNU Pth 2.0.7 calls sigpending() throughout its scheduler and "
+    "sigsuspend() both there and while bootstrapping signal-stack contexts. "
+    "Pedigree exports both functions only as ENOSYS stubs, and no active port "
+    "depends on Pth; replacing those calls with fake semantics is unsafe."
 )
 
 
@@ -21,7 +22,7 @@ class PthPackage(buildsystem.Package):
         return "pth"
 
     def version(self):
-        return "2.0.7"
+        return UPSTREAM_VERSION
 
     def patches(self, env, srcdir):
         return ["pedigree-elf.diff"]

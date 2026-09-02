@@ -5,6 +5,7 @@
 pup/build/
 pup/dist/
 pup/package_repo/
+pup/*.egg-info/
 pup/**/__pycache__/
 pup/**/.ruff_cache/
 pup/**/*.pyc

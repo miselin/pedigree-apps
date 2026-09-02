@@ -22,17 +22,26 @@ pup-install.py: install a package
 import hashlib
 import logging
 import os
-import shutil
 import sys
 import tarfile
 from collections import defaultdict
 from pathlib import Path
 
-import requests
-
 from . import base
+from ..lib import http as pup_http
 
 log = logging.getLogger(__name__)
+
+
+def _package_matches_sha1(path, expected):
+    digest = hashlib.sha1()
+    with open(path, "rb") as package:
+        while True:
+            chunk = package.read(1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest() == expected
 
 
 def macos_safe_members(tar, log):
@@ -112,14 +121,10 @@ class InstallCommand(base.PupCommand):
             package_sha1 = package["sha1"]
             download = True
             if os.path.isfile(package_file):
-                # Do we need to download again?
-                h = hashlib.sha1()
-                with open(package_file, "rb") as f:
-                    h.update(f.read())
-
-                download = package_sha1 != h.hexdigest()
+                download = not _package_matches_sha1(package_file, package_sha1)
 
             if download:
+                Path(package_file).unlink(missing_ok=True)
                 log.info("package %s needs to be downloaded", package["name"])
                 for repo in config.repo_urls:
                     if repo in banned_repos:
@@ -129,22 +134,22 @@ class InstallCommand(base.PupCommand):
                     remote_url = f"{repo.rstrip('/')}/{pup_filename}"
 
                     try:
-                        with requests.get(
-                            remote_url,
-                            stream=True,
-                            timeout=(5, 60),
-                            headers={"User-Agent": "pup-client/1.0"},
-                        ) as response:
-                            response.raise_for_status()
-                            response.raw.decode_content = True
-
-                            with open(package_file, "wb") as target:
-                                shutil.copyfileobj(response.raw, target)
-
-                    except requests.RequestException:
+                        with open(package_file, "wb") as target:
+                            pup_http.copy_url(remote_url, target)
+                        if not _package_matches_sha1(package_file, package_sha1):
+                            log.warning(
+                                "package %s from %s failed its SHA-1 check",
+                                package["name"],
+                                repo,
+                            )
+                            Path(package_file).unlink(missing_ok=True)
+                            banned_repos.add(repo)
+                            continue
+                    except (pup_http.RequestError, OSError):
                         Path(package_file).unlink(missing_ok=True)
                         banned_repos.add(repo)
                         continue
+                    break
 
             if not os.path.isfile(package_file):
                 print(

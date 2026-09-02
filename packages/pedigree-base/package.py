@@ -1,7 +1,8 @@
 LEGACY_VERSION = "0.1"
 
 DISABLED_REASON = (
-    "This recipe copies the removed images/base/{system,config} tree instead "
-    "of an FHS root. Pedigree base files now need a versioned artifact export "
-    "from the main build rather than implicit source-tree packaging."
+    "The main build still owns images/base and translates that tree to FHS "
+    "only while composing a disk image. It does not publish a versioned FHS "
+    "staging root, so packaging the mounted checkout as legacy version 0.1 "
+    "would produce mutable, untraceable PUP contents."
 )

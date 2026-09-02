@@ -23,6 +23,7 @@ RUN apt-get update \
         python3-pip \
         python3-venv \
         tar \
+        texinfo \
         unzip \
         xz-utils \
     && rm -rf /var/lib/apt/lists/*

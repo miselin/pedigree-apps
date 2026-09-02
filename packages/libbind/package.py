@@ -6,11 +6,13 @@ from support import buildsystem
 from support import steps
 
 
+UPSTREAM_VERSION = '6.0'
+
 DISABLED_REASON = (
-    "ISC libbind duplicates musl's resolver API and the forced global FHS "
-    "paths would overwrite musl and BIND headers; no active port depends on "
-    "it. Revive only for a concrete legacy consumer with namespaced headers "
-    "and target resolver validation."
+    "ISC libbind 6.0 is the final standalone release and duplicates musl's "
+    "resolver implementation. Its install replaces global resolv.h, netdb.h, "
+    "and arpa/nameser.h headers; no active port requires that conflicting "
+    "ABI, so it cannot safely share the target sysroot."
 )
 
 
@@ -25,7 +27,7 @@ class LibBindPackage(buildsystem.Package):
         return 'libbind'
 
     def version(self):
-        return '6.0'
+        return UPSTREAM_VERSION
 
     def patches(self, env, srcdir):
         # resolv.h comes out by default with no #include for netinet/in.h, which

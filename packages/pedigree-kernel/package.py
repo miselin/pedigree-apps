@@ -1,7 +1,8 @@
 LEGACY_VERSION = "0.1"
 
 DISABLED_REASON = (
-    "The recipe copies obsolete build/kernel/kernel paths and writes debug "
-    "data below legacy /support. Enable it only after the main Pedigree build "
-    "exports versioned kernel and debug artifacts with an FHS package layout."
+    "The main boot-artifacts target builds kernel-mini64 and its diagnostic "
+    "kernel, but is explicitly an aggregate build target rather than an "
+    "installer or staging directory. A versioned /boot export and an agreed "
+    "debug-file destination are required before this can be a PUP package."
 )

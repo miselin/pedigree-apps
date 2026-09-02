@@ -21,9 +21,8 @@ import hashlib
 import logging
 import os
 
-import requests
-
 from . import base
+from ..lib import http as pup_http
 
 log = logging.getLogger(__name__)
 
@@ -99,15 +98,17 @@ class RegisterPackageCommand(base.PupCommand):
 
         # Obtain an upload URL.
         try:
-            r = requests.get(url, params=get_params, timeout=30)
-        except requests.RequestException:
+            upload_url = pup_http.get_text(
+                url,
+                parameters=get_params,
+                timeout=30,
+            ).strip()
+        except pup_http.RequestError:
             print("Failed to get upload URL.")
             return 1
-        if r.status_code != 200:
+        if not upload_url:
             print("Failed to get upload URL.")
             return 1
-
-        upload_url = r.text.strip()
 
         # Upload the package to the given upload URL.
         postdata = {
@@ -117,18 +118,17 @@ class RegisterPackageCommand(base.PupCommand):
             "sha1": digest,
         }
         try:
-            with open(package_file, "rb") as f:
-                r = requests.post(
-                    upload_url,
-                    data=postdata,
-                    files={"file": f},
-                    timeout=300,
-                )
-        except requests.RequestException:
+            result = pup_http.post_multipart(
+                upload_url,
+                postdata,
+                "file",
+                package_file,
+                timeout=300,
+            ).strip()
+        except pup_http.RequestError:
             print(f'Registering package "{package_name}" failed.')
             return 1
 
-        result = r.text.strip()
         if result != "ok":
             print(f'Registering package "{package_name}" failed: {result}')
             return 1

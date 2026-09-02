@@ -1,60 +1,144 @@
+import os
 
 from support import buildsystem
 from support import steps
 
 
-DISABLED_REASON = (
-    "man-db 2.13.1 needs an nroff formatter for ordinary source manual pages. "
-    "The catalog does not yet provide groff or mandoc, so packaging man-db "
-    "would install a command that cannot perform its primary runtime job."
-)
-
-
 class ManDbPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(ManDbPackage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'xz'
+        self._options.tarfile_format = "xz"
 
     def name(self):
-        return 'man-db'
+        return "man-db"
 
     def version(self):
-        return '2.13.1'
+        return "2.13.1"
 
     def build_requires(self):
-        return ['libpipeline', 'gdbm']
+        return ["gdbm", "libpipeline", "mandoc", "zlib"]
 
     def install_deps(self):
-        return ['gdbm', 'gzip', 'less', 'libpipeline']
+        return [
+            "gdbm",
+            "grep",
+            "gzip",
+            "less",
+            "libpipeline",
+            "mandoc",
+            "zlib",
+        ]
 
     def patches(self, env, srcdir):
-        return []
+        return [
+            "gnulib-pselect-stddef.diff",
+            "mandoc-default-preprocessor.diff",
+        ]
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'https://download.savannah.nongnu.org/releases/%(package)s/%(package)s-%(version)s.tar.xz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
         steps.download(
-            url, target,
-            sha256='8afebb6f7eb6bb8542929458841f5c7e6f240e30c86358c1fbcefbea076c87d9')
+            "https://download.savannah.nongnu.org/releases/man-db/"
+            "man-db-%s.tar.xz" % self.version(),
+            target,
+            sha256=(
+                "8afebb6f7eb6bb8542929458841f5c7e"
+                "6f240e30c86358c1fbcefbea076c87d9"
+            ),
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, extra_config=(
-            '--with-db=gdbm', '--without-libseccomp',
-            '--disable-shared', '--enable-static', '--disable-setuid',
-            '--with-pager=/usr/bin/less',
-            '--with-nroff=/usr/bin/nroff', '--with-gzip=/usr/bin/gzip',
-            '--enable-cross-guesses=conservative'))
+        # The formatter is a target executable and cannot be probed by the
+        # build host. These values describe mandoc's supported invocation.
+        env["man_cv_prog_gnu_nroff"] = "no"
+        env["man_cv_prog_heirloom_nroff"] = "no"
+        env["man_cv_prog_nroff_macro"] = "-mandoc"
+        env["man_cv_prog_nroff_warnings"] = "no"
+        env["ac_cv_prog_cat"] = "/usr/bin/cat"
+        env["ac_cv_prog_grep"] = "/usr/bin/grep"
+        env["ac_cv_prog_tr"] = "/usr/bin/tr"
+        env["ac_cv_prog_troff"] = ""
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                "--with-db=gdbm",
+                "--with-config-file=/etc/man_db.conf",
+                "--with-nroff=/usr/bin/mandoc",
+                "--with-pager=/usr/bin/less",
+                "--with-gzip=/usr/bin/gzip",
+                "--with-browser=",
+                "--with-eqn=",
+                "--with-neqn=",
+                "--with-tbl=",
+                "--with-col=",
+                "--with-vgrind=",
+                "--with-refer=",
+                "--with-grap=",
+                "--with-pic=",
+                "--with-compress=",
+                "--with-bzip2=",
+                "--with-xz=",
+                "--with-lzma=",
+                "--with-lzip=",
+                "--with-zstd=",
+                "--with-systemdtmpfilesdir=no",
+                "--with-systemdsystemunitdir=no",
+                "--with-snapdir=/var/lib/snapd/snap",
+                "--enable-cross-guesses=conservative",
+                "--disable-cache-owner",
+                "--disable-dependency-tracking",
+                "--disable-manual",
+                "--disable-nls",
+                "--disable-rpath",
+                "--disable-setuid",
+                "--disable-shared",
+                "--disable-threads",
+                "--enable-static",
+                "--without-libseccomp",
+            ),
+        )
+        self._disable_libtool_rpaths(env, srcdir)
+
+    @staticmethod
+    def _disable_libtool_rpaths(env, srcdir):
+        libtool_path = os.path.join(
+            steps.get_builddir(srcdir, env, True), "libtool"
+        )
+        with open(libtool_path, encoding="utf-8") as source:
+            contents = source.read()
+
+        replacements = (
+            ("hardcode_into_libs=yes", "hardcode_into_libs=no"),
+            (
+                'hardcode_libdir_flag_spec="\\$wl-rpath \\$wl\\$libdir"',
+                'hardcode_libdir_flag_spec=""',
+            ),
+            ("hardcode_action=immediate", "hardcode_action=unsupported"),
+        )
+        for old, new in replacements:
+            if old not in contents:
+                raise RuntimeError(
+                    "man-db Libtool is missing setting: %s" % old
+                )
+            contents = contents.replace(old, new, 1)
+
+        with open(libtool_path, "w", encoding="utf-8") as destination:
+            destination.write(contents)
 
     def build(self, env, srcdir):
         steps.make(srcdir, env, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(
+            srcdir,
+            env,
+            target="install",
+            extra_opts=("DESTDIR=%s" % deploydir,),
+            parallel=False,
+        )

@@ -1,0 +1,92 @@
+diff --git a/configure b/configure
+index 847f50b..b3241af 100755
+--- a/configure
++++ b/configure
+@@ -6059,7 +6059,7 @@ SLANG_DLL_CFLAGS=""
+ M_LIB="-lm"
+ 
+ case "$host_os" in
+-  *linux*|*gnu*|k*bsd*-gnu )
++  *linux*|*gnu*|*pedigree*|k*bsd*-gnu )
+     DYNAMIC_LINK_FLAGS="-Wl,-export-dynamic"
+     ELF_CC="\$(CC)"
+     ELF_CFLAGS="\$(CFLAGS) \$(CPPFLAGS) -fPIC"
+@@ -6996,5 +6996,11 @@ do
+    fi
+ done
++case "$host_os" in
++  *pedigree*)
++    MISC_TERMINFO_DIRS="/usr/share/terminfo"
++    TERMCAP=""
++    ;;
++esac
+ if test "$TERMCAP"; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+ $as_echo "no" >&6; }
+diff --git a/src/slsig.c b/src/slsig.c
+index 6d5c3cd..701ad18 100644
+--- a/src/slsig.c
++++ b/src/slsig.c
+@@ -580,7 +580,8 @@ static void sigsuspend_intrinsic (void)
+ 
+    if (SLang_Num_Function_Args == 0)
+      {
+-#ifdef HAVE_PAUSE
++#if defined(HAVE_PAUSE) \
++    && !defined(__pedigree__) && !defined(__PEDIGREE__)
+ 	(void) pause ();
+ #else
+ 	SLang_set_error (SL_NotImplemented_Error);
+@@ -588,7 +589,8 @@ static void sigsuspend_intrinsic (void)
+ 	return;
+      }
+ 
+-#ifndef SLANG_POSIX_SIGNALS
++#if !defined(SLANG_POSIX_SIGNALS) \
++    || defined(__pedigree__) || defined(__PEDIGREE__)
+    SLang_set_error (SL_NotImplemented_Error);
+ #else
+    if (-1 == pop_signal_mask (&mask))
+diff --git a/modules/socket-module.c b/modules/socket-module.c
+index 2f53fe2..0bb2518 100644
+--- a/modules/socket-module.c
++++ b/modules/socket-module.c
+@@ -1396,7 +1396,9 @@ static SLang_Intrin_Fun_Type Module_Intrinsics [] =
+    MAKE_INTRINSIC_2("listen", listen_intrin, V, F, I),
+    MAKE_INTRINSIC_0("accept", accept_intrin, V),
+    MAKE_INTRINSIC_0("getsockopt", getsockopt_intrin, V),
++#if !defined(__PEDIGREE__)
+    MAKE_INTRINSIC_0("setsockopt", setsockopt_intrin, V),
++#endif
+    SLANG_END_INTRIN_FUN_TABLE
+ };
+ #undef F
+diff --git a/modules/termios-module.c b/modules/termios-module.c
+index c3d8e6e..f830b43 100644
+--- a/modules/termios-module.c
++++ b/modules/termios-module.c
+@@ -496,18 +496,24 @@ static SLang_Intrin_Fun_Type Termios_Intrinsics [] =
+ #define U SLANG_UINT_TYPE
+ static SLang_Intrin_Fun_Type Termios_Intrinsics [] =
+ {
++#if !defined(__PEDIGREE__)
+    MAKE_INTRINSIC_1("tcdrain", tcdrain_intrin, I, F),
+    MAKE_INTRINSIC_2("tcflow", tcflow_intrin, I, F, I),
++#endif
+    MAKE_INTRINSIC_2("tcflush", tcflush_intrin, I, F, I),
+    MAKE_INTRINSIC_1("tcgetpgrp", tcgetpgrp_intrin, I, F),
+    MAKE_INTRINSIC_2("tcsetpgrp", tcsetpgrp_intrin, I, F, I),
++#if !defined(__PEDIGREE__)
+    MAKE_INTRINSIC_2("tcsendbreak", tcsendbreak_intrin, I, F, I),
++#endif
+    MAKE_INTRINSIC_1("tcgetattr", tcgetattr_intrin, V, F),
+    MAKE_INTRINSIC_3("tcsetattr", tcsetattr_intrin, I, F, I, T),
++#if !defined(__PEDIGREE__)
+    MAKE_INTRINSIC_1("cfgetispeed", cfgetispeed_intrin, V, T),
+    MAKE_INTRINSIC_1("cfgetospeed", cfgetospeed_intrin, V, T),
+    MAKE_INTRINSIC_2("cfsetispeed", cfsetispeed_intrin, I, T, U),
+    MAKE_INTRINSIC_2("cfsetospeed", cfsetospeed_intrin, I, T, U),
++#endif
+    MAKE_INTRINSIC_1("termios_get_oflag", termios_get_oflag, I, T),
+    MAKE_INTRINSIC_1("termios_get_iflag", termios_get_iflag, I, T),
+    MAKE_INTRINSIC_1("termios_get_cflag", termios_get_cflag, I, T),

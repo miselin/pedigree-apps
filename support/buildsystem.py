@@ -24,6 +24,7 @@ _SCRIPT_INTERPRETER_PROVIDERS = {
     "perl": "perl",
     "python": "python3",
     "python3": "python3",
+    "slsh": "slang",
 }
 
 

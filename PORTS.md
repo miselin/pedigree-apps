@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 58 active Pedigree ports and 23 explicit disabled
+The current catalog contains 69 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -24,29 +24,43 @@ List the active catalog or inspect a dependency closure without building:
 
 | Port | Version | Port | Version | Port | Version |
 | --- | --- | --- | --- | --- | --- |
+| apache2 | 2.4.68 | apr | 1.7.6 | apr-util | 1.6.5 |
 | atk | 2.38.0 | autoconf | 2.73 | bash | 5.3.15 |
-| bind | 9.11.37 | bsdtar | 3.8.9 | ca-certificates | 2026.08.13 |
-| cairo | 1.18.4 | cmake | 4.4.3 | coreutils | 9.11 |
-| curl | 8.22.0 | dialog | 1.3.20260721 | diffutils | 3.12 |
-| dropbear | 2026.94 | e2fsprogs | 1.47.4 | expat | 2.8.4 |
-| fontconfig | 2.18.3 | fribidi | 1.0.16 | gawk | 5.4.1 |
-| gdbm | 1.26 | gettext | 1.0 | git | 2.55.0 |
-| glib | 2.88.3 | gnumake | 4.4.1 | grep | 3.12 |
-| gzip | 1.14 | harfbuzz | 14.4.0 | inetutils | 2.8 |
-| less | 704 | libffi | 3.8.0 | libfreetype | 2.14.3 |
-| libgmp | 6.3.0 | libiconv | 1.19 | libmpc | 1.4.1 |
-| libmpfr | 4.2.2 | libpcre | 8.45 | libpcre2 | 10.48 |
-| libpipeline | 1.5.8 | libpng | 1.6.58 | libtool | 2.6.2 |
-| lua | 5.5.1 | lynx | 2.9.3 | m4 | 1.4.21 |
-| mtools | 4.0.49 | nano | 9.2 | nasm | 3.02 |
-| ncurses | 6.6 | openssl | 3.5.8 | pango | 1.58.2 |
-| perl | 5.44.0 | pixman | 0.46.4 |  |  |
-| python3 | 3.14.7 | readline | 8.3.3 | sed | 4.10 |
-| sqlite | 3.53.4 | vim | 9.2.1031 | vttest | 20251205 |
-| wget | 1.25.0 | zlib | 1.3.2 |  |  |
+| bind | 9.11.37 | binutils | 2.46.1 | bsdtar | 3.8.9 |
+| ca-certificates | 2026.08.13 | cairo | 1.18.4 | cmake | 4.4.3 |
+| coreutils | 9.11 | curl | 8.22.0 | dialog | 1.3.20260721 |
+| diffutils | 3.12 | dropbear | 2026.94 | e2fsprogs | 1.47.4 |
+| expat | 2.8.4 | fontconfig | 2.18.3 | fribidi | 1.0.16 |
+| gawk | 5.4.1 | gcc | 15.3.0 | gdbm | 1.26 |
+| gettext | 1.0 | git | 2.55.0 | glib | 2.88.3 |
+| gnumake | 4.4.1 | grep | 3.12 | gzip | 1.14 |
+| harfbuzz | 14.4.0 | inetutils | 2.8 | less | 704 |
+| libffi | 3.8.0 | libfreetype | 2.14.3 | libgmp | 6.3.0 |
+| libiconv | 1.19 | libmpc | 1.4.1 | libmpfr | 4.2.2 |
+| libpcre | 8.45 | libpcre2 | 10.48 | libpipeline | 1.5.8 |
+| libpng | 1.6.58 | libtool | 2.6.2 | lua | 5.5.1 |
+| lynx | 2.9.3 | m4 | 1.4.21 | man-db | 2.13.1 |
+| mandoc | 1.14.6 | mesa | 25.0.7 | mtools | 4.0.49 |
+| nano | 9.2 | nasm | 3.02 | ncurses | 6.6 |
+| openssl | 3.5.8 | pango | 1.58.2 | perl | 5.44.0 |
+| pixman | 0.46.4 | pup | 1.2 | python3 | 3.14.7 |
+| readline | 8.3.3 | sdl2 | 2.32.10 | sed | 4.10 |
+| slang | 2.3.3 | sqlite | 3.53.4 | vim | 9.2.1031 |
+| vttest | 20251205 | wget | 1.25.0 | zlib | 1.3.2 |
 
 Python 3.14.7 replaces the disabled Python 2 recipe and also provides
 `/usr/bin/python` as a compatibility link.
+
+PUP 1.2 installs its Python 3 client at `/usr/bin/pup`, its configuration at
+`/etc/pup/pup.conf`, and its local package database and cache under
+`/var/lib/pup`. The target client uses the Python standard library for HTTPS;
+its runtime closure explicitly includes Python 3 and the system trust bundle.
+
+Mandoc 1.14.6 supplies the manual-page formatter, while man-db 2.13.1 owns
+`/usr/bin/man` and the manual-page database. The recipes avoid a file conflict
+by installing mandoc's user-facing aliases with `mandoc-` prefixes. S-Lang
+2.3.3 uses the catalog's ncurses terminfo database and omits interfaces backed
+only by unimplemented Pedigree libc stubs.
 
 The `ca-certificates` port installs the versioned Mozilla-derived trust bundle
 at `/etc/ssl/cert.pem` for the catalog's HTTPS clients.
@@ -74,47 +88,52 @@ Documentation examples are not treated as installed commands.
 
 ## Disabled and deferred ports
 
-The package loader omits the 23 recipes that define `DISABLED_REASON`. These
+The package loader omits the 15 recipes that define `DISABLED_REASON`. These
 entries remain in-tree so their missing contracts and prerequisites stay
 explicit.
 
 | Port | Deferred version | Reason |
 | --- | --- | --- |
-| apache2 | 2.4.68 | Needs current APR and APR-util; APR-util is absent, and the old Apache recipe depended on a legacy layout and bundled APR trees. |
-| apr | 1.7.6 | Pedigree lacks a selected process-shared mutex/shared-memory backend, and APR's libtool lacks the target integration needed beyond a static-only probe. |
-| binutils | 2.46.1 | The builder supplies binutils. A self-hosted package needs the old Pedigree BFD, GAS, and linker changes rebased beyond 2.32 and validated separately. |
-| dosbox | 0.74-3 | Requires SDL 1.2, which is absent from the FHS catalog; the old recipe also hard-coded a legacy `sdl-config` path. |
-| fuse | 3.18.2 | Pedigree has no FUSE kernel protocol or `/dev/fuse`, and the historical entry had no implementation. |
-| gcc | 16.2.0 | GCC 15.3.0 comes from the builder. Self-hosting GCC is a separate bootstrap and target-runtime project; the legacy GCC 8 path references missing old patches and obsolete Autotools. |
-| grub2 | 2.12 | GRUB is a host boot-image tool, not a target-root package. The current i386-pc flow needs a native build contract and rebased platform patch. |
-| llvm | 22.1.8 | The old placeholder has no Pedigree target, runtime, resource-directory, or staged-install integration for this host/self-hosting toolchain. |
-| libbind | 6.0 | Duplicates musl's resolver API and would overwrite musl and BIND headers under the global FHS paths. No active port depends on it; revival needs namespaced headers and target resolver validation. |
-| man-db | 2.13.1 | The catalog has no groff or mandoc provider, so `man` would lack the formatter needed for ordinary source manual pages. |
-| mesa | 26.2.1 | The current Meson build has no Pedigree platform, WSI, DRM, or software-renderer integration; the Mesa 9.1 Autotools patches are not reusable as-is. |
-| netsurf | 3.11 | The historical Pedigree framebuffer frontend and support paths were not carried into the current component build; a new frontend port is required. |
-| newlib | 4.6.0.20260123 | Pedigree's supported C library and sysroot ABI is musl; the old placeholder had no source, build, or install recipe. |
-| pedigree-base | 0.1 | References a removed source-tree image layout; it needs a versioned FHS base artifact exported by the main Pedigree build. |
-| pedigree-devel | 0.1 | Emits legacy paths and duplicates old musl/CRT files; a replacement needs a maintained FHS sysroot export while keeping libstdc++ in the compiler prefix. |
-| pedigree-kernel | 0.1 | References obsolete kernel and debug paths; it needs versioned FHS kernel and debug artifacts from the main build. |
-| pedigree-modules | 0.1 | Assumes removed module, subsystem, driver, and initrd paths; it needs a versioned module/initrd export from the main build. |
-| prboom | 2.5.0 | The unmaintained original release depends on missing SDL 1.2 and legacy paths; choosing a maintained Doom source port is separate work. |
-| pth | 2.0.7 | Its scheduler, pending-signal bookkeeping, and signal-stack context creation require `sigpending()` and `sigsuspend()`, which Pedigree does not implement. No active port depends on it; revival needs target signal support or a validated replacement backend. |
-| pup | 0.1 | The target updater is a Python 2 `setup.py` package for legacy paths; it needs a Python 3 port plus FHS and runtime-dependency contracts. |
-| python27 | 2.7.3 | Python 2 is end-of-life. Use active `python3` 3.14.7, which also supplies `/usr/bin/python`. |
-| qemu | 11.1.0 | QEMU is a native host emulator, not target-root software; it belongs in the local builder and tooling layer. |
-| slang | 2.3.3 | The old entry was an empty placeholder; a port still needs a pinned source, cross-configure answers, ncurses integration, and target terminal validation. |
+| dosbox | 0.82.2 | DOSBox Staging 0.82.2 requires a functional SDL2 video, input, and audio frontend; the current Pedigree SDL2 compatibility profile is intentionally offscreen-only. Its mandatory static build dependencies iir, opusfile (plus opus and ogg), and SpeexDSP are also not yet in the FHS package catalog. zlib and libpng are already available. |
+| fuse | 3.18.2 | libfuse 3.18.2 is a userspace half of the FUSE protocol, not a standalone filesystem layer. Pedigree provides neither `/dev/fuse` nor the matching kernel protocol ABI, and no target consumer can exercise the library without them. |
+| grub2 | 2.14 | GNU GRUB 2.14 is a host-side boot-image tool, not a Pedigree target package. The current image build consumes checked-in GRUB Legacy 0.97 `stage2_eltorito` files and has no GRUB 2 host-tool or image-generation contract to package here. |
+| libbind | 6.0 | ISC libbind 6.0 is the final standalone release and duplicates musl's resolver implementation. Its install replaces global `resolv.h`, `netdb.h`, and `arpa/nameser.h` headers; no active port requires that conflicting ABI, so it cannot safely share the target sysroot. |
+| llvm | 22.1.8 | LLVM 22.1.8 is the current stable release, but Pedigree uses it only as a host analysis toolchain. Pedigree's maintained target compiler family is GCC, and LLVM has no Pedigree triple/driver, runtime, resource-directory, or target install contract. |
+| netsurf | 3.11 | NetSurf 3.11 has no Pedigree frontend or HOST definition. Its generic framebuffer frontend uses libnsfb, whose only SDL surface still targets SDL 1.2; the RAM surface has no display or input. The full source build also requires separately staged NetSurf component libraries, including libcss, libdom, libnsfb, libnsutils, and their build system. |
+| newlib | 4.6.0.20260123 | Pedigree's supported C library and final sysroot ABI is musl. GCC's stage-one `--with-newlib` flag only describes a compiler built before headers exist; the bootstrap does not build or install newlib, so a newlib target package would introduce a second incompatible libc. |
+| pedigree-base | 0.1 | The main build still owns `images/base` and translates that tree to FHS only while composing a disk image. It does not publish a versioned FHS staging root, so packaging the mounted checkout as legacy version 0.1 would produce mutable, untraceable PUP contents. |
+| pedigree-devel | 0.1 | The main build has no CMake install target or versioned SDK/sysroot export. Its bootstrap stages musl into the target sysroot while libgcc and libstdc++ remain owned by the compiler prefix; copying build-tree headers, CRT objects, or libraries would violate that boundary. |
+| pedigree-kernel | 0.1 | The main `boot-artifacts` target builds `kernel-mini64` and its diagnostic kernel, but is explicitly an aggregate build target rather than an installer or staging directory. A versioned `/boot` export and an agreed debug-file destination are required before this can be a PUP package. |
+| pedigree-modules | 0.1 | The main `boot-artifacts` target now builds `src/modules/initrd.tar` and a deterministic `initrd.manifest`, but it does not install or version that artifact. The package must consume an explicit module/initrd export instead of copying a mutable build directory. |
+| prboom | 2.6.66 | PrBoom+ 2.6.66 is the final release of the archived upstream. A playable port requires a functional Pedigree SDL2 video and input frontend; the current compatibility profile is offscreen-only. Its cross build also requires a native first stage to export the WAD generator targets before compiling the Pedigree executable. |
+| pth | 2.0.7 | GNU Pth 2.0.7 calls `sigpending()` throughout its scheduler and `sigsuspend()` both there and while bootstrapping signal-stack contexts. Pedigree exports both functions only as `ENOSYS` stubs, and no active port depends on Pth; replacing those calls with fake semantics is unsafe. |
+| python27 | 2.7.18 | Python 2.7.18 is the final Python 2 release and is end-of-life. No active package requires it; depend on `python3` instead, which also provides `/usr/bin/python` for the target compatibility command. |
+| qemu | 11.1.1 | QEMU 11.1.1 is a native host emulator used to run Pedigree, not software for the Pedigree root filesystem. It belongs in the local host tooling layer and has no target package or runtime contract. |
 
 ## Evidence boundary
 
 At the 2026-09-02 modernization snapshot:
 
-- All 165 host unit tests and static checks pass.
-- All 58 active recipes have an exact versioned build root, completion marker,
-  and PUP archive. The full Docker artifact audit passes for the complete
-  active catalog.
+- All 247 unit tests invoked by `./runtests.sh` pass, and its Python syntax
+  checks complete successfully.
+- All 69 active recipes have exact versioned build roots, completion markers,
+  and PUP archives that pass the full Docker artifact audit.
+- PUP, Mesa, binutils, GCC, mandoc, man-db, S-Lang, SDL2, APR, APR-util, and
+  Apache all cross-build, stage, package, and audit successfully.
+- A separate whole-catalog scan found no path-ownership or directory-mode
+  conflicts and no unresolved, ambiguous, or undeclared target ELF runtime
+  library providers across 769 target ELFs and 1,426 `DT_NEEDED` edges.
+- A semantic symbol sweep checked those ELFs and all 87 active archives against
+  95 known-unavailable target interfaces; every remaining reference is locally
+  satisfied, advisory, diagnostic, or has an explicit failure fallback, with
+  no unhandled reachable blocker.
 - Python 3.14.7 and CMake 4.4.3 both cross-build, stage, package, and audit
   successfully. CMake includes the Pedigree platform modules and uses the
   staged OpenSSL and CA configuration.
-- No target-runtime validation is claimed; neither Python nor CMake was
-  executed on Pedigree during this sweep.
+- The new runtime profiles are deliberately bounded: Mesa is shared-only
+  OSMesa/softpipe, SDL2 is static dummy/offscreen, and Apache is a runtime-only,
+  no-DSO profile that supports only `httpd -X` until target file locking works.
+- No target-runtime validation is claimed; the built binaries were not
+  executed on Pedigree, and GCC was not run on target or used for a
+  self-hosting rebuild.
 - No package upload has been performed.

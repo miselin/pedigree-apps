@@ -97,7 +97,10 @@ def generate_environment(target_arch, env=None, recurse=True):
     env["MAKEFLAGS"] = "-j%s" % jobs
     env["LD_LIBRARY_PATH"] = ""
 
-    env["PATH"] = _expand("$CROSS_BASE/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
+    env["PATH"] = _expand(
+        "/opt/pedigree-apps/bin:$CROSS_BASE/bin:"
+        "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
     env["MAKE"] = "/usr/bin/make"
     env["PATCH"] = "/usr/bin/patch"
     env["AUTOCONF"] = "/usr/bin/autoconf"

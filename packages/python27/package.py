@@ -1,6 +1,7 @@
-LEGACY_VERSION = "2.7.3"
+UPSTREAM_VERSION = "2.7.18"
 
 DISABLED_REASON = (
-    "Python 2 is end-of-life; depend on the python3 package instead. "
-    "The python3 package also provides /usr/bin/python for compatibility."
+    "Python 2.7.18 is the final Python 2 release and is end-of-life. No "
+    "active package requires it; depend on python3 instead, which also "
+    "provides /usr/bin/python for the target compatibility command."
 )

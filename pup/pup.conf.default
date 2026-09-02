@@ -1,10 +1,10 @@
 [paths]
 installroot=/
-localdb=/support/pup/db
+localdb=/var/lib/pup
 
 [settings]
 arch=amd64
 
 [remotes]
-server=http://pup.pedigree-project.org
-upload=http://the-pedigree-project.appspot.com
+server=https://pup.pedigree-project.org
+upload=https://pup.pedigree-project.org

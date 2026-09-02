@@ -365,6 +365,36 @@ ELF Header:
                 with self.assertRaisesRegex(audit.AuditError, "ELF machine"):
                     audit.audit_package("example", self.FakePackage(__file__), env)
 
+    def test_relocatable_objects_and_archives_skip_program_headers(self):
+        for extension, prefix in ((".o", b"\x7fELFstub"), (".a", b"!<arch>\n")):
+            with self.subTest(
+                extension=extension
+            ), tempfile.TemporaryDirectory() as temporary:
+                env, root, _, archive = self.complete_artifacts(temporary)
+                libdir = os.path.join(root, "usr", "lib")
+                os.makedirs(libdir)
+                with open(
+                    os.path.join(libdir, "example" + extension), "wb"
+                ) as artifact:
+                    artifact.write(prefix)
+                self.create_archive(root, archive)
+                relocatable_header = self.valid_header.replace(
+                    "DYN (Shared object file)", "REL (Relocatable file)"
+                )
+
+                def readelf(command, **kwargs):
+                    self.assertNotIn("-lW", command)
+                    return self.readelf_result(
+                        command, header=relocatable_header
+                    )
+
+                with mock.patch(
+                    "support.audit.subprocess.run", side_effect=readelf
+                ):
+                    audit.audit_package(
+                        "example", self.FakePackage(__file__), env
+                    )
+
     def test_rejects_missing_soname_and_unsafe_needed(self):
         cases = (
             ("0x1 (NEEDED) Shared library: [libc.so]\n", "no SONAME"),
@@ -480,6 +510,64 @@ ELF Header:
                         audit.audit_package(
                             "example", self.FakePackage(__file__), env
                         )
+
+    def test_rejects_executable_gnu_stack(self):
+        executable_stack_headers = (
+            "GNU_STACK 0x000000 0x0000000000000000 0x0000000000000000 "
+            "0x000000 0x000000 RWE 0x10\n",
+            "GNU_STACK 0x000000 0x0000000000000000 0x0000000000000000 "
+            "0x000000 0x000000 R E 0x10\n",
+        )
+        for program_headers in executable_stack_headers:
+            with self.subTest(
+                program_headers=program_headers
+            ), tempfile.TemporaryDirectory() as temporary:
+                env, root, _, archive = self.complete_artifacts(temporary)
+                executable = os.path.join(root, "usr", "bin", "elf-example")
+                with open(executable, "wb") as output:
+                    output.write(b"\x7fELFstub")
+                os.chmod(executable, 0o755)
+                self.create_archive(root, archive)
+                readelf = lambda command, **kwargs: self.readelf_result(
+                    command, program_headers=program_headers
+                )
+
+                with mock.patch(
+                    "support.audit.subprocess.run", side_effect=readelf
+                ):
+                    with self.assertRaisesRegex(
+                        audit.AuditError, "executable GNU_STACK"
+                    ):
+                        audit.audit_package(
+                            "example", self.FakePackage(__file__), env
+                        )
+
+    def test_accepts_non_executable_or_missing_gnu_stack(self):
+        program_header_cases = (
+            "",
+            "GNU_STACK 0x000000 0x0000000000000000 0x0000000000000000 "
+            "0x000000 0x000000 RW 0x10\n",
+        )
+        for program_headers in program_header_cases:
+            with self.subTest(
+                program_headers=program_headers
+            ), tempfile.TemporaryDirectory() as temporary:
+                env, root, _, archive = self.complete_artifacts(temporary)
+                executable = os.path.join(root, "usr", "bin", "elf-example")
+                with open(executable, "wb") as output:
+                    output.write(b"\x7fELFstub")
+                os.chmod(executable, 0o755)
+                self.create_archive(root, archive)
+                readelf = lambda command, **kwargs: self.readelf_result(
+                    command, program_headers=program_headers
+                )
+
+                with mock.patch(
+                    "support.audit.subprocess.run", side_effect=readelf
+                ):
+                    audit.audit_package(
+                        "example", self.FakePackage(__file__), env
+                    )
 
     def test_exec_type_requires_interpreter_even_with_so_filename(self):
         with tempfile.TemporaryDirectory() as temporary:

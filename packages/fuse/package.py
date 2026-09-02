@@ -1,7 +1,8 @@
 UPSTREAM_VERSION = "3.18.2"
 
 DISABLED_REASON = (
-    "libfuse 3.18.2 requires the FUSE kernel protocol and /dev/fuse. "
-    "Pedigree does not provide that device/protocol ABI, and the historical "
-    "entry contains no source or build implementation."
+    "libfuse 3.18.2 is a userspace half of the FUSE protocol, not a "
+    "standalone filesystem layer. Pedigree provides neither /dev/fuse nor "
+    "the matching kernel protocol ABI, and no target consumer can exercise "
+    "the library without them."
 )

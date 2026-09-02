@@ -1,7 +1,8 @@
 LEGACY_VERSION = "0.1"
 
 DISABLED_REASON = (
-    "The recipe assumes removed build/{modules,subsystems,drivers} trees, an "
-    "old initrd.tar, and legacy /system and /support destinations. It needs a "
-    "versioned module/initrd export from the current Pedigree build."
+    "The main boot-artifacts target now builds src/modules/initrd.tar and a "
+    "deterministic initrd.manifest, but it does not install or version that "
+    "artifact. The package must consume an explicit module/initrd export "
+    "instead of copying a mutable build directory."
 )

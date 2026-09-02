@@ -1,0 +1,37 @@
+diff --git a/bfd/config.bfd b/bfd/config.bfd
+index 4dde532..2885e05 100644
+--- a/bfd/config.bfd
++++ b/bfd/config.bfd
+@@ -681 +681 @@ case "${targ}" in
+-  x86_64-*-elf* | x86_64-*-rtems* | x86_64-*-fuchsia | x86_64-*-genode*)
++  x86_64-*-elf* | x86_64-*-pedigree* | x86_64-*-rtems* | x86_64-*-fuchsia | x86_64-*-genode*)
+diff --git a/config/elf.m4 b/config/elf.m4
+index 1772a44..b824f8b 100644
+--- a/config/elf.m4
++++ b/config/elf.m4
+@@ -17,0 +18,3 @@ case $target in
++  *-*-pedigree*)
++    target_elf=yes
++    ;;
+diff --git a/configure b/configure
+index 2551fe0..299dc53 100755
+--- a/configure
++++ b/configure
+@@ -9613,0 +9614,3 @@ case $target in
++  *-*-pedigree*)
++    target_elf=yes
++    ;;
+diff --git a/gas/configure.tgt b/gas/configure.tgt
+index f0ea55d..838fc95 100644
+--- a/gas/configure.tgt
++++ b/gas/configure.tgt
+@@ -230,0 +231 @@ case ${generic_target} in
++  i386-*-pedigree*)			fmt=elf ;;
+diff --git a/ld/configure.tgt b/ld/configure.tgt
+index 3e15891..04b0383 100644
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
+@@ -967,0 +968,3 @@ x86_64-*-redox*)	targ_emul=elf_x86_64
++x86_64-*-pedigree*)	targ_emul=elf_x86_64
++			targ_extra_emuls=elf_i386
++			;;

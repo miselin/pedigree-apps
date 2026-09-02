@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 PUP: Pedigree UPdater
 
@@ -22,8 +22,8 @@ import logging
 import sys
 
 # Subclass discovery below only sees command modules imported into this process.
-from pedigree_updater.commands import base, create, install, register, sync
-from pedigree_updater.lib import util
+from ..commands import base, create, install, register, sync
+from ..lib import util
 
 log = logging.getLogger()
 
@@ -46,11 +46,6 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
-
-    # Remove informational logging from requests & urllib3, which leaks more
-    # data than is desirable.
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     if not args.which:
         parser.print_help()

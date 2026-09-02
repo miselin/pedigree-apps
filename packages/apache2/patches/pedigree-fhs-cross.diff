@@ -1,0 +1,97 @@
+diff --git a/config.layout b/config.layout
+index 6a76e5a..b381a31 100644
+--- a/config.layout
++++ b/config.layout
+@@ -323,6 +323,31 @@
+     errordir:      ${datadir}/error
+ </Layout>
+ 
++# Pedigree follows the Filesystem Hierarchy Standard. Runtime state is kept
++# out of /usr so the installed package can live on a read-only system image.
++<Layout Pedigree>
++    prefix:          /usr
++    exec_prefix:     ${prefix}
++    bindir:          ${prefix}/bin
++    sbindir:         ${prefix}/sbin
++    libdir:          ${prefix}/lib
++    libexecdir:      ${prefix}/lib/apache2/modules
++    installbuilddir: ${prefix}/share/apache2/build
++    mandir:          ${prefix}/share/man
++    sysconfdir:      /etc/apache2
++    datadir:         ${prefix}/share/apache2
++    iconsdir:        ${datadir}/icons
++    htdocsdir:       /var/www/htdocs
++    manualdir:       ${datadir}/manual
++    cgidir:          /var/www/cgi-bin
++    errordir:        ${datadir}/error
++    includedir:      ${prefix}/include/apache2
++    localstatedir:   /var
++    runtimedir:      ${localstatedir}/run/apache2
++    logfiledir:      ${localstatedir}/log/apache2
++    proxycachedir:   ${localstatedir}/cache/apache2
++</Layout>
++
+ # Generic RPM layout
+ <Layout RPM>
+     prefix:        /usr
+diff --git a/server/Makefile.in b/server/Makefile.in
+index 8a7a78b..2558946 100644
+--- a/server/Makefile.in
++++ b/server/Makefile.in
+@@ -24,9 +24,8 @@ include $(top_builddir)/build/rules.mk
+ include $(top_builddir)/build/rules.mk
+ include $(top_srcdir)/build/library.mk
+ 
+-gen_test_char_OBJECTS = gen_test_char.lo
+-gen_test_char: $(gen_test_char_OBJECTS)
+-	$(LINK) $(EXTRA_LDFLAGS) $(gen_test_char_OBJECTS) $(EXTRA_LIBS)
++gen_test_char: $(top_srcdir)/server/gen_test_char.c
++	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) -DCROSS_COMPILE $< -o $@
+ 
+ test_char.h: gen_test_char
+ 	./gen_test_char > test_char.h
+diff --git a/server/mpm/prefork/prefork.c b/server/mpm/prefork/prefork.c
+index c30e1c5..c1b3c61 100644
+--- a/server/mpm/prefork/prefork.c
++++ b/server/mpm/prefork/prefork.c
+@@ -380,7 +380,7 @@ static void stop_listening(int sig)
+ static int requests_this_child;
+ static int num_listensocks = 0;
+ 
+-#if APR_HAS_THREADS
++#if APR_HAS_THREADS && (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND)
+ static void child_sigmask(sigset_t *new_mask, sigset_t *old_mask)
+ {
+ #if defined(SIGPROCMASK_SETS_THREAD_MASK)
+@@ -395,6 +395,8 @@ static void child_main(int child_num_arg, int child_bucket)
+ {
+ #if APR_HAS_THREADS
+     apr_thread_t *thd = NULL;
++#endif
++#if APR_HAS_THREADS && (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND)
+     sigset_t sig_mask;
+ #endif
+     apr_pool_t *ptrans;
+@@ -475,7 +477,7 @@ static void child_main(int child_num_arg, int child_bucket)
+         clean_child_exit(APEXIT_CHILDFATAL);
+     }
+ 
+-#if APR_HAS_THREADS
++#if APR_HAS_THREADS && (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND)
+     /* Save the signal mask and block all the signals from being received by
+      * threads potentially created in child_init() hooks (e.g. mod_watchdog).
+      */
+@@ -489,11 +491,11 @@ static void child_main(int child_num_arg, int child_bucket)
+             clean_child_exit(APEXIT_CHILDFATAL);
+         }
+     }
+-#endif /* APR_HAS_THREADS */
++#endif /* APR_HAS_THREADS && (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND) */
+ 
+     ap_run_child_init(pchild, ap_server_conf);
+ 
+-#if APR_HAS_THREADS
++#if APR_HAS_THREADS && (APR_HAVE_SIGWAIT || APR_HAVE_SIGSUSPEND)
+     /* Restore the original signal mask for this main thread, the only one
+      * that should possibly get interrupted by signals.
+      */

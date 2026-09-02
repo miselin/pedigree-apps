@@ -1,18 +1,12 @@
+import json
 import logging
 import os
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
-try:
-    from ConfigParser import ConfigParser, NoOptionError
-except ImportError:
-    from configparser import ConfigParser, NoOptionError
-
+from configparser import ConfigParser, NoOptionError
 
 log = logging.getLogger(__name__)
+
+DEFAULT_CONFIG_PATH = "/etc/pup/pup.conf"
+DEFAULT_LOCAL_CACHE = "/var/lib/pup"
 
 
 def SqliteDictFactory(cursor, row):
@@ -41,11 +35,11 @@ class PupConfig:
                 os.makedirs(parent_dir)
 
             # Write an empty JSON file.
-            with open(self.db_path, "w") as f:
+            with open(self.db_path, "w", encoding="utf-8") as f:
                 f.write("{}")
 
         try:
-            with open(self.db_path) as f:
+            with open(self.db_path, encoding="utf-8") as f:
                 self.db = json.load(f)
         except ValueError:
             log.warning("failed to load database, you should sync")
@@ -60,7 +54,7 @@ class PupConfig:
 def load_config(args):
     pup_config = args.config
     if pup_config is None:
-        pup_config = "/support/pup/pup.conf"
+        pup_config = DEFAULT_CONFIG_PATH
 
     # Does it exist?
     if not os.path.exists(pup_config):
@@ -87,7 +81,7 @@ def load_config(args):
         local_cache = parser.get("paths", "localdb")
         install_root = parser.get("paths", "installroot")
     else:
-        local_cache = "/support/pup/db"
+        local_cache = DEFAULT_LOCAL_CACHE
         install_root = "/"
 
     if parser.has_section("settings"):

@@ -20,7 +20,9 @@ or:
     python3 -m build --wheel
 
 The resulting wheel is written to `dist/`. The project requires Python 3.8 or
-newer and declares Requests as a runtime dependency.
+newer. The command-line client uses only the Python standard library. The
+repository's separate release helper continues to use the development
+environment's Requests dependency.
 
 Releasing
 ---------

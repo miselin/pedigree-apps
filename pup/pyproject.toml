@@ -12,9 +12,7 @@ license = "ISC"
 authors = [
     { name = "Matthew Iselin", email = "matthew@theiselins.net" },
 ]
-dependencies = [
-    "requests>=2.9.1",
-]
+dependencies = []
 
 [project.urls]
 Homepage = "https://www.pedigree-project.org"
@@ -27,4 +25,4 @@ pup = "pedigree_updater.frontend.main:main"
 include = ["pedigree_updater*"]
 
 [tool.setuptools.data-files]
-config = ["pup.conf.default"]
+"share/pup" = ["pup.conf.default"]

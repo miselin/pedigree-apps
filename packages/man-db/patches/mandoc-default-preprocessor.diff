@@ -1,0 +1,51 @@
+--- a/include/manconfig.h
++++ b/include/manconfig.h
+@@ -56,8 +56,13 @@
+ 
+ /* uncomment the following line if manual pages require tbl by default */
+ #ifndef DEFAULT_MANROFFSEQ
++#if defined(__pedigree__) || defined(__PEDIGREE__)
++/* The Pedigree profile uses mandoc's integrated preprocessors. */
++#  define DEFAULT_MANROFFSEQ ""
++#else
+ #  define DEFAULT_MANROFFSEQ "t"
+ #endif
++#endif
+ 
+ /* By default, man-db will store a whatis referenced manual page in favour
+    of a stray cat page when they both share identical namespace. If you
+--- a/src/man.c
++++ b/src/man.c
+@@ -1342,8 +1342,10 @@ static pipeline *make_roff_command (const char *file, const char *encoding,
+ 	if (recode)
+ 		;
+ 	else if (!fmt_prog) {
++#if !defined(__pedigree__) && !defined(__PEDIGREE__)
+ 		char *pp_string_initial;
+ 		const char *pp;
++#endif
+ #ifndef GNU_NROFF
+ 		bool using_tbl = false;
+ #endif /* GNU_NROFF */
+@@ -1351,6 +1353,13 @@ static pipeline *make_roff_command (const char *file, const char *encoding,
+ 		const char *warning;
+ #endif /* NROFF_WARNINGS */
+ 
++#if defined(__pedigree__) || defined(__PEDIGREE__)
++		/*
++		 * mandoc handles tbl and eqn directives in the input stream.  Cookies
++		 * such as '\" t, MANROFFSEQ, database filters, and -p must not spawn
++		 * empty external commands in this target profile.
++		 */
++#else
+ 		/* Add preprocessors.  Per groff(1), grap, chem, and ideal must
+ 		 * come before pic, and tbl must come before eqn.
+ 		 */
+@@ -1399,6 +1408,7 @@ static pipeline *make_roff_command (const char *file, const char *encoding,
+ 				       *pp);
+ 		}
+ 		free (pp_string_initial);
++#endif
+ 
+ 		/* Add *roff itself. */
+ 		if (troff) {

@@ -1,7 +1,8 @@
 UPSTREAM_VERSION = "22.1.8"
 
 DISABLED_REASON = (
-    "LLVM is a host/self-hosting toolchain project, and the old entry is an "
-    "empty placeholder. LLVM 22.1.8 has no catalog-level Pedigree target, "
-    "runtime, resource-directory, or staged-install integration yet."
+    "LLVM 22.1.8 is the current stable release, but Pedigree uses it only as "
+    "a host analysis toolchain. Pedigree's maintained target compiler "
+    "family is GCC, and LLVM has no Pedigree triple/driver, runtime, "
+    "resource-directory, or target install contract."
 )

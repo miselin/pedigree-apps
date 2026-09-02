@@ -1,7 +1,7 @@
-UPSTREAM_VERSION = "11.1.0"
+UPSTREAM_VERSION = "11.1.1"
 
 DISABLED_REASON = (
-    "QEMU is a native host emulator used to run Pedigree, not software for "
-    "the Pedigree root filesystem. The old entry has no source URL, target, "
-    "or install contract; keep QEMU in the local builder/tooling layer."
+    "QEMU 11.1.1 is a native host emulator used to run Pedigree, not "
+    "software for the Pedigree root filesystem. It belongs in the local "
+    "host tooling layer and has no target package or runtime contract."
 )

@@ -1,7 +1,84 @@
-UPSTREAM_VERSION = "2.3.3"
+from support import buildsystem
+from support import steps
 
-DISABLED_REASON = (
-    "The S-Lang entry was an empty placeholder. A 2.3.3 port still needs a "
-    "pinned source, Pedigree cross-configure answers, ncurses integration, "
-    "and target terminal/runtime validation."
-)
+
+class SlangPackage(buildsystem.Package):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._options = buildsystem.Options()
+        self._options.tarfile_format = "bz2"
+
+    def name(self):
+        return "slang"
+
+    def version(self):
+        return "2.3.3"
+
+    def build_requires(self):
+        return ["ncurses"]
+
+    def install_deps(self):
+        # S-Lang reads the target terminfo database directly.
+        return ["ncurses"]
+
+    def patches(self, env, srcdir):
+        return ["pedigree-target.diff"]
+
+    def options(self):
+        return self._options
+
+    def download(self, env, target):
+        steps.download(
+            "https://www.jedsoft.org/releases/slang/slang-%s.tar.bz2"
+            % self.version(),
+            target,
+            sha256=(
+                "f9145054ae131973c61208ea82486d5d"
+                "d10e3c5cdad23b7c4a0617743c8f5a18"
+            ),
+        )
+
+    def configure(self, env, srcdir):
+        # pause() and sigsuspend() are linkable compatibility stubs on the
+        # target. The source patch exposes an honest NotImplemented result.
+        env["ac_cv_func_cfgetospeed"] = "no"
+        env["ac_cv_func_getitimer"] = "no"
+        env["ac_cv_func_isinf"] = "yes"
+        env["ac_cv_func_isnan"] = "yes"
+        env["ac_cv_func_issetugid"] = "no"
+        env["ac_cv_func_mkfifo"] = "no"
+        env["ac_cv_func_pathconf"] = "no"
+        env["ac_cv_func_pause"] = "no"
+        env["ac_cv_func_sigsuspend"] = "no"
+        env["ac_cv_func_setitimer"] = "no"
+        env["ac_cv_func_socketpair"] = "no"
+        env["ac_cv_path_nc5config"] = "no"
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            not_paths=("infodir",),
+            extra_config=(
+                "--with-readline=slang",
+                "--with-terminfo=default",
+                "--without-iconv",
+                "--without-onig",
+                "--without-pcre",
+                "--without-png",
+                "--without-x",
+                "--without-z",
+            ),
+        )
+
+    def build(self, env, srcdir):
+        steps.make(srcdir, env)
+
+    def deploy(self, env, srcdir, deploydir):
+        steps.make(
+            srcdir,
+            env,
+            target="install",
+            extra_opts=("DESTDIR=%s" % deploydir,),
+            parallel=False,
+        )

@@ -529,8 +529,34 @@ def _check_dynamic(env, path, relative, elf_types, forbidden_paths):
     return tags
 
 
-def _check_interpreter(env, path, relative, elf_types, tags, mode):
+def _check_program_headers(env, path, relative, elf_types, tags, mode):
+    if not any(elf_type in ("DYN", "EXEC") for elf_type in elf_types):
+        return
+
     output = _readelf(env, path, "-lW")
+    for line in output.splitlines():
+        fields = line.split()
+        if not fields or fields[0] != "GNU_STACK":
+            continue
+        numeric_fields = fields[1:6] + fields[-1:]
+        flags = "".join(fields[6:-1])
+        if (
+            len(fields) < 7
+            or not all(
+                re.fullmatch(r"0x[0-9A-Fa-f]+", value)
+                for value in numeric_fields
+            )
+            or not set(flags).issubset(set("RWE"))
+        ):
+            raise AuditError(
+                "malformed GNU_STACK program header in %s: %s"
+                % (relative, line.strip())
+            )
+        # A missing marker remains valid for legacy target objects, but an
+        # explicit executable stack request is unambiguous and unsafe.
+        if "E" in flags:
+            raise AuditError("executable GNU_STACK in %s" % relative)
+
     interpreters = re.findall(
         r"^\s*\[Requesting program interpreter:\s*(.*)\]\s*$",
         output,
@@ -631,7 +657,7 @@ def _check_artifact_formats(root, payload, env):
             tags = _check_dynamic(
                 env, path, relative, elf_types, forbidden_paths
             )
-            _check_interpreter(
+            _check_program_headers(
                 env, path, relative, elf_types, tags, entry.mode
             )
             continue

@@ -1,8 +1,9 @@
-UPSTREAM_VERSION = "2.5.0"
+UPSTREAM_VERSION = "2.6.66"
 
 DISABLED_REASON = (
-    "Original PrBoom 2.5.0 is unmaintained and the existing port depends on "
-    "the absent SDL 1.2 target plus legacy /applications and /support paths. "
-    "Moving to a maintained Doom source port is a separate compatibility "
-    "decision."
+    "PrBoom+ 2.6.66 is the final release of the archived upstream. A "
+    "playable port requires a functional Pedigree SDL2 video and input "
+    "frontend; the current compatibility profile is offscreen-only. Its "
+    "cross build also requires a native first stage to export the WAD "
+    "generator targets before compiling the Pedigree executable."
 )

@@ -9,15 +9,15 @@
 This repository contains application ports and the Pedigree UPdater (`pup`)
 package tooling for [Pedigree](https://www.pedigree-project.org/).
 
-The modernization catalog currently contains 58 active ports and 23 explicit
+The modernization catalog currently contains 69 active ports and 15 explicit
 disabled or deferred entries. See [`PORTS.md`](PORTS.md) for the complete
 version list, compatibility ceilings, deferrals, and the current verification
 boundary.
 
-At the 2026-09-02 snapshot, every active port has a completed local build root
-and PUP archive that passes the full artifact audit. This is cross-build and
-packaging evidence; the binaries have not been executed on Pedigree as part of
-this sweep.
+At the 2026-09-02 snapshot, all 69 active ports have exact versioned build
+roots, completion markers, and PUP archives that pass the full Docker artifact
+audit. This is cross-build and packaging evidence; the binaries were not
+executed on Pedigree during this sweep.
 
 The maintained build path is local Docker. It uses Pedigree's current amd64
 cross-toolchain and creates packages with the FHS layout used by the operating
@@ -106,11 +106,12 @@ A successful build writes:
 - per-package build logs to `.build/x86_64/logs`.
 
 Current revived examples include zlib 1.3.2, libpng 1.6.58, GNU Make 4.4.1,
-and CMake 4.4.3. The versioned `ca-certificates` port provides the system trust
-bundle at `/etc/ssl/cert.pem`. Updated ports use HTTPS downloads with pinned
-SHA-256 hashes. MPC 1.4.1 is active. GCC remains a separate self-hosting and
-bootstrap deferral; the Docker builder supplies the maintained Pedigree GCC
-15.3.0 cross-toolchain instead.
+CMake 4.4.3, mandoc 1.14.6, and man-db 2.13.1. The versioned
+`ca-certificates` port provides the system trust bundle at `/etc/ssl/cert.pem`.
+Updated ports use HTTPS downloads with pinned SHA-256 hashes. Target-native
+binutils 2.46.1 and GCC 15.3.0 are active and pass the Docker artifact audit.
+They are built with the existing Pedigree cross-toolchain; execution on
+Pedigree and compiler self-hosting remain unverified.
 
 ## Publish explicitly
 
@@ -168,8 +169,13 @@ metadata, so individual archives are not standalone root filesystems and
 publication remains unavailable for recipes with non-baseline runtime
 dependencies.
 
-`pup` is also kept in this repository. Use `run_pup.sh` to run it in the same
-builder image when working with the local repository by hand.
+PUP 1.2 is also an active target port. It installs `/usr/bin/pup`, uses
+`/etc/pup/pup.conf`, stores its local database and package cache under
+`/var/lib/pup`, and declares Python 3 plus the system CA bundle as its runtime
+closure. Its client remains compatible with the legacy PUP v1 JSON database,
+SHA-1 catalog entries, tar archives, and multipart upload fields. Use
+`run_pup.sh` to run the host copy in the builder image when working with the
+local repository by hand.
 
 ## Tests
 

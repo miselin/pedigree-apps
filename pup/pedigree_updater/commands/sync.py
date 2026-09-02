@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 PUP: Pedigree UPdater
 
@@ -17,17 +17,42 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 """
 
+import json
 import logging
 import os
-import shutil
 import tempfile
-
-import requests
-from pedigree_updater.lib import util
+from pathlib import Path
 
 from . import base
+from ..lib import http as pup_http
+from ..lib import util
 
 log = logging.getLogger(__name__)
+
+
+def _valid_package_database(path):
+    try:
+        with open(path, encoding="utf-8") as database_file:
+            database = json.load(database_file)
+    except (OSError, UnicodeDecodeError, ValueError):
+        return False
+
+    if not isinstance(database, dict):
+        return False
+
+    required_fields = ("name", "version", "architecture", "sha1")
+    for key, package in database.items():
+        if not isinstance(key, str) or not isinstance(package, dict):
+            return False
+        if any(
+            not isinstance(package.get(field), str) or not package[field]
+            for field in required_fields
+        ):
+            return False
+        if key != "%s-%s" % (package["name"], package["architecture"]):
+            return False
+
+    return True
 
 
 class SyncCommand(base.PupCommand):
@@ -46,6 +71,7 @@ class SyncCommand(base.PupCommand):
 
         new_database = os.path.join(config.local_cache, "packages_new.pupdb")
         target_database = os.path.join(config.local_cache, "packages.pupdb")
+        Path(new_database).unlink(missing_ok=True)
 
         banned_repos = set()
 
@@ -55,33 +81,34 @@ class SyncCommand(base.PupCommand):
                 continue
 
             remote_url = f"{repo.rstrip('/')}/packages.pupdb"
+            temporary_path = None
 
             try:
                 log.info("trying %s", remote_url)
 
-                with requests.get(
-                    remote_url,
-                    stream=True,
-                    timeout=(5, 60),
-                    headers={"User-Agent": "pup-client/1.0"},
-                ) as response:
-                    response.raise_for_status()
-                    response.raw.decode_content = True
+                with tempfile.NamedTemporaryFile(
+                    mode="wb",
+                    dir=os.path.dirname(new_database),
+                    delete=False,
+                ) as target:
+                    temporary_path = target.name
+                    pup_http.copy_url(remote_url, target)
 
-                    log.info("%s is OK", remote_url)
-
-                    with tempfile.NamedTemporaryFile(
-                        mode="wb",
-                        dir=os.path.dirname(new_database),
-                        delete=False,
-                    ) as target:
-                        shutil.copyfileobj(response.raw, target)
-                        temporary_path = target.name
+                if not _valid_package_database(temporary_path):
+                    log.warning(
+                        "repo returned an invalid package database: %s", repo
+                    )
+                    Path(temporary_path).unlink(missing_ok=True)
+                    banned_repos.add(repo)
+                    continue
 
                 os.replace(temporary_path, new_database)
+                log.info("%s is OK", remote_url)
                 break
 
-            except (requests.RequestException, OSError):
+            except (pup_http.RequestError, OSError):
+                if temporary_path:
+                    Path(temporary_path).unlink(missing_ok=True)
                 log.exception("repo failed: %s", repo)
                 banned_repos.add(repo)
 
@@ -95,7 +122,7 @@ class SyncCommand(base.PupCommand):
             log.info("overwriting newly-created database with synced database")
             have_db = False
         if not have_db:
-            os.rename(new_database, target_database)
+            os.replace(new_database, target_database)
             new_database = target_database
 
             config = util.load_config(args)
@@ -103,6 +130,6 @@ class SyncCommand(base.PupCommand):
         # Drop in place if we had a database previously, we've now verified
         # the new database.
         if have_db:
-            os.rename(new_database, target_database)
+            os.replace(new_database, target_database)
 
         print("Synchronisation complete.")

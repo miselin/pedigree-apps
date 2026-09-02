@@ -44,7 +44,7 @@ class CatalogTest(unittest.TestCase):
             )
 
     def test_tls_clients_include_system_trust_store(self):
-        for name in ("cmake", "curl", "lynx", "python3", "wget"):
+        for name in ("cmake", "curl", "lynx", "pup", "python3", "wget"):
             package = self.packages[name]
             with self.subTest(package=name, dependency="build"):
                 self.assertIn("ca-certificates", package.build_requires())

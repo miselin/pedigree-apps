@@ -164,10 +164,16 @@ class BuildSystemTest(unittest.TestCase):
             package.check({}, "", deploydir)
 
     def test_package_check_accepts_interpreter_provided_by_same_package(self):
-        with tempfile.TemporaryDirectory() as deploydir:
-            self.write_script(deploydir, "#!/usr/bin/perl")
-            package = self.ScriptPackage(__file__, name="perl")
-            package.check({}, "", deploydir)
+        for package_name, shebang in (
+            ("perl", "#!/usr/bin/perl"),
+            ("slang", "#!/usr/bin/env slsh"),
+        ):
+            with self.subTest(
+                package=package_name
+            ), tempfile.TemporaryDirectory() as deploydir:
+                self.write_script(deploydir, shebang)
+                package = self.ScriptPackage(__file__, name=package_name)
+                package.check({}, "", deploydir)
 
     def test_package_check_rejects_unknown_executable_interpreter(self):
         with tempfile.TemporaryDirectory() as deploydir:

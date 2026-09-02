@@ -23,7 +23,7 @@ class LibffiPackage(buildsystem.Package):
         return []
 
     def patches(self, env, srcdir):
-        return []
+        return ['pedigree-nonexec-stack.diff']
 
     def options(self):
         return self._options
