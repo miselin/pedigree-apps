@@ -9,6 +9,16 @@
 This repository contains application ports and the Pedigree UPdater (`pup`)
 package tooling for [Pedigree](https://www.pedigree-project.org/).
 
+The modernization catalog currently contains 58 active ports and 23 explicit
+disabled or deferred entries. See [`PORTS.md`](PORTS.md) for the complete
+version list, compatibility ceilings, deferrals, and the current verification
+boundary.
+
+At the 2026-09-02 snapshot, every active port has a completed local build root
+and PUP archive that passes the full artifact audit. This is cross-build and
+packaging evidence; the binaries have not been executed on Pedigree as part of
+this sweep.
+
 The maintained build path is local Docker. It uses Pedigree's current amd64
 cross-toolchain and creates packages with the FHS layout used by the operating
 system: `/usr/bin`, `/usr/lib`, `/usr/include`, `/etc`, `/var`, and
@@ -21,13 +31,29 @@ environment, chroot, or `sudo` setup is needed.
 
 ```sh
 ./buildPackages.sh --list
+./buildPackages.sh
 ./buildPackages.sh --dry-run --only-depends cmake
 ./buildPackages.sh --only-depends libpng
 ```
 
+With no package selection, the builder processes the complete active catalog.
 `--only-depends` builds the requested packages and their transitive build
 dependencies. `--only` builds only the named packages and expects their
 dependency artifacts to exist already.
+
+Audit completed artifacts without rebuilding or uploading:
+
+```sh
+./buildPackages.sh --audit-only
+./buildPackages.sh --only zlib openssl --audit-only
+```
+
+The audit is read-only. It verifies each selected recipe's exact versioned
+build root and completion marker, exact root-to-PUP payload match, archive
+ownership and path safety, FHS paths and symlinks, and target ELF, archive,
+interpreter, dynamic-path, and libtool metadata. It does not execute target
+binaries, resolve `NEEDED` entries across packages, or establish Pedigree
+runtime compatibility.
 
 The first run builds `pedigree-apps-builder:local` from a pinned published
 Pedigree builder image. Rebuild that derived image after changing its
@@ -80,10 +106,11 @@ A successful build writes:
 - per-package build logs to `.build/x86_64/logs`.
 
 Current revived examples include zlib 1.3.2, libpng 1.6.58, GNU Make 4.4.1,
-and CMake 4.4.3. Updated ports use HTTPS downloads with pinned SHA-256 hashes.
-The legacy GCC 8 and MPC 0.8 recipes remain in-tree but are deferred because
-they require obsolete host Autoconf and Automake versions; the Docker builder
-supplies the maintained Pedigree cross-toolchain instead.
+and CMake 4.4.3. The versioned `ca-certificates` port provides the system trust
+bundle at `/etc/ssl/cert.pem`. Updated ports use HTTPS downloads with pinned
+SHA-256 hashes. MPC 1.4.1 is active. GCC remains a separate self-hosting and
+bootstrap deferral; the Docker builder supplies the maintained Pedigree GCC
+15.3.0 cross-toolchain instead.
 
 ## Publish explicitly
 
@@ -91,8 +118,12 @@ Local builds never upload by default. With a valid PUP upload key already in
 the environment, upload completed artifacts explicitly without rebuilding:
 
 ```sh
-./buildPackages.sh --only cmake --upload-only
+./buildPackages.sh --only zlib --audit-only
+./buildPackages.sh --only zlib --upload-only
 ```
+
+Run the matching audit first: `--upload-only` checks that the root, completion
+marker, and PUP exist, but it does not repeat the artifact audit.
 
 Use `--upload` instead to build the complete selected wave first and upload it
 only after every build succeeds. The wrapper runs the build without the key,
@@ -103,13 +134,14 @@ If `UPLOAD_KEY` is not already available, the publication helper retrieves it
 from the legacy GCP project using an authenticated `gcloud` account:
 
 ```sh
-./scripts/publish-packages.py cmake gnumake zlib
+./scripts/publish-packages.py zlib
 ```
 
 The direct build command exits before building if `UPLOAD_KEY` is not set;
 the helper obtains it without printing or copying it into a command line.
 The legacy PUP service does not store runtime dependency metadata, so the
-builder refuses to upload a package that declares runtime dependencies.
+builder refuses the entire upload selection before registration if any
+selected package declares runtime dependencies.
 
 ## Package definitions
 
@@ -117,6 +149,24 @@ Each `packages/<name>/package.py` defines its source, checksum, dependency
 metadata, patches, and build phases. Common Autoconf and CMake helpers install
 under FHS paths and stage dependency roots for each package without modifying
 the Pedigree toolchain sysroot.
+
+The target image contract has a small package baseline: Bash supplies
+`/usr/bin/bash`, the image's FHS aliases expose it as `/usr/bin/sh` and
+`/bin/sh`, and coreutils provides `/usr/bin/env` plus the basic command-line
+utilities used by package scripts.
+Image assembly must install both packages and their declared runtime closures
+before ordinary ports. Recipes therefore do not list `bash` or `coreutils` as
+runtime dependencies; doing so would introduce cycles such as Bash -> Readline
+-> ncurses -> shell. All other executable-script interpreters remain explicit:
+for example, Autoconf and OpenSSL declare Perl, and GLib declares Python 3. The
+builder checks this contract against staged executable scripts; documentation
+examples are not treated as installed commands.
+
+This baseline is an image-assembly invariant, not dependency information hidden
+inside a PUP archive. The legacy PUP format records none of the dependency
+metadata, so individual archives are not standalone root filesystems and
+publication remains unavailable for recipes with non-baseline runtime
+dependencies.
 
 `pup` is also kept in this repository. Use `run_pup.sh` to run it in the same
 builder image when working with the local repository by hand.

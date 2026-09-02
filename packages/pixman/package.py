@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -10,16 +8,19 @@ class PixmanPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(PixmanPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'pixman'
 
     def version(self):
-        return '0.28.2'
+        return '0.46.4'
 
     def build_requires(self):
-        return ['libtool']
+        return []
+
+    def install_deps(self):
+        return []
 
     def patches(self, env, srcdir):
         return []
@@ -28,24 +29,31 @@ class PixmanPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://cairographics.org/releases/%(package)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://cairographics.org/releases/pixman-%s.tar.xz'
+            % self.version(),
+            target,
+            sha256='a098c33924754ad43f981b740f6d576c70f9ed1006e12221b1845431ebce1239',
+        )
 
     def configure(self, env, srcdir):
-        # TODO(miselin): fix TLS in pixman (it causes a linker error).
-        env['CPPFLAGS'] = '-DPIXMAN_NO_TLS'
-        steps.run_configure(self, srcdir, env, extra_config=('--disable-gtk',))
+        steps.meson_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                '-Ddefault_library=both',
+                '-Dtls=disabled',
+                '-Dgtk=disabled',
+                '-Dlibpng=disabled',
+                '-Dtests=disabled',
+                '-Ddemos=disabled',
+                '-Dopenmp=disabled',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.meson_build(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.meson_install(srcdir, env, deploydir)

@@ -1,46 +1,60 @@
-
 from support import buildsystem
 from support import steps
+
+
+DISABLED_REASON = (
+    "GNU Pth 2.0.7 requires sigpending() and sigsuspend() for scheduler "
+    "signal bookkeeping and signal-stack context creation. Pedigree does "
+    "not implement either syscall, and no active port depends on Pth. "
+    "Revive it only with target signal support or a validated replacement "
+    "backend."
+)
 
 
 class PthPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(PthPackage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
 
     def name(self):
-        return 'pth'
+        return "pth"
 
     def version(self):
-        return '2.0.7'
-
-    def build_requires(self):
-        return ['libtool']
+        return "2.0.7"
 
     def patches(self, env, srcdir):
-        return []
+        return ["pedigree-elf.diff"]
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = ('http://ftp.gnu.org/gnu/%(package)s/'
-               '%(package)s-%(version)s.tar.gz' % {
-                   'package': self.name(),
-                   'version': self.version()})
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        pass
+        steps.download(
+            "https://ftp.gnu.org/gnu/pth/pth-%s.tar.gz" % self.version(),
+            target,
+            sha256=(
+                "72353660c5a2caafd601b20e12e75d86"
+                "5fd88f6cf1a088b306a3963f0bc77232"
+            ),
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, not_paths=('docdir,'))
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            not_paths=("datarootdir", "docdir"),
+        )
 
     def build(self, env, srcdir):
         steps.make(srcdir, env, parallel=False)
 
     def deploy(self, env, srcdir, deploydir):
-        steps.make(srcdir, env, target='install', extra_opts=(
-            'DESTDIR=%s' % deploydir,), parallel=False)
+        steps.make(
+            srcdir,
+            env,
+            target="install",
+            extra_opts=("DESTDIR=%s" % deploydir,),
+            parallel=False,
+        )

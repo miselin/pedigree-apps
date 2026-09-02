@@ -5,12 +5,46 @@ set -euo pipefail
 python3 -m unittest -v \
     buildPackages_test \
     environment_test \
+    support.audit_test \
     support.build_test \
     support.buildsystem_test \
+    support.catalog_test \
     support.deps_test \
     support.steps_test \
     support.toolchain_test \
     support.util_test \
+    packages.bash.package_test \
+    packages.bind.package_test \
+    packages.bsdtar.package_test \
+    packages.ca_certificates.package_test \
+    packages.cmake.package_test \
+    packages.coreutils.package_test \
+    packages.curl.package_test \
+    packages.dialog.package_test \
+    packages.e2fsprogs.package_test \
+    packages.gawk.package_test \
+    packages.gdbm.package_test \
+    packages.gettext.package_test \
+    packages.git.package_test \
+    packages.grep.package_test \
+    packages.glib.package_test \
+    packages.gnumake.package_test \
+    packages.gzip.package_test \
+    packages.harfbuzz.package_test \
+    packages.inetutils.package_test \
+    packages.libgmp.package_test \
+    packages.libtool.package_test \
+    packages.lynx.package_test \
+    packages.m4.package_test \
+    packages.ncurses.package_test \
+    packages.openssl.package_test \
+    packages.perl.package_test \
+    packages.pth.package_test \
+    packages.python3.package_test \
+    packages.readline.package_test \
+    packages.sed.package_test \
+    packages.sqlite.package_test \
+    packages.vim.package_test \
     pup.dist_test \
     pup.pedigree_updater.commands.create_test
 python3 -m compileall -q \

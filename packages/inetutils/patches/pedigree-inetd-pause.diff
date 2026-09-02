@@ -1,0 +1,14 @@
+--- a/src/inetd.c
++++ b/src/inetd.c
+@@ -355,7 +355,11 @@
+ #if defined HAVE_SIGACTION
+ # define SIGSTATUS sigset_t
+ # define sigstatus_empty(s) sigemptyset(&s)
++# if defined HAVE_SIGSUSPEND
+ # define inetd_pause(s) sigsuspend(&s)
++# else
++# define inetd_pause(s) pause()
++# endif
+ #else
+ # define SIGSTATUS long
+ # define sigstatus_empty(s) s = 0

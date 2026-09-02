@@ -1,0 +1,40 @@
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -4583,7 +4583,7 @@
+ 			LD_RPATH_OPT="-rpath "
+ 		fi
+ 		;;
+-	(linux*|gnu*|k*bsd*-gnu|freebsd*)
++	(linux*|pedigree*|gnu*|k*bsd*-gnu|freebsd*)
+ 		LD_RPATH_OPT="-Wl,-rpath,"
+ 		;;
+ 	(openbsd[[2-9]].*|mirbsd*)
+@@ -7843,7 +7843,7 @@
+ 		fi
+ 		cf_cv_rm_so_locs=yes
+ 		;;
+-	(linux*|gnu*|k*bsd*-gnu)
++	(linux*|pedigree*|gnu*|k*bsd*-gnu)
+ 		if test "$DFT_LWR_MODEL" = "shared" && test -n "$LD_RPATH_OPT" ; then
+ 			LOCAL_LDFLAGS="${LD_RPATH_OPT}\$(LOCAL_LIBDIR)"
+ 			LOCAL_LDFLAGS2="$LOCAL_LDFLAGS"
+--- a/configure
++++ b/configure
+@@ -6764,7 +6764,7 @@
+ 			LD_RPATH_OPT="-rpath "
+ 		fi
+ 		;;
+-	(linux*|gnu*|k*bsd*-gnu|freebsd*)
++	(linux*|pedigree*|gnu*|k*bsd*-gnu|freebsd*)
+ 		LD_RPATH_OPT="-Wl,-rpath,"
+ 		;;
+ 	(openbsd[2-9].*|mirbsd*)
+@@ -7123,7 +7123,7 @@
+ 		fi
+ 		cf_cv_rm_so_locs=yes
+ 		;;
+-	(linux*|gnu*|k*bsd*-gnu)
++	(linux*|pedigree*|gnu*|k*bsd*-gnu)
+ 		if test "$DFT_LWR_MODEL" = "shared" && test -n "$LD_RPATH_OPT" ; then
+ 			LOCAL_LDFLAGS="${LD_RPATH_OPT}\$(LOCAL_LIBDIR)"
+ 			LOCAL_LDFLAGS2="$LOCAL_LDFLAGS"

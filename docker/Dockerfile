@@ -7,13 +7,16 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         autoconf \
         automake \
+        binutils \
         bzip2 \
         ccache \
         file \
         gperf \
         help2man \
+        libglib2.0-dev-bin \
         libtool \
         make \
+        ninja-build \
         patch \
         perl \
         pkg-config \

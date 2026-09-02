@@ -81,8 +81,15 @@ def build_package(package, env):
     try:
         if download_target:
             log.info("== %s extract ==", package_id)
-            with tarfile.open(download_target) as archive:
-                archive.extractall(srcdir, members=_safe_members(archive), filter="data")
+            if package.options().tarfile_format == "bare":
+                shutil.copyfile(download_target, os.path.join(srcdir, "source"))
+            else:
+                with tarfile.open(download_target) as archive:
+                    archive.extractall(
+                        srcdir,
+                        members=_safe_members(archive),
+                        filter="data",
+                    )
 
         for phase in ("patch", "prebuild", "configure", "build"):
             log.info("== %s %s ==", package_id, phase)
@@ -98,6 +105,7 @@ def build_package(package, env):
         if (
             download_target
             and os.path.isfile(download_target)
+            and package.options().tarfile_format != "bare"
             and not tarfile.is_tarfile(download_target)
         ):
             os.unlink(download_target)

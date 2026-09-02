@@ -1,0 +1,54 @@
+diff --git a/ext/Errno/Errno_pm.PL b/ext/Errno/Errno_pm.PL
+--- a/ext/Errno/Errno_pm.PL
++++ b/ext/Errno/Errno_pm.PL
+@@ -111,38 +111,43 @@ sub get_files {
+     my @file;
+     # When cross-compiling we may store a path for gcc's "sysroot" option:
+     my $sysroot = $Config{sysroot} || '';
+-    my $linux_errno_h;
+-    if ($^O eq 'linux') {
++    # perl-cross runs this with a build-host miniperl, so $^O does not
++    # identify the target.  Config.pm does.
++    my $direct_errno_h;
++    my $direct_errno = $^O eq 'linux' || $Config{osname} eq 'linux' ||
++        $Config{osname} eq 'pedigree';
++    if ($direct_errno) {
+ 	# Some Linuxes have weird errno.hs which generate
+ 	# no #file or #line directives
+-	($linux_errno_h) = grep { -e $_ } map { "$_/errno.h" }
++	($direct_errno_h) = grep { -e $_ } map { "$_/errno.h" }
+-	    "$sysroot/usr/include", "$sysroot/usr/local/include",
++	    "$sysroot/include", "$sysroot/usr/include",
++	    "$sysroot/usr/local/include",
+ 	    split / / => $Config{locincpth};
+     }
+ 
+     # VMS keeps its include files in system libraries
+     if ($^O eq 'VMS') {
+ 	push(@file, 'Sys$Library:DECC$RTLDEF.TLB');
+     } elsif ($^O eq 'os390') {
+ 	# OS/390 C compiler doesn't generate #file or #line directives
+         # and it does not tag the header as 1047 (EBCDIC), so make a local
+         # copy and tag it
+         my $cp = `cp /usr/include/errno.h ./errno.h`;
+         my $chtag = `chtag -t -cIBM-1047 ./errno.h`;
+ 	push(@file, './errno.h');
+     } elsif ($Config{archname} eq 'arm-riscos') {
+ 	# Watch out for cross compiling for RISC OS
+ 	my $dep = `echo "#include <errno.h>" | gcc -E -M -`;
+ 	if ($dep =~ /(\S+errno\.h)/) {
+ 	     push(@file, $1);
+ 	}
+-    } elsif ($^O eq 'linux' &&
++    } elsif ($direct_errno &&
+ 	      $Config{gccversion} ne '' && 
+ 	      $Config{gccversion} !~ /intel/i &&
+ 	      # might be using, say, Intel's icc
+-	      $linux_errno_h
++	      $direct_errno_h
+ 	     ) {
+-	push(@file, $linux_errno_h);
++	push(@file, $direct_errno_h);
+     } elsif ($^O eq 'haiku') {
+ 	# hidden in a special place
+ 	push(@file, '/boot/system/develop/headers/posix/errno.h');

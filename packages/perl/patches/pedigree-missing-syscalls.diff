@@ -1,0 +1,37 @@
+--- a/ext/POSIX/POSIX.xs
++++ b/ext/POSIX/POSIX.xs
+@@ -3032,8 +3032,8 @@
+     ALIAS:
+ 	sigsuspend = 1
+     CODE:
+-#ifdef __amigaos4__
+-	RETVAL = not_here("sigpending");
++#if defined(__amigaos4__) || defined(__pedigree__)
++	RETVAL = not_here(ix ? "sigsuspend" : "sigpending");
+ #else
+ 	RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);
+ #endif
+--- a/dist/Time-HiRes/Makefile.PL
++++ b/dist/Time-HiRes/Makefile.PL
+@@ -678,7 +678,9 @@
+ 
+     print "Looking for working futimens()... ";
+     my $has_futimens;
+-    if (has_futimens()) {
++    if (exists $Config{d_futimens}
++            ? $Config{d_futimens}
++            : has_futimens()) {
+         $has_futimens++;
+         $DEFINE .= ' -DHAS_FUTIMENS';
+     }
+@@ -691,7 +693,9 @@
+ 
+     print "Looking for working utimensat()... ";
+     my $has_utimensat;
+-    if (has_utimensat()) {
++    if (exists $Config{d_utimensat}
++            ? $Config{d_utimensat}
++            : has_utimensat()) {
+         $has_utimensat++;
+         $DEFINE .= ' -DHAS_UTIMENSAT';
+     }

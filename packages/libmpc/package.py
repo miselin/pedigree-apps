@@ -1,30 +1,25 @@
-
-import os
-
 from support import buildsystem
 from support import steps
-
-
-DISABLED_REASON = (
-    'the legacy MPC 0.8 recipe requires obsolete host Autoconf and Automake'
-)
 
 
 class LibmpcPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(LibmpcPackage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = "xz"
 
     def name(self):
-        return 'libmpc'
+        return "libmpc"
 
     def version(self):
-        return '0.8.2'
+        return "1.4.1"
 
     def build_requires(self):
-        return ['libtool', 'libgmp', 'libmpfr']
+        return ["libgmp", "libmpfr"]
+
+    def install_deps(self):
+        return self.build_requires()
 
     def patches(self, env, srcdir):
         return []
@@ -33,29 +28,27 @@ class LibmpcPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://www.multiprecision.org/%(urlpackage)s/download/%(urlpackage)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-            'urlpackage': 'mpc',
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        # need an older autoconf/automake for libmpc
-        env['AUTORECONF'] = 'autoreconf2.64'
-        env['AUTOCONF'] = 'autoconf2.64'
-        env['AUTOMAKE'] = 'automake-1.11'
-        env['ACLOCAL'] = 'aclocal-1.11'
-
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            "https://ftp.gnu.org/gnu/mpc/mpc-%s.tar.xz" % self.version(),
+            target,
+            sha256=(
+                "91204cd32f164bd3b7c992d4a6a8ce65"
+                "19511aadab30f78b6982d0bf8d73e931"
+            ),
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            inplace=False,
+            extra_config=("--enable-shared", "--enable-static"),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, inplace=False)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        env["DESTDIR"] = deploydir
+        steps.make(srcdir, env, target="install", inplace=False)

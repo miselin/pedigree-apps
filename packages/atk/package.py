@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -10,16 +8,20 @@ class AtkPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(AtkPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'xz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'atk'
 
     def version(self):
-        return '2.16.0'
+        # ATK 2.38 is the final standalone release before its APIs moved to GTK.
+        return '2.38.0'
 
     def build_requires(self):
-        return ['libtool', 'glib']
+        return ['glib']
+
+    def install_deps(self):
+        return self.build_requires()
 
     def patches(self, env, srcdir):
         return []
@@ -28,22 +30,27 @@ class AtkPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.gnome.org/pub/gnome/sources/%(package)s/2.16/%(package)s-%(version)s.tar.xz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://download.gnome.org/sources/atk/2.38/'
+            'atk-%s.tar.xz' % self.version(),
+            target,
+            sha256='ac4de2a4ef4bd5665052952fe169657e65e895c5057dffb3c2a810f6191a0c36',
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.meson_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                '-Ddefault_library=both',
+                '-Ddocs=false',
+                '-Dintrospection=false',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.meson_build(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.meson_install(srcdir, env, deploydir)

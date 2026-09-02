@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -10,46 +8,52 @@ class LibfreetypePackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(LibfreetypePackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'libfreetype'
 
     def version(self):
-        return '2.6'
+        return '2.14.3'
 
     def build_requires(self):
-        return ['libtool', 'zlib']
+        return ['zlib', 'libpng']
+
+    def install_deps(self):
+        return self.build_requires()
 
     def patches(self, env, srcdir):
-        return ['autogen.sh.diff']
+        return []
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'http://download.savannah.gnu.org/releases/%(urlpackage)s/%(urlpackage)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-            'urlpackage': 'freetype',
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        # $(wildcard ...) breaks with fakechroot.
-        pattern = 's@$(wildcard@$(shell ls@g'
-        steps.cmd('find %s -type f -print0 | xargs -0 sed -i.bak \'%s\'' % (
-            srcdir, pattern), cwd=srcdir, env=env, shell=True)
-
-        env['NOCONFIGURE'] = 'yes'
-        steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
+        steps.download(
+            'https://download.savannah.gnu.org/releases/freetype/'
+            'freetype-%s.tar.xz' % self.version(),
+            target,
+            sha256='36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f',
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, extra_config=('--without-png',))
+        steps.meson_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                '-Ddefault_library=both',
+                '-Dzlib=system',
+                '-Dpng=enabled',
+                '-Dbzip2=disabled',
+                '-Dbrotli=disabled',
+                '-Dharfbuzz=disabled',
+                '-Dtests=disabled',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.meson_build(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.meson_install(srcdir, env, deploydir)

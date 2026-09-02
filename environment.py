@@ -51,6 +51,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     env["SOURCE_BASE"] = _expand("$APPS_BASE/packages")
     env["DOWNLOAD_TEMP"] = _expand("$APPS_BASE/downloads")
     env["BUILD_BASE"] = _expand("$APPS_BASE/.build/$ARCH_TARGET")
+    env["TARGET_CONFIG_SITE"] = _expand("$APPS_BASE/config.site")
     env["HOME"] = os.environ.get("HOME", "/tmp")
     env["CCACHE_DIR"] = os.environ.get(
         "CCACHE_DIR", _expand("$BUILD_BASE/ccache")
@@ -67,7 +68,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     env["CROSS_CXX"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-g++")
     env["CROSS_CPP"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-cpp")
     env["CROSS_AS"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-as")
-    env["CROSS_LD"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-gcc")
+    env["CROSS_LD"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-ld")
     env["CROSS_AR"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-ar")
     env["CROSS_RANLIB"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-ranlib")
     env["CROSS_STRIP"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-strip")
@@ -106,6 +107,7 @@ def generate_environment(target_arch, env=None, recurse=True):
     env["TAR"] = "/usr/bin/tar"
     env["CCACHE"] = "/usr/bin/ccache"
     env["CMAKE"] = "/usr/bin/cmake"
+    env["MESON"] = "/opt/pedigree-apps/bin/meson"
     env["NINJA"] = "/usr/bin/ninja"
     env["PKG_CONFIG"] = "/usr/bin/pkg-config"
 

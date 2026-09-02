@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -10,40 +8,52 @@ class ExpatPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(ExpatPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'expat'
 
     def version(self):
-        return '2.0.1'
+        return '2.8.4'
 
     def build_requires(self):
-        return ['libtool']
+        return []
+
+    def install_deps(self):
+        return []
 
     def patches(self, env, srcdir):
-        return ['libtool.m4.diff']
+        return []
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'http://sourceforge.net/projects/%(package)s/files/%(package)s/%(version)s/%(package)s-%(version)s.tar.gz/download' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://github.com/libexpat/libexpat/releases/download/'
+            'R_2_8_4/expat-2.8.4.tar.xz',
+            target,
+            sha256='656ae1cc8da3b4ea513bb4e254f33e6243938084c0ec6239da873376b09985a7',
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, not_paths=('docdir',))
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            inplace=False,
+            extra_config=(
+                '--without-tests',
+                '--without-examples',
+                '--without-docbook',
+                '--enable-shared',
+                '--enable-static',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, inplace=False)
 
     def deploy(self, env, srcdir, deploydir):
-        steps.make(srcdir, env, target='install', extra_opts=(
-            'DESTDIR=%s' % deploydir,))
+        env['DESTDIR'] = deploydir
+        steps.make(srcdir, env, target='install', inplace=False)

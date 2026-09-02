@@ -1,0 +1,56 @@
+# perl-cross cannot execute target probes. Keep the target identity distinct
+# from Linux and describe only Pedigree's translated generic Unix interfaces.
+d_voidsig='define'
+d_nanosleep='define'
+d_clock_gettime='define'
+d_clock_getres='undef'
+d_clock_nanosleep='undef'
+d_clock='define'
+
+usemallocwrap='define'
+libswanted='m crypt pthread dl'
+
+d_procselfexe='undef'
+procselfexe='"undef"'
+
+charsize='1'
+shortsize='2'
+intsize='4'
+longsize='8'
+doublesize='8'
+ptrsize='8'
+longdblsize='16'
+longlongsize='8'
+sizesize='8'
+fpossize='16'
+lseeksize='8'
+uidsize='4'
+gidsize='4'
+timesize='8'
+byteorder='12345678'
+longdblkind='3'
+
+st_ino_sign=1
+st_ino_size=8
+d_fcntl_can_lock='define'
+
+# musl exposes these entry points, but Pedigree does not translate their
+# backing syscalls yet. Do not compile runtime paths that can only return ENOSYS.
+d_dup3='undef'
+d_futimes='undef'
+d_futimens='undef'
+d_lchown='undef'
+d_madvise='undef'
+d_msgctl='undef'
+d_msgget='undef'
+d_msgrcv='undef'
+d_msgsnd='undef'
+d_semctl='undef'
+d_semget='undef'
+d_semop='undef'
+d_shmat='undef'
+d_shmctl='undef'
+d_shmdt='undef'
+d_shmget='undef'
+d_syscall='undef'
+d_utimensat='undef'

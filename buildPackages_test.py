@@ -1,5 +1,6 @@
 
 import os
+import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -25,6 +26,42 @@ class BuildPackagesTest(unittest.TestCase):
 
         def version(self):
             return "1.0"
+
+    def test_wrapper_accepts_no_package_arguments(self):
+        repository = os.path.dirname(__file__)
+        with tempfile.TemporaryDirectory() as temporary:
+            docker = os.path.join(temporary, "docker")
+            docker_log = os.path.join(temporary, "docker.log")
+            with open(docker, "w", encoding="utf-8") as executable:
+                executable.write(
+                    "#!/bin/sh\n"
+                    'printf "%s\\n" "$*" >> "$DOCKER_LOG"\n'
+                )
+            os.chmod(docker, 0o755)
+
+            command_env = os.environ.copy()
+            command_env.pop("UPLOAD_KEY", None)
+            command_env.update(
+                {
+                    "DOCKER_LOG": docker_log,
+                    "PATH": temporary + os.pathsep + command_env["PATH"],
+                    "PEDIGREE_APPS_BUILDER_IMAGE": "wrapper-test",
+                }
+            )
+            result = subprocess.run(
+                [os.path.join(repository, "buildPackages.sh")],
+                cwd=repository,
+                env=command_env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            with open(docker_log, encoding="utf-8") as invocation_log:
+                invocations = invocation_log.read()
+            self.assertIn("image inspect wrapper-test", invocations)
+            self.assertIn("python3 /workspace/buildPackages.py --target amd64", invocations)
 
     def test_inner_builder_refuses_a_key_during_builds(self):
         with mock.patch.dict(
@@ -77,6 +114,39 @@ class BuildPackagesTest(unittest.TestCase):
         self.assertEqual(result, 0)
         build_all.assert_not_called()
         upload_all.assert_called_once_with(ordered, build_env, "secret")
+
+    def test_audit_only_never_prepares_or_builds(self):
+        package = self.UploadablePackage(__file__)
+        packages = {package.name(): package}
+        ordered = [(package.name(), package)]
+        build_env = {"SAFE": "value"}
+        with mock.patch.dict(
+            os.environ,
+            {"PEDIGREE_APPS_CONTAINER": "1"},
+            clear=True,
+        ), mock.patch(
+            "buildPackages.environment.generate_environment",
+            return_value=build_env,
+        ), mock.patch(
+            "buildPackages.buildsystem.load_packages",
+            return_value=packages,
+        ), mock.patch(
+            "buildPackages.deps.sort_dependencies",
+            return_value=ordered,
+        ), mock.patch(
+            "buildPackages.steps.prepare_package_manager"
+        ) as prepare_package_manager, mock.patch(
+            "buildPackages.build_all"
+        ) as build_all, mock.patch(
+            "buildPackages.audit.audit_packages",
+            return_value=0,
+        ) as audit_packages:
+            result = buildPackages.main(["buildPackages.py", "--audit-only"])
+
+        self.assertEqual(result, 0)
+        prepare_package_manager.assert_not_called()
+        build_all.assert_not_called()
+        audit_packages.assert_called_once_with(ordered, build_env)
 
     def test_upload_preflight_rejects_runtime_dependencies(self):
         package = self.RuntimeDependentPackage(__file__)

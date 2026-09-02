@@ -1,0 +1,256 @@
+diff --git a/Misc/platform_triplet.c b/Misc/platform_triplet.c
+--- a/Misc/platform_triplet.c
++++ b/Misc/platform_triplet.c
+@@ -26,6 +26,12 @@
+ #    error unknown Android platform
+ #  endif
+ 
++#elif defined(__PEDIGREE__)
++#  if defined(__x86_64__) && defined(__LP64__)
++PLATFORM_TRIPLET=x86_64-pedigree
++#  else
++#    error unknown Pedigree platform
++#  endif
+ #elif defined(__linux__)
+ /*
+  * BEGIN of Linux block
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -4111,6 +4111,9 @@
+ 		;;
+ 	*-*-linux*)
+ 		ac_sys_system=Linux
++		;;
++	*-*-pedigree*)
++		ac_sys_system=Pedigree
+ 		;;
+ 	*-*-cygwin*)
+ 		ac_sys_system=Cygwin
+@@ -4590,6 +4593,9 @@
+ 		*)
+ 			_host_ident=$host_cpu
+ 		esac
++		;;
++	*-*-pedigree*)
++		_host_ident=$host_cpu
+ 		;;
+ 	*-*-cygwin*)
+ 		_host_ident=
+@@ -7735,7 +7741,7 @@
+         PY3LIBRARY=libpython3.so
+       fi
+       ;;
+-    Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*|OpenBSD*|VxWorks*)
++    Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*|OpenBSD*|Pedigree*|VxWorks*)
+       LDLIBRARY='libpython$(LDVERSION).so'
+       BLDLIBRARY='-L. -lpython$(LDVERSION)'
+       RUNSHARED=LD_LIBRARY_PATH=`pwd`${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+@@ -13750,7 +13756,7 @@
+ 	Emscripten*|WASI*)
+ 		LDSHARED='$(CC) -shared'
+ 		LDCXXSHARED='$(CXX) -shared';;
+-	Linux*|GNU*|QNX*|VxWorks*|Haiku*)
++	Linux*|GNU*|QNX*|Pedigree*|VxWorks*|Haiku*)
+ 		LDSHARED='$(CC) -shared'
+ 		LDCXXSHARED='$(CXX) -shared';;
+ 	FreeBSD*)
+@@ -13835,7 +13841,7 @@
+ 		 then CCSHARED="-fPIC";
+ 		 else CCSHARED="+z";
+ 		 fi;;
+-	Linux*|GNU*) CCSHARED="-fPIC";;
++	Linux*|GNU*|Pedigree*) CCSHARED="-fPIC";;
+ 	Emscripten*|WASI*)
+ 		if test "x$enable_wasm_dynamic_linking" = xyes
+ then :
+@@ -13873,7 +13879,7 @@
+ 	    LINKFORSHARED="-Wl,-E -Wl,+s";;
+ #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
+ 	Linux-android*) LINKFORSHARED="-pie -Xlinker -export-dynamic";;
+-	Linux*|GNU*) LINKFORSHARED="-Xlinker -export-dynamic";;
++	Linux*|GNU*|Pedigree*) LINKFORSHARED="-Xlinker -export-dynamic";;
+ 	# -u libsys_s pulls in all symbols in libsys
+	Darwin/*|iOS/*)
+		LINKFORSHARED="$extra_undefs -framework CoreFoundation"
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -324,6 +324,9 @@
+ 	*-*-linux*)
+ 		ac_sys_system=Linux
+ 		;;
++	*-*-pedigree*)
++		ac_sys_system=Pedigree
++		;;
+ 	*-*-cygwin*)
+ 		ac_sys_system=Cygwin
+ 		;;
+@@ -771,6 +774,9 @@
+ 			_host_ident=$host_cpu
+ 		esac
+ 		;;
++	*-*-pedigree*)
++		_host_ident=$host_cpu
++		;;
+ 	*-*-cygwin*)
+ 		_host_ident=
+ 		;;
+@@ -1577,7 +1583,7 @@
+         PY3LIBRARY=libpython3.so
+       fi
+       ;;
+-    Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*|OpenBSD*|VxWorks*)
++    Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*|OpenBSD*|Pedigree*|VxWorks*)
+       LDLIBRARY='libpython$(LDVERSION).so'
+       BLDLIBRARY='-L. -lpython$(LDVERSION)'
+       RUNSHARED=LD_LIBRARY_PATH=`pwd`${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+@@ -3562,7 +3568,7 @@
+ 	Emscripten*|WASI*)
+ 		LDSHARED='$(CC) -shared'
+ 		LDCXXSHARED='$(CXX) -shared';;
+-	Linux*|GNU*|QNX*|VxWorks*|Haiku*)
++	Linux*|GNU*|QNX*|Pedigree*|VxWorks*|Haiku*)
+ 		LDSHARED='$(CC) -shared'
+ 		LDCXXSHARED='$(CXX) -shared';;
+ 	FreeBSD*)
+@@ -3643,7 +3649,7 @@
+ 		 then CCSHARED="-fPIC";
+ 		 else CCSHARED="+z";
+ 		 fi;;
+-	Linux*|GNU*) CCSHARED="-fPIC";;
++	Linux*|GNU*|Pedigree*) CCSHARED="-fPIC";;
+ 	Emscripten*|WASI*)
+ 		AS_VAR_IF([enable_wasm_dynamic_linking], [yes], [
+ 			CCSHARED="-fPIC"
+@@ -3676,7 +3682,7 @@
+ 	    LINKFORSHARED="-Wl,-E -Wl,+s";;
+ #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
+ 	Linux-android*) LINKFORSHARED="-pie -Xlinker -export-dynamic";;
+-	Linux*|GNU*) LINKFORSHARED="-Xlinker -export-dynamic";;
++	Linux*|GNU*|Pedigree*) LINKFORSHARED="-Xlinker -export-dynamic";;
+ 	# -u libsys_s pulls in all symbols in libsys
+	Darwin/*|iOS/*)
+		LINKFORSHARED="$extra_undefs -framework CoreFoundation"
+diff --git a/Modules/timemodule.c b/Modules/timemodule.c
+--- a/Modules/timemodule.c
++++ b/Modules/timemodule.c
+@@ -1339,12 +1339,14 @@ py_process_time(time_module_state *state, PyTime_t *tp,
+ // gh-115714: Don't use CLOCK_PROCESS_CPUTIME_ID on WASI.
+ /* CLOCK_PROF is defined on NetBSD, but not supported.
+  * CLOCK_PROCESS_CPUTIME_ID is broken on NetBSD for the same reason as
+- * CLOCK_THREAD_CPUTIME_ID (see comment below).
++ * CLOCK_THREAD_CPUTIME_ID (see comment below). Pedigree only implements
++ * CLOCK_REALTIME and CLOCK_MONOTONIC.
+  */
+ #if defined(HAVE_CLOCK_GETTIME) \
+     && (defined(CLOCK_PROCESS_CPUTIME_ID) || defined(CLOCK_PROF)) \
+     && !defined(__wasi__) \
+-    && !defined(__NetBSD__)
++    && !defined(__NetBSD__) \
++    && !defined(__PEDIGREE__)
+     struct timespec ts;
+ 
+     if (HAVE_CLOCK_GETTIME_RUNTIME) {
+@@ -1543,10 +1543,12 @@
+  * https://github.com/python/cpython/issues/123978
+  * https://gnats.netbsd.org/57512
+  */
++/* Pedigree defines the clock ID for ABI compatibility, but its clock_gettime()
++ * implementation does not support per-thread CPU clocks yet. */
+ #elif defined(HAVE_CLOCK_GETTIME) && \
+       defined(CLOCK_THREAD_CPUTIME_ID) && \
+       !defined(__EMSCRIPTEN__) && !defined(__wasi__) && \
+-      !defined(__NetBSD__)
++      !defined(__NetBSD__) && !defined(__PEDIGREE__)
+ #define HAVE_THREAD_TIME
+ 
+ #if defined(__APPLE__) && _Py__has_attribute(availability)
+diff --git a/Modules/signalmodule.c b/Modules/signalmodule.c
+--- a/Modules/signalmodule.c
++++ b/Modules/signalmodule.c
+@@ -44,6 +44,11 @@
+ #  include <sys/time.h>           // setitimer()
+ #endif
+ 
++#ifdef __PEDIGREE__
++/* musl implements raise() with tkill(), which Pedigree does not translate. */
++#  define raise(signum) kill(getpid(), (signum))
++#endif
++
+ #if defined(HAVE_PTHREAD_SIGMASK) && !defined(HAVE_BROKEN_PTHREAD_SIGMASK)
+ #  define PYPTHREAD_SIGMASK
+ #endif
+diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
+--- a/Modules/faulthandler.c
++++ b/Modules/faulthandler.c
+@@ -25,6 +25,11 @@
+ #  include <sys/resource.h>       // setrlimit()
+ #endif
+ 
++#ifdef __PEDIGREE__
++/* musl implements raise() with tkill(), which Pedigree does not translate. */
++#  define raise(signum) kill(getpid(), (signum))
++#endif
++
+ #if defined(FAULTHANDLER_USE_ALT_STACK) && defined(HAVE_LINUX_AUXVEC_H) && defined(HAVE_SYS_AUXV_H)
+ #  include <linux/auxvec.h>       // AT_MINSIGSTKSZ
+ #  include <sys/auxv.h>           // getauxval()
+diff --git a/Modules/_decimal/libmpdec/context.c b/Modules/_decimal/libmpdec/context.c
+--- a/Modules/_decimal/libmpdec/context.c
++++ b/Modules/_decimal/libmpdec/context.c
+@@ -32,6 +32,12 @@
+ #include <stdio.h>
+ #include <string.h>
+ 
++#ifdef __PEDIGREE__
++#include <unistd.h>
++/* musl implements raise() with tkill(), which Pedigree does not translate. */
++#define raise(signum) kill(getpid(), (signum))
++#endif
++
+ 
+ void
+ mpd_dflt_traphandler(mpd_context_t *ctx)
+diff --git a/Python/pytime.c b/Python/pytime.c
+--- a/Python/pytime.c
++++ b/Python/pytime.c
+@@ -955,16 +955,20 @@ py_get_system_clock(PyTime_t *tp, _Py_clock_info_t *info, int raise_exc)
+     }
+ 
+     if (info) {
+-        struct timespec res;
+         info->implementation = "clock_gettime(CLOCK_REALTIME)";
+         info->monotonic = 0;
+         info->adjustable = 1;
++#ifdef HAVE_CLOCK_GETRES
++        struct timespec res;
+         if (clock_getres(CLOCK_REALTIME, &res) == 0) {
+             info->resolution = (double)res.tv_sec + (double)res.tv_nsec * 1e-9;
+         }
+         else {
+             info->resolution = 1e-9;
+         }
++#else
++        info->resolution = 1e-9;
++#endif
+     }
+ 
+ #ifdef HAVE_CLOCK_GETTIME_RUNTIME
+@@ -1207,12 +1211,16 @@ py_get_monotonic_clock(PyTime_t *tp, _Py_clock_info_t *info, int raise_exc)
+         info->monotonic = 1;
+         info->implementation = implementation;
+         info->adjustable = 0;
++#ifdef HAVE_CLOCK_GETRES
+         struct timespec res;
+         if (clock_getres(clk_id, &res) != 0) {
+             PyErr_SetFromErrno(PyExc_OSError);
+             return -1;
+         }
+         info->resolution = res.tv_sec + res.tv_nsec * 1e-9;
++#else
++        info->resolution = 1e-9;
++#endif
+     }
+ #endif
+     return 0;

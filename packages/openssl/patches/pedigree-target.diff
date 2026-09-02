@@ -1,0 +1,44 @@
+--- /dev/null
++++ b/Configurations/50-pedigree.conf
+@@ -0,0 +1,30 @@
++## -*- mode: perl; -*-
++
++my %targets = (
++    "pedigree-x86_64" => {
++        inherit_from     => [ "BASE_unix" ],
++        CC               => "gcc",
++        CXX              => "g++",
++        CFLAGS           => picker(default => "-Wall",
++                                   debug   => "-O0 -g",
++                                   release => "-O3"),
++        CXXFLAGS         => picker(default => "-Wall",
++                                   debug   => "-O0 -g",
++                                   release => "-O3"),
++        cflags           => threads("-pthread"),
++        cxxflags         => combine("-std=c++11", threads("-pthread")),
++        # musl exposes the batching APIs, but Pedigree does not implement
++        # their syscalls yet. OpenSSL falls back to sendmsg()/recvmsg().
++        lib_cppflags     => add("-DL_ENDIAN -DNO_RECVMMSG"),
++        ex_libs          => add("-ldl", threads("-pthread")),
++        bn_ops           => "SIXTY_FOUR_BIT_LONG",
++        thread_scheme    => "pthreads",
++        dso_scheme       => "dlfcn",
++        shared_target    => "linux-shared",
++        shared_cflag     => "-fPIC",
++        sys_id           => "PEDIGREE",
++        asm_arch         => "x86_64",
++        perlasm_scheme   => "elf",
++        multilib         => "64",
++    },
++);
+--- a/crypto/build.info
++++ b/crypto/build.info
+@@ -115,7 +115,7 @@ DEFINE[../libcrypto]=$UPLINKDEF
+ 
+ DEPEND[info.o]=buildinf.h
+ DEPEND[cversion.o]=buildinf.h
+-GENERATE[buildinf.h]=../util/mkbuildinf.pl "$(CC) $(LIB_CFLAGS) $(CPPFLAGS_Q)" "$(PLATFORM)"
++GENERATE[buildinf.h]=../util/mkbuildinf.pl "gcc" "$(PLATFORM)"
+ 
+ GENERATE[uplink-x86.S]=../ms/uplink-x86.pl
+ GENERATE[uplink-x86_64.s]=../ms/uplink-x86_64.pl

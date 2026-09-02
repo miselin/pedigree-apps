@@ -1,0 +1,15 @@
+diff --git a/cpan/ExtUtils-Install/lib/ExtUtils/Install.pm b/cpan/ExtUtils-Install/lib/ExtUtils/Install.pm
+--- a/cpan/ExtUtils-Install/lib/ExtUtils/Install.pm
++++ b/cpan/ExtUtils-Install/lib/ExtUtils/Install.pm
+@@ -374,6 +374,11 @@
+     my  $has_posix;
+     sub _have_write_access {
+         my $dir=shift;
++        # The Linux bootstrap miniperl can transiently misreport -w for a
++        # writable Docker bind mount.  The following copy still reports a
++        # real permission error, and native Pedigree Perl keeps this check.
++        return 1 if $^O eq 'linux' && $Config{osname} eq 'pedigree' &&
++                    -d $dir;
+         unless (defined $has_posix) {
+             $has_posix = (!_Is_cygwin && !_Is_Win32
+              && eval { local $^W; require POSIX; 1} ) || 0;

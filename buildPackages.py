@@ -6,6 +6,7 @@ import os
 import sys
 
 import environment
+from support import audit
 from support import build
 from support import buildsystem
 from support import deps
@@ -115,11 +116,16 @@ def parse_args(argv):
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--only", nargs="+", metavar="PACKAGE")
     group.add_argument("--only-depends", nargs="+", metavar="PACKAGE")
-    upload_group = parser.add_mutually_exclusive_group()
-    upload_group.add_argument(
+    operation_group = parser.add_mutually_exclusive_group()
+    operation_group.add_argument(
         "--upload-only",
         action="store_true",
         help="upload existing completed artifacts without rebuilding",
+    )
+    operation_group.add_argument(
+        "--audit-only",
+        action="store_true",
+        help="audit existing completed artifacts without rebuilding",
     )
     parser.add_argument("--debug", action="store_true")
     return parser.parse_args(argv[1:])
@@ -168,6 +174,9 @@ def main(argv=None):
     if args.upload_only and not upload_key:
         log.error("upload requires UPLOAD_KEY")
         return 2
+
+    if args.audit_only:
+        return audit.audit_packages(ordered, env)
 
     steps.prepare_package_manager(env)
 

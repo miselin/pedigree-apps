@@ -1,0 +1,13 @@
+diff --git a/src/default.c b/src/default.c
+index 0d4c2c8..ebc55ef 100644
+--- a/src/default.c
++++ b/src/default.c
+@@ -532,7 +532,7 @@ static const char *default_variables[] =
+     "CC", "cc",
+     "OBJC", "cc",
+ #endif
+-#ifdef MAKE_CXX
++#if defined(MAKE_CXX) && !defined(__pedigree__) && !defined(__PEDIGREE__)
+     "CXX", MAKE_CXX,
+ #else
+ # ifdef GCC_IS_NATIVE

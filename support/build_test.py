@@ -31,6 +31,24 @@ class BuildTest(unittest.TestCase):
             super().deploy(env, srcdir, deploydir)
             raise RuntimeError("deploy failed")
 
+    class BarePackage(FakePackage):
+        def options(self):
+            options = buildsystem.Options()
+            options.tarfile_format = "bare"
+            return options
+
+        def download(self, env, target):
+            with open(target, "wb") as source:
+                source.write(b"bare source\n")
+
+        def deploy(self, env, srcdir, deploydir):
+            destination = os.path.join(deploydir, "etc", "bare-source")
+            os.makedirs(os.path.dirname(destination))
+            with open(os.path.join(srcdir, "source"), "rb") as source:
+                contents = source.read()
+            with open(destination, "wb") as installed:
+                installed.write(contents)
+
     def environment(self, temporary):
         return {
             "DOWNLOAD_TEMP": os.path.join(temporary, "downloads"),
@@ -55,6 +73,22 @@ class BuildTest(unittest.TestCase):
             deploy_base = os.path.join(temporary, "output", "fake", "1.0")
             self.assertFalse(os.path.exists(os.path.join(deploy_base, "root")))
             self.assertFalse(os.path.exists(os.path.join(deploy_base, "root.incomplete")))
+
+    def test_bare_download_is_available_to_deploy(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            package = self.BarePackage(__file__)
+            build.build_package(package, self.environment(temporary))
+            installed = os.path.join(
+                temporary,
+                "output",
+                "fake",
+                "1.0",
+                "root",
+                "etc",
+                "bare-source",
+            )
+            with open(installed, "rb") as source:
+                self.assertEqual(source.read(), b"bare source\n")
 
     def test_safe_members_keeps_a_single_top_level_file(self):
         with tempfile.NamedTemporaryFile() as archive_file:

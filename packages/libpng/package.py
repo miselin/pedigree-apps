@@ -8,7 +8,7 @@ class LibpngPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(LibpngPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'libpng'

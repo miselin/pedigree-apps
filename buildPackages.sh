@@ -99,10 +99,19 @@ run_builder() {
 }
 
 if [[ "$upload" == 1 ]]; then
-    run_builder 0 "${args[@]}"
-    run_builder 1 "${args[@]}" --upload-only
+    if ((${#args[@]})); then
+        run_builder 0 "${args[@]}"
+        run_builder 1 "${args[@]}" --upload-only
+    else
+        run_builder 0
+        run_builder 1 --upload-only
+    fi
 elif [[ "$upload_only" == 1 ]]; then
     run_builder 1 "${args[@]}"
 else
-    run_builder 0 "${args[@]}"
+    if ((${#args[@]})); then
+        run_builder 0 "${args[@]}"
+    else
+        run_builder 0
+    fi
 fi

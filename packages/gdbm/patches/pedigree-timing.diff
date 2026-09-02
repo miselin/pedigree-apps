@@ -1,0 +1,61 @@
+--- a/tools/gdbmshell.c
++++ b/tools/gdbmshell.c
+@@ -3092,14 +3092,34 @@
+   struct timeval sys;
++  int have_rusage;
+ };
+ 
++static int
++timing_getrusage (struct rusage *r)
++{
++#ifdef __pedigree__
++  (void) r;
++  return -1;
++#else
++  return getrusage (RUSAGE_SELF, r);
++#endif
++}
++
+ void
+ timing_start (struct timing *t)
+ {
+   struct rusage r;
+   gettimeofday (&t->real, NULL);
+-  getrusage (RUSAGE_SELF, &r);
+-  t->user  = r.ru_utime;
+-  t->sys = r.ru_stime;
++  t->have_rusage = timing_getrusage (&r) == 0;
++  if (t->have_rusage)
++    {
++      t->user = r.ru_utime;
++      t->sys = r.ru_stime;
++    }
++  else
++    {
++      t->user.tv_sec = t->user.tv_usec = 0;
++      t->sys.tv_sec = t->sys.tv_usec = 0;
++    }
+ }
+ 
+ static inline struct timeval
+@@ -3125,10 +3145,17 @@
+   struct timeval now;
+ 
+   gettimeofday (&now, NULL);
+-  getrusage (RUSAGE_SELF, &r);
+   t->real = timeval_sub (now, t->real);
+-  t->user = timeval_sub (r.ru_utime, t->user);
+-  t->sys = timeval_sub (r.ru_stime, t->sys);
++  if (t->have_rusage && timing_getrusage (&r) == 0)
++    {
++      t->user = timeval_sub (r.ru_utime, t->user);
++      t->sys = timeval_sub (r.ru_stime, t->sys);
++    }
++  else
++    {
++      t->user.tv_sec = t->user.tv_usec = 0;
++      t->sys.tv_sec = t->sys.tv_usec = 0;
++    }
+ }
+ 
+ #ifndef HAVE_GETLINE

@@ -1,0 +1,17 @@
+--- a/git-compat-util.h
++++ b/git-compat-util.h
+@@ -24,6 +24,14 @@
+ #endif
+ 
+ #include "compat/posix.h"
++
++#ifdef __pedigree__
++static inline int git_raise(int sig)
++{
++	return kill(getpid(), sig);
++}
++#define raise git_raise
++#endif
+ 
+ struct strbuf;
+ 

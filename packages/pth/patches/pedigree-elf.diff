@@ -1,0 +1,92 @@
+--- a/configure
++++ b/configure
+@@ -4220,8 +4220,8 @@
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
+-# This must be Linux ELF.
+-linux*)
++# Pedigree uses the GNU ELF dynamic-linking model.
++linux* | pedigree*)
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
+@@ -5903,7 +5903,7 @@
+   lt_cv_sys_global_symbol_to_cdecl="sed -n -e 's/^T .* \(.*\)$/extern int \1();/p' -e 's/^$symcode* .* \(.*\)$/extern char \1;/p'"
+   lt_cv_sys_global_symbol_to_c_name_address="sed -n -e 's/^: \([^ ]*\) $/  {\\\"\1\\\", (lt_ptr) 0},/p' -e 's/^$symcode* \([^ ]*\) \([^ ]*\)$/  {\"\2\", (lt_ptr) \&\2},/p'"
+   ;;
+-linux*)
++linux* | pedigree*)
+   if test "$host_cpu" = ia64; then
+     symcode='[ABCDGIRSTW]'
+     lt_cv_sys_global_symbol_to_cdecl="sed -n -e 's/^T .* \(.*\)$/extern int \1();/p' -e 's/^$symcode* .* \(.*\)$/extern char \1;/p'"
+@@ -6827,7 +6827,7 @@
+       lt_prog_compiler_static='-Bstatic'
+       ;;
+ 
+-    linux*)
++    linux* | pedigree*)
+       case $cc_basename in
+       icc* | ecc*)
+ 	lt_prog_compiler_wl='-Wl,'
+@@ -7266,7 +7266,7 @@
+       archive_expsym_cmds='sed "s,^,_," $export_symbols >$output_objdir/$soname.expsym~$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-h,$soname ${wl}--retain-symbols-file,$output_objdir/$soname.expsym ${wl}--image-base,`expr ${RANDOM-$$} % 4096 / 2 \* 262144 + 1342177280` -o $lib'
+       ;;
+ 
+-    linux*)
++    linux* | pedigree*)
+       if $LD --help 2>&1 | grep ': supported targets:.* elf' > /dev/null; then
+ 	tmp_addflag=
+ 	case $cc_basename,$host_cpu in
+@@ -8487,8 +8487,8 @@
+   dynamic_linker=no
+   ;;
+ 
+-# This must be Linux ELF.
+-linux*)
++# Pedigree uses the GNU ELF dynamic-linking model.
++linux* | pedigree*)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+@@ -10958,7 +10958,7 @@
+     hardcode_libdir_flag_spec_CXX='${wl}-rpath ${wl}$libdir'
+     hardcode_libdir_separator_CXX=:
+     ;;
+-  linux*)
++  linux* | pedigree*)
+     case $cc_basename in
+       KCC*)
+ 	# Kuck and Associates, Inc. (KAI) C++ Compiler
+@@ -11674,7 +11674,7 @@
+ 	    ;;
+ 	esac
+ 	;;
+-      linux*)
++      linux* | pedigree*)
+ 	case $cc_basename in
+ 	  KCC*)
+ 	    # KAI C++ Compiler
+@@ -12447,8 +12447,8 @@
+   dynamic_linker=no
+   ;;
+ 
+-# This must be Linux ELF.
+-linux*)
++# Pedigree uses the GNU ELF dynamic-linking model.
++linux* | pedigree*)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+--- a/pth-config.in
++++ b/pth-config.in
+@@ -38,8 +38,8 @@
+ pth_mandir="@mandir@"
+ pth_datadir="@datadir@"
+ pth_acdir="@datadir@/aclocal"
+-pth_cflags="@CFLAGS@"
+-pth_ldflags="@LDFLAGS@"
++pth_cflags=""
++pth_ldflags=""
+ pth_libs="@LIBS@"
+ pth_version="@PTH_VERSION_STR@"

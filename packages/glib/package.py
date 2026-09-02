@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -16,41 +14,59 @@ class GlibPackage(buildsystem.Package):
         return 'glib'
 
     def version(self):
-        return '2.51.0'
+        return '2.88.3'
 
     def build_requires(self):
-        return ['libiconv', 'gettext', 'libffi', 'libpcre', 'zlib']
+        return ['libffi', 'libpcre2', 'zlib']
+
+    def install_deps(self):
+        # GLib installs gdbus-codegen and related Python utilities.
+        return self.build_requires() + ['python3']
+
+    def patches(self, env, srcdir):
+        return [
+            'pedigree-meson-features.diff',
+            'pedigree-signal-fallback.diff',
+        ]
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        shortversion = '2.51'
-        url = 'http://ftp.gnome.org/pub/gnome/sources/%(package)s/%(shortversion)s/%(package)s-%(version)s.tar.xz' % {
-            'package': self.name(), 'version': self.version(),
-            'shortversion': shortversion,
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://download.gnome.org/sources/glib/2.88/'
+            'glib-%s.tar.xz' % self.version(),
+            target,
+            sha256='ab24d24e698dfa1e408b7bcdb508f4aafc906185a8b8ce72fdf79bbbdc9b383b',
+        )
 
     def configure(self, env, srcdir):
-        env['PCRE_CFLAGS'] = '-I/include'
-        env['PCRE_LIBS'] = '-L/libraries -lpcre'
-        steps.run_configure(self, srcdir, env, extra_config=(
-            'glib_cv_stack_grows=no', 'glib_cv_uscore=no', 'ac_cv_func_posix_getpwuid_r=no',
-            'ac_cv_func_posix_getgrgid_r=no', '--with-libiconv'))
+        steps.meson_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                '-Ddefault_library=both',
+                '-Dtests=false',
+                '-Dinstalled_tests=false',
+                '-Dintrospection=disabled',
+                '-Ddocumentation=false',
+                '-Dman-pages=disabled',
+                '-Dnls=disabled',
+                '-Dselinux=disabled',
+                '-Dlibmount=disabled',
+                '-Dxattr=false',
+                '-Ddtrace=disabled',
+                '-Dsystemtap=disabled',
+                '-Dsysprof=disabled',
+                '-Dlibelf=disabled',
+                '-Dglib_debug=disabled',
+                '-Dfile_monitor_backend=none',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.meson_build(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, 'install')
-
-    def links(self, env, deploydir, cross_dir):
-        libs = ['gio', 'libgthread-2.0.so', 'libgmodule-2.0.so',
-            'libgobject-2.0.so', 'glib-2.0', 'libglib-2.0.so', 'libgio-2.0.so']
-        headers = ['glib-2.0', 'gio-unix-2.0']
-        steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)
+        steps.meson_install(srcdir, env, deploydir)

@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -118,6 +119,55 @@ def autoconf(srcdir, env, aclocal_flags=(), only_aclocal=False):
         cmd([env["AUTOCONF"]], cwd=srcdir, env=env)
 
 
+def patch_libtool_configure(srcdir):
+    """Teach generated Libtool configure fragments about Pedigree ELF."""
+    for current, _, filenames in os.walk(srcdir):
+        if "configure" not in filenames:
+            continue
+
+        path = os.path.join(current, "configure")
+        try:
+            with open(path, encoding="utf-8") as source:
+                contents = source.read()
+        except UnicodeDecodeError:
+            continue
+
+        # These markers keep the rewrite confined to generated Libtool logic.
+        if not (
+            "lt_cv_deplibs_check_method" in contents
+            and "lt_prog_compiler" in contents
+        ):
+            continue
+
+        changed = False
+        result = []
+        for line in contents.splitlines(keepends=True):
+            case_pattern = line.split(")", 1)[0]
+            is_libtool_elf_case = (
+                ")" in line
+                and "linux*" in case_pattern
+                and any(
+                    marker in case_pattern
+                    for marker in ("k*bsd", "kopensolaris")
+                )
+            )
+            if is_libtool_elf_case and "pedigree*" not in case_pattern:
+                if "linux* |" in line:
+                    line = line.replace(
+                        "linux* |", "linux* | pedigree* |", 1
+                    )
+                    changed = True
+                elif "linux*|" in line:
+                    line = line.replace("linux*|", "linux*|pedigree*|", 1)
+                    changed = True
+            result.append(line)
+
+        if changed:
+            with open(path, "w", encoding="utf-8") as destination:
+                destination.writelines(result)
+            log.debug("enabled Pedigree ELF in generated Libtool: %s", path)
+
+
 def run_configure(
     package,
     srcdir,
@@ -128,10 +178,21 @@ def run_configure(
     paths=None,
     not_paths=None,
 ):
+    patch_libtool_configure(srcdir)
     builddir = get_builddir(srcdir, env, inplace)
-    options = [os.path.join(srcdir, "configure")]
+    command_env = env.copy()
+    command_env["CONFIG_SITE"] = env["TARGET_CONFIG_SITE"]
+    configure = os.path.join(srcdir, "configure")
+    options = [configure]
     if host:
         options.append("--host=%s" % env["CROSS_TARGET"])
+
+    # Libtool otherwise treats absolute /usr/lib references in dependency .la
+    # files as host paths instead of resolving them in the staged port sysroot.
+    if os.path.isfile(configure):
+        with open(configure, encoding="utf-8", errors="ignore") as script:
+            if "--with-sysroot" in script.read():
+                options.append("--with-sysroot=%s" % env["PORTS_SYSROOT"])
 
     enabled_paths = set(AUTOCONF_PATHFLAGS) if paths is None else set(paths)
     disabled_paths = set(not_paths or ())
@@ -142,7 +203,7 @@ def run_configure(
             "--%s=%s" % (option, value.replace("$package", package.name()))
         )
     options.extend(extra_config)
-    cmd(options, cwd=builddir, env=env)
+    cmd(options, cwd=builddir, env=command_env)
 
 
 def cmake_configure(package, srcdir, env, extra_config=()):
@@ -187,6 +248,100 @@ def cmake_install(srcdir, env, deploydir):
     command_env["DESTDIR"] = deploydir
     cmd(
         [env["CMAKE"], "--install", get_builddir(srcdir, env, False)],
+        cwd=srcdir,
+        env=command_env,
+    )
+
+
+def _meson_values(arguments):
+    return "[{}]".format(
+        ", ".join("'{}'".format(value.replace("'", "\\'")) for value in arguments)
+    )
+
+
+def meson_configure(package, srcdir, env, extra_config=()):
+    builddir = get_builddir(srcdir, env, False)
+    cross_file = os.path.join(builddir, "pedigree-cross.ini")
+    c_args = shlex.split(env.get("CFLAGS", "")) + shlex.split(
+        env.get("CPPFLAGS", "")
+    )
+    cpp_args = shlex.split(env.get("CXXFLAGS", "")) + shlex.split(
+        env.get("CPPFLAGS", "")
+    )
+    link_args = shlex.split(env.get("LDFLAGS", ""))
+    # The cross GCC already knows its non-FHS compiler sysroot. Meson's
+    # sys_root property would invent a nonexistent <root>/usr/include path.
+    with open(cross_file, "w", encoding="utf-8") as config:
+        config.write(
+            """[binaries]
+c = %(c)s
+cpp = %(cpp)s
+ar = %(ar)s
+strip = %(strip)s
+pkg-config = %(pkg_config)s
+
+[host_machine]
+system = 'pedigree'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
+
+[properties]
+needs_exe_wrapper = true
+
+[built-in options]
+c_args = %(c_args)s
+cpp_args = %(cpp_args)s
+c_link_args = %(link_args)s
+cpp_link_args = %(link_args)s
+"""
+            % {
+                "c": _meson_values((env["CCACHE"], env["CROSS_CC"])),
+                "cpp": _meson_values((env["CCACHE"], env["CROSS_CXX"])),
+                "ar": repr(env["CROSS_AR"]),
+                "strip": repr(env["CROSS_STRIP"]),
+                "pkg_config": repr(env["PKG_CONFIG"]),
+                "c_args": _meson_values(c_args),
+                "cpp_args": _meson_values(cpp_args),
+                "link_args": _meson_values(link_args),
+            }
+        )
+
+    options = [
+        env["MESON"],
+        "setup",
+        builddir,
+        srcdir,
+        "--cross-file",
+        cross_file,
+        "--prefix=/usr",
+        "--libdir=lib",
+        "--buildtype=release",
+        "--wrap-mode=nodownload",
+    ]
+    options.extend(extra_config)
+    cmd(options, cwd=srcdir, env=env)
+
+
+def meson_build(srcdir, env, target=None):
+    args = [
+        env["MESON"],
+        "compile",
+        "-C",
+        get_builddir(srcdir, env, False),
+        "-j",
+        env["MAKEFLAGS"].removeprefix("-j"),
+    ]
+    if target:
+        args.append(target)
+    cmd(args, cwd=srcdir, env=env)
+
+
+def meson_install(srcdir, env, deploydir):
+    command_env = env.copy()
+    command_env["DESTDIR"] = deploydir
+    cmd(
+        [env["MESON"], "install", "-C", get_builddir(srcdir, env, False)],
         cwd=srcdir,
         env=command_env,
     )

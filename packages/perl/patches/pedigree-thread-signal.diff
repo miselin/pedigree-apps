@@ -1,0 +1,15 @@
+--- a/mg.c
++++ b/mg.c
+@@ -1600,7 +1600,12 @@
+          * thread, presumably created by a library, redirect it to the
+          * main thread.
+          */
++#ifdef __pedigree__
++        /* Pedigree process signals are delivered to the primary thread. */
++        kill(getpid(), sig);
++#else
+         pthread_kill(PL_main_thread, sig);
++#endif
+         return;
+     }
+ #endif

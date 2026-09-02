@@ -1,7 +1,4 @@
 
-import os
-import subprocess
-
 from support import buildsystem
 from support import steps
 
@@ -11,16 +8,19 @@ class LibmpfrPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(LibmpfrPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'libmpfr'
 
     def version(self):
-        return '3.1.5'
+        return '4.2.2'
 
     def build_requires(self):
-        return ['libtool', 'libgmp']
+        return ['libgmp']
+
+    def install_deps(self):
+        return self.build_requires()
 
     def patches(self, env, srcdir):
         return []
@@ -29,22 +29,24 @@ class LibmpfrPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://www.mpfr.org/%(urlpackage)s-current/%(urlpackage)s-%(version)s.tar.xz' % {
-            'package': self.name(),
-            'version': self.version(),
-            'urlpackage': 'mpfr',
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://ftp.gnu.org/gnu/mpfr/mpfr-%s.tar.xz'
+            % self.version(),
+            target,
+            sha256='b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01',
+        )
 
     def configure(self, env, srcdir):
-        build_cc_machine = subprocess.check_output(
-            ['/usr/bin/gcc', '-dumpmachine'], text=True).strip()
-        steps.run_configure(self, srcdir, env, inplace=False, extra_config=(
-                                '--build=%s' % build_cc_machine,))
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            inplace=False,
+            extra_config=(
+                '--enable-shared',
+                '--enable-static',
+            ),
+        )
 
     def build(self, env, srcdir):
         steps.make(srcdir, env, inplace=False)

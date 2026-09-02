@@ -1,0 +1,20 @@
+--- a/m4/libtool.m4
++++ b/m4/libtool.m4
+@@ -3050 +3050 @@
+-linux* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
++linux* | pedigree* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
+@@ -3805 +3805 @@
+-linux* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
++linux* | pedigree* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
+@@ -4632 +4632 @@
+-      linux* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
++      linux* | pedigree* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
+@@ -4964 +4964 @@
+-    linux* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu* | freebsd*)
++    linux* | pedigree* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu* | freebsd*)
+@@ -5472 +5472 @@
+-    gnu* | linux* | tpf* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu)
++    gnu* | linux* | pedigree* | tpf* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu)
+@@ -7250 +7250 @@
+-      linux* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
++      linux* | pedigree* | ironclad*-gnu | k*bsd*-gnu | kopensolaris*-gnu | gnu*)

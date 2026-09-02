@@ -6,12 +6,20 @@ from support import buildsystem
 from support import steps
 
 
+DISABLED_REASON = (
+    "ISC libbind duplicates musl's resolver API and the forced global FHS "
+    "paths would overwrite musl and BIND headers; no active port depends on "
+    "it. Revive only for a concrete legacy consumer with namespaced headers "
+    "and target resolver validation."
+)
+
+
 class LibBindPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
         super(LibBindPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = 'gz'
 
     def name(self):
         return 'libbind'
@@ -26,46 +34,40 @@ class LibBindPackage(buildsystem.Package):
         return ['resolv.h.diff']
 
     def build_requires(self):
-        return ['libtool']
+        return []
+
+    def install_deps(self):
+        return []
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.isc.org/isc/%(package)s/%(version)s/%(package)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        # Inject paths.h for correct configuration.
-        with open(os.path.join(srcdir, 'port/unknown/include/paths.h'), 'w') as f:
-            f.write('''
-#ifndef _PATHS_H
-#define _PATHS_H
-
-#define _PATH_DEVNULL "/dev/null"
-
-#endif
-''')
-
-        # Dirty hack, but we have no headers to install here, and the default is
-        # to fail the build outright. Grumble.
-        with open(os.path.join(srcdir, 'port/unknown/include/Makefile.in'), 'w') as f:
-            f.write('all:\n\texit 0\n\n@BIND9_MAKE_RULES@\n')
-
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://downloads.isc.org/isc/libbind/%s/libbind-%s.tar.gz'
+            % (self.version(), self.version()),
+            target,
+            sha256='b98b6aa6e7c403f5a6522ffb68325785a87ea8b13377ada8ba87953a3e8cb29d',
+        )
 
     def configure(self, env, srcdir):
-        env['CFLAGS'] = '-fPIC -g -O2'
-        env['CXXFLAGS'] = '-fPIC -g -O2'
-        steps.run_configure(self, srcdir, env,
-            extra_config=('--with-randomdev=/dev/urandom', '--with-pic',
-                          '--with-libtool'))
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            inplace=False,
+            extra_config=(
+                '--with-randomdev=/dev/urandom',
+                '--with-pic',
+                '--with-libtool',
+                '--enable-shared',
+                '--enable-static',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(srcdir, env, inplace=False)
 
     def deploy(self, env, srcdir, deploydir):
-        steps.make(srcdir, env, 'install', extra_opts=('DESTDIR=%s' % deploydir,))
+        env['DESTDIR'] = deploydir
+        steps.make(srcdir, env, 'install', inplace=False)

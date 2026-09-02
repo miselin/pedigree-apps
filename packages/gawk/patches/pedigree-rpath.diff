@@ -1,0 +1,29 @@
+--- a/build-aux/config.rpath
++++ b/build-aux/config.rpath
+@@ -132,7 +132,7 @@
+     nonstopux*)
+       wl='-Wl,'
+       ;;
+-    linux* | k*bsd*-gnu | kopensolaris*-gnu)
++    linux* | pedigree* | k*bsd*-gnu | kopensolaris*-gnu)
+       case $cc_basename in
+         ecc*)
+           wl='-Wl,'
+@@ -281,7 +281,7 @@
+       hardcode_direct=no
+       hardcode_libdir_flag_spec='${wl}-rpath,$libdir'
+       ;;
+-    gnu* | linux* | tpf* | k*bsd*-gnu | kopensolaris*-gnu)
++    gnu* | linux* | pedigree* | tpf* | k*bsd*-gnu | kopensolaris*-gnu)
+       if $LD --help 2>&1 | grep ': supported targets:.* elf' > /dev/null; then
+         :
+       else
+@@ -645,7 +645,7 @@
+     ;;
+   linux*oldld* | linux*aout* | linux*coff*)
+     ;;
+-  linux* | k*bsd*-gnu | kopensolaris*-gnu)
++  linux* | pedigree* | k*bsd*-gnu | kopensolaris*-gnu)
+     library_names_spec='$libname$shrext'
+     ;;
+   knetbsd*-gnu)

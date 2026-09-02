@@ -1,11 +1,7 @@
-from support import buildsystem
+UPSTREAM_VERSION = "2.3.3"
 
-
-class SlangPackage(buildsystem.Package):
-    """Placeholder for the unfinished S-Lang port."""
-
-    def name(self):
-        return ""
-
-    def version(self):
-        return ""
+DISABLED_REASON = (
+    "The S-Lang entry was an empty placeholder. A 2.3.3 port still needs a "
+    "pinned source, Pedigree cross-configure answers, ncurses integration, "
+    "and target terminal/runtime validation."
+)

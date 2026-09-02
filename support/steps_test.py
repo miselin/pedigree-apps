@@ -43,6 +43,100 @@ class StepsTest(unittest.TestCase):
         self.assertEqual(steps.AUTOCONF_PATHFLAGS["libdir"], "/usr/lib")
         self.assertEqual(steps.AUTOCONF_PATHFLAGS["sysconfdir"], "/etc")
 
+    def test_configure_scopes_target_config_site(self):
+        package = mock.Mock()
+        package.name.return_value = "example"
+        env = {
+            "CROSS_TARGET": "x86_64-pedigree",
+            "TARGET_CONFIG_SITE": "/workspace/config.site",
+        }
+
+        steps.run_configure(package, "/source", env)
+
+        command_env = self.command.call_args.kwargs["env"]
+        self.assertEqual(command_env["CONFIG_SITE"], "/workspace/config.site")
+        self.assertNotIn("CONFIG_SITE", env)
+
+    def test_configure_scopes_libtool_dependencies_to_ports_sysroot(self):
+        package = mock.Mock()
+        package.name.return_value = "example"
+        with tempfile.TemporaryDirectory() as source:
+            configure = os.path.join(source, "configure")
+            with open(configure, "w", encoding="utf-8") as script:
+                script.write("# supports --with-sysroot for libtool\n")
+            env = {
+                "CROSS_TARGET": "x86_64-pedigree",
+                "PORTS_SYSROOT": "/workspace/.build/sysroots/example",
+                "TARGET_CONFIG_SITE": "/workspace/config.site",
+            }
+
+            steps.run_configure(package, source, env)
+
+        command = self.command.call_args.args[0]
+        self.assertIn(
+            "--with-sysroot=/workspace/.build/sysroots/example", command
+        )
+
+    def test_libtool_configure_adds_only_pedigree_elf_cases(self):
+        with tempfile.TemporaryDirectory() as source:
+            nested = os.path.join(source, "extension")
+            os.makedirs(nested)
+            configure = os.path.join(nested, "configure")
+            with open(configure, "w", encoding="utf-8") as script:
+                script.write(
+                    "lt_cv_deplibs_check_method=unknown\n"
+                    "lt_prog_compiler_wl=\n"
+                    "case $host_os in\n"
+                    "  linux* | k*bsd*-gnu | gnu*)\n"
+                    "    version_type=linux ;;\n"
+                    "  s390*-*linux*|s390*-*tpf*) s390_linker=yes ;;\n"
+                    "  linux*) use_epoll=yes ;;\n"
+                    "esac\n"
+                )
+
+            steps.patch_libtool_configure(source)
+            steps.patch_libtool_configure(source)
+
+            with open(configure, encoding="utf-8") as script:
+                contents = script.read()
+
+        self.assertIn("linux* | pedigree* | k*bsd*-gnu | gnu*)", contents)
+        self.assertEqual(contents.count("pedigree*"), 1)
+        self.assertIn("s390*-*linux*|s390*-*tpf*)", contents)
+        self.assertIn("linux*) use_epoll=yes ;;", contents)
+
+    def test_meson_cross_file_uses_pedigree_and_staged_flags(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = os.path.join(temporary, "source")
+            os.makedirs(source)
+            env = {
+                "MESON": "/opt/meson",
+                "CCACHE": "/usr/bin/ccache",
+                "CROSS_CC": "/opt/x86_64-pedigree-gcc",
+                "CROSS_CXX": "/opt/x86_64-pedigree-g++",
+                "CROSS_AR": "/opt/x86_64-pedigree-ar",
+                "CROSS_STRIP": "/opt/x86_64-pedigree-strip",
+                "PKG_CONFIG": "/usr/bin/pkg-config",
+                "TARGET_SYSROOT": "/opt/pedigree/x86_64-pedigree",
+                "CFLAGS": "-O2",
+                "CXXFLAGS": "-O2",
+                "CPPFLAGS": "-I/staged/usr/include",
+                "LDFLAGS": "-L/staged/usr/lib",
+            }
+
+            steps.meson_configure(mock.Mock(), source, env)
+            cross_file = os.path.join(
+                source, "pedigree-build", "pedigree-cross.ini"
+            )
+            with open(cross_file, encoding="utf-8") as config:
+                contents = config.read()
+
+        self.assertIn("system = 'pedigree'", contents)
+        self.assertIn("needs_exe_wrapper = true", contents)
+        self.assertIn("'-I/staged/usr/include'", contents)
+        self.assertNotIn("sys_root", contents)
+        self.assertNotIn("system = 'linux'", contents)
+
     def test_serial_make_overrides_environment_parallelism(self):
         env = {"MAKE": "/usr/bin/make", "MAKEFLAGS": "-j8"}
         steps.make(".", env, parallel=False)

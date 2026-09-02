@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -10,17 +8,19 @@ class CairoPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(CairoPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'xz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'cairo'
 
     def version(self):
-        return '1.12.10'
+        return '1.18.4'
 
     def build_requires(self):
-        return ['libtool', 'libpng', 'zlib', 'libfreetype', 'fontconfig',
-                'pixman', 'glib']
+        return ['libpng', 'zlib', 'libfreetype', 'fontconfig', 'pixman', 'glib']
+
+    def install_deps(self):
+        return self.build_requires()
 
     def patches(self, env, srcdir):
         return []
@@ -29,42 +29,41 @@ class CairoPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://cairographics.org/releases/%(package)s-%(version)s.tar.xz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        env['NOCONFIGURE'] = 'yes'
-        steps.cmd([os.path.join(srcdir, 'autogen.sh')], cwd=srcdir, env=env)
+        steps.download(
+            'https://cairographics.org/releases/cairo-%s.tar.xz'
+            % self.version(),
+            target,
+            sha256='445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb',
+        )
 
     def configure(self, env, srcdir):
-        # similar to pixman, without this the build goes crazy
-        env['CPPFLAGS'] = '-DCAIRO_NO_MUTEX=1'
-        steps.run_configure(self, srcdir, env, extra_config=(
-            '--disable-xcd', '--disable-xlib', '--without-x', '--disable-ps',
-            '--disable-pdf', '--enable-shared', '--disable-full-testing'))
+        steps.meson_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                '-Ddefault_library=both',
+                '-Dtests=disabled',
+                '-Dxcb=disabled',
+                '-Dxlib=disabled',
+                '-Dxlib-xcb=disabled',
+                '-Dquartz=disabled',
+                '-Ddwrite=disabled',
+                '-Dtee=disabled',
+                '-Dpng=enabled',
+                '-Dzlib=enabled',
+                '-Dfontconfig=enabled',
+                '-Dfreetype=enabled',
+                '-Dglib=enabled',
+                '-Dspectre=disabled',
+                '-Dlzo=disabled',
+                '-Dsymbol-lookup=disabled',
+                '-Dgtk_doc=false',
+            ),
+        )
 
     def build(self, env, srcdir):
-        # Fudge the test makefiles because Cairo's test assume all features
-        # are actually enabled.
-        ignore_makefile = '''
-ign:
-\t@echo '<ignored>'
-all: ign
-install: ign
-clean: ign
-'''
-
-        with open(os.path.join(srcdir, 'test', 'Makefile'), 'w') as f:
-            f.write(ignore_makefile)
-        with open(os.path.join(srcdir, 'perf', 'Makefile'), 'w') as f:
-            f.write(ignore_makefile)
-
-        steps.make(srcdir, env)
+        steps.meson_build(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.meson_install(srcdir, env, deploydir)

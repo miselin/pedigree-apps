@@ -1,0 +1,37 @@
+diff --git a/src/os_unix.c b/src/os_unix.c
+--- a/src/os_unix.c
++++ b/src/os_unix.c
+@@ -941,9 +941,13 @@ sig_tstp SIGDEFARG(sigarg)
+     if (in_mch_suspend)
+     {
+ 	mch_signal(SIGTSTP, ignore_sigtstp ? SIG_IGN : SIG_DFL);
++#ifdef __pedigree__
++	kill(getpid(), sigarg);
++#else
+ 	raise(sigarg);
++#endif
+     }
+     else
+ 	got_tstp = TRUE;
+ 
+ # if !defined(__ANDROID__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
+@@ -9118,12 +9118,19 @@ start_timeout(long msec)
+     ret = ret == 0 ? sigaddset(&sigs, SIGALRM) : ret;
+     ret = ret == 0 ? sigprocmask(SIG_BLOCK, &sigs, &saved_sigs) : ret;
+     timeout_flag = FALSE;
++#ifdef __pedigree__
++    // Pedigree cannot query pending signals yet.  A stopped timer is normally
++    // enough to prevent a stale alarm, so restore the mask and continue.
++    if (ret == 0)
++	ret = sigprocmask(SIG_SETMASK, &saved_sigs, NULL);
++#else
+     ret = ret == 0 ? sigpending(&sigs) : ret;
+     if (ret == 0)
+     {
+ 	alarm_pending = sigismember(&sigs, SIGALRM);
+ 	ret = sigprocmask(SIG_SETMASK, &saved_sigs, NULL);
+     }
++#endif
+     if (unlikely(ret != 0 || alarm_pending < 0))
+     {
+ 	// Just catching coding errors. Write an error message, but carry on.

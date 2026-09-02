@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -10,39 +8,69 @@ class DropbearPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(DropbearPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'bz2'
+        self._options.tarfile_format = 'bz2'
 
     def name(self):
         return 'dropbear'
 
     def version(self):
-        return '2013.58'
+        return '2026.94'
 
     def build_requires(self):
-        return ['gettext', 'openssl']
+        return ['zlib']
+
+    def install_deps(self):
+        return ['zlib']
 
     def patches(self, env, srcdir):
-        return ['pedigree-fix-bindir.diff', 'pedigree-fixes.diff']
+        return []
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'https://matt.ucc.asn.au/%(package)s/releases/%(package)s-%(version)s.tar.bz2' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        pass
+        steps.download(
+            'https://matt.ucc.asn.au/dropbear/releases/'
+            'dropbear-%s.tar.bz2' % self.version(),
+            target,
+            sha256='e098034a843699200c8c977a991fff73159735bf795d5f72ef672c41a6b1ae81',
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            inplace=False,
+            extra_config=(
+                '--enable-zlib',
+                '--enable-bundled-libtom',
+                '--disable-openpty',
+                '--disable-lastlog',
+                '--disable-utmp',
+                '--disable-utmpx',
+                '--disable-wtmp',
+                '--disable-wtmpx',
+                '--disable-loginfunc',
+                '--disable-pututline',
+                '--disable-pututxline',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.make(
+            srcdir,
+            env,
+            inplace=False,
+            extra_opts=('PROGRAMS=dropbear dbclient dropbearkey dropbearconvert scp',),
+        )
 
     def deploy(self, env, srcdir, deploydir):
         env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.make(
+            srcdir,
+            env,
+            target='install',
+            inplace=False,
+            extra_opts=('PROGRAMS=dropbear dbclient dropbearkey dropbearconvert scp',),
+        )

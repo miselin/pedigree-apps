@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -10,16 +8,26 @@ class PangoPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(PangoPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'xz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'pango'
 
     def version(self):
-        return '1.37.2'
+        return '1.58.2'
 
     def build_requires(self):
-        return ['libtool', 'glib', 'harfbuzz', 'libfreetype', 'cairo']
+        return [
+            'glib',
+            'harfbuzz',
+            'libfreetype',
+            'cairo',
+            'fontconfig',
+            'fribidi',
+        ]
+
+    def install_deps(self):
+        return self.build_requires()
 
     def patches(self, env, srcdir):
         return []
@@ -28,35 +36,36 @@ class PangoPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.gnome.org/pub/GNOME/sources/%(package)s/1.37/%(package)s-%(version)s.tar.xz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://download.gnome.org/sources/pango/1.58/'
+            'pango-%s.tar.xz' % self.version(),
+            target,
+            sha256='342385b6ca3b7c73455d7c80a13b7dbe4489e00bc3bd4c5bd6ed4dce421e374a',
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.meson_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                '-Ddefault_library=both',
+                '-Ddocumentation=false',
+                '-Dman-pages=false',
+                '-Dintrospection=disabled',
+                '-Dbuild-testsuite=false',
+                '-Dbuild-examples=false',
+                '-Dfontconfig=enabled',
+                '-Dlibthai=disabled',
+                '-Dcairo=enabled',
+                '-Dxft=disabled',
+                '-Dfreetype=enabled',
+                '-Dsysprof=disabled',
+            ),
+        )
 
     def build(self, env, srcdir):
-        # Wipe out the test Makefile (only linker tests).
-        # TODO(miselin): fix this rather than rip out the Makefile
-        ignore_makefile = '''
-ign:
-\t@echo '<ignored>'
-all: ign
-install: ign
-clean: ign
-'''
-
-        with open(os.path.join(srcdir, 'tests', 'Makefile'), 'w') as f:
-            f.write(ignore_makefile)
-
-        steps.make(srcdir, env)
+        steps.meson_build(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.meson_install(srcdir, env, deploydir)

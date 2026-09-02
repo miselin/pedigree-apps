@@ -1,0 +1,14 @@
+diff --git a/src/copy.c b/src/copy.c
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -59,6 +59,10 @@
+ #include "yesno.h"
+ #include "selinux.h"
+ 
++#ifndef HAVE_LCHOWN
++# define HAVE_LCHOWN 0
++#endif
++
+ #ifndef USE_XATTR
+ # define USE_XATTR false
+ #endif

@@ -1,6 +1,3 @@
-
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -8,18 +5,15 @@ from support import steps
 class NasmPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(NasmPackage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = "xz"
 
     def name(self):
-        return 'nasm'
+        return "nasm"
 
     def version(self):
-        return '2.08.02'
-
-    def build_requires(self):
-        return []
+        return "3.02"
 
     def patches(self, env, srcdir):
         return []
@@ -28,21 +22,24 @@ class NasmPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://www.%(package)s.us/pub/%(package)s/releasebuilds/%(version)s/%(package)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        pass
+        steps.download(
+            "https://www.nasm.us/pub/nasm/releasebuilds/%s/"
+            "nasm-%s.tar.xz" % (self.version(), self.version()),
+            target,
+            sha256=(
+                "87336eba53b4acfe917424ab5d500d2b"
+                "0054d9f5148d35c2273ccf2cfb712f0d"
+            ),
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.run_configure(
+            self, srcdir, env, extra_config=("--disable-werror",)
+        )
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['INSTALLROOT'] = deploydir
-        steps.make(srcdir, env, target='install')
+        env["DESTDIR"] = deploydir
+        steps.make(srcdir, env, target="install")

@@ -1,0 +1,27 @@
+--- a/gio/gdbusconnection.c
++++ b/gio/gdbusconnection.c
+@@ -97,6 +97,11 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++#ifdef __pedigree__
++#include <signal.h>
++#include <unistd.h>
++#endif
++
+ #include "gdbusauth.h"
+ #include "gdbusutils.h"
+ #include "gdbusaddress.h"
+@@ -931,7 +936,12 @@
+       (flags & FLAG_INITIALIZED) != 0 &&
+       connection->initialization_error == NULL)
+     {
++#ifdef __pedigree__
++      /* raise() uses the unsupported tkill syscall in Pedigree's musl. */
++      kill (getpid (), SIGTERM);
++#else
+       raise (SIGTERM);
++#endif
+     }
+ }
+ 

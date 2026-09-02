@@ -1,0 +1,24 @@
+--- a/gettext-runtime/gnulib-lib/getlocalename_l-unsafe.c
++++ b/gettext-runtime/gnulib-lib/getlocalename_l-unsafe.c
+@@ -37 +37 @@
+-#if (__GLIBC__ >= 2 && !defined __UCLIBC__) || (defined __linux__ && HAVE_LANGINFO_H) || defined __CYGWIN__
++#if (__GLIBC__ >= 2 && !defined __UCLIBC__) || ((defined __linux__ || defined __pedigree__) && HAVE_LANGINFO_H) || defined __CYGWIN__
+@@ -483 +483 @@
+-#elif defined __linux__ && HAVE_LANGINFO_H && defined NL_LOCALE_NAME
++#elif (defined __linux__ || defined __pedigree__) && HAVE_LANGINFO_H && defined NL_LOCALE_NAME
+--- a/gettext-runtime/intl/gnulib-lib/getlocalename_l-unsafe.c
++++ b/gettext-runtime/intl/gnulib-lib/getlocalename_l-unsafe.c
+@@ -37 +37 @@
+-#if (__GLIBC__ >= 2 && !defined __UCLIBC__) || (defined __linux__ && HAVE_LANGINFO_H) || defined __CYGWIN__
++#if (__GLIBC__ >= 2 && !defined __UCLIBC__) || ((defined __linux__ || defined __pedigree__) && HAVE_LANGINFO_H) || defined __CYGWIN__
+@@ -483 +483 @@
+-#elif defined __linux__ && HAVE_LANGINFO_H && defined NL_LOCALE_NAME
++#elif (defined __linux__ || defined __pedigree__) && HAVE_LANGINFO_H && defined NL_LOCALE_NAME
+--- a/gettext-tools/gnulib-lib/getlocalename_l-unsafe.c
++++ b/gettext-tools/gnulib-lib/getlocalename_l-unsafe.c
+@@ -37 +37 @@
+-#if (__GLIBC__ >= 2 && !defined __UCLIBC__) || (defined __linux__ && HAVE_LANGINFO_H) || defined __CYGWIN__
++#if (__GLIBC__ >= 2 && !defined __UCLIBC__) || ((defined __linux__ || defined __pedigree__) && HAVE_LANGINFO_H) || defined __CYGWIN__
+@@ -483 +483 @@
+-#elif defined __linux__ && HAVE_LANGINFO_H && defined NL_LOCALE_NAME
++#elif (defined __linux__ || defined __pedigree__) && HAVE_LANGINFO_H && defined NL_LOCALE_NAME

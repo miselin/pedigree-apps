@@ -1,5 +1,5 @@
-
-import os
+import pathlib
+import shutil
 
 from support import buildsystem
 from support import steps
@@ -8,43 +8,82 @@ from support import steps
 class VimPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
-        super(VimPackage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'bz2'
 
     def name(self):
-        return 'vim'
+        return "vim"
 
     def version(self):
-        return '7.3'
+        return "9.2.1031"
 
     def build_requires(self):
-        return ['ncurses']
+        return ["ncurses"]
+
+    def install_deps(self):
+        return ["ncurses", "perl"]
 
     def patches(self, env, srcdir):
-        return ['pedigree.cache.diff', 'vim-7.3-cross.diff']
+        return ["pedigree-no-sigpending.diff"]
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.%(package)s.org/pub/%(package)s/unix/%(package)s-%(version)s.tar.bz2' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.autoconf(os.path.join(srcdir, 'src'), env)
+        steps.download(
+            "https://github.com/vim/vim/archive/refs/tags/"
+            "v%s.tar.gz" % self.version(),
+            target,
+            sha256=(
+                "15a2cd025f92593ad6945f906ed0ae93"
+                "e89b716da99633f80e95b4b6b7bf73dd"
+            ),
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env, extra_config=(
-            '--with-tlib=ncurses', '--cache-file=auto/config.cache',
-            '--enable-256-color'))
+        env.update(
+            {
+                "vim_cv_getcwd_broken": "no",
+                "vim_cv_memmove_handles_overlap": "yes",
+                "vim_cv_stat_ignores_slash": "yes",
+                "vim_cv_tgetent": "zero",
+                "vim_cv_timer_create": "no",
+                "vim_cv_timer_create_with_lrt": "no",
+                "vim_cv_terminfo": "yes",
+                "vim_cv_toupper_broken": "no",
+                "vim_cv_uname_m_output": "x86_64",
+                "vim_cv_uname_output": "Pedigree",
+                "vim_cv_uname_r_output": "1",
+            }
+        )
+        steps.run_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                "--disable-acl",
+                "--disable-channel",
+                "--disable-gui",
+                "--disable-netbeans",
+                "--disable-nls",
+                "--disable-selinux",
+                "--disable-xattr",
+                "--disable-xsmp",
+                "--enable-gpm=no",
+                "--enable-multibyte",
+                "--with-features=normal",
+                "--with-tlib=tinfow",
+                "--without-x",
+            ),
+        )
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        env["DESTDIR"] = deploydir
+        steps.make(srcdir, env, target="install")
+
+    def postdeploy(self, env, srcdir, deploydir):
+        for tools_dir in pathlib.Path(deploydir).glob("usr/share/vim/vim*/tools"):
+            shutil.rmtree(tools_dir)

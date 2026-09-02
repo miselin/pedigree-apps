@@ -1,0 +1,31 @@
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -1153,6 +1153,7 @@
+ cmake_config.set('PACKAGE_INCLUDE_INSTALL_DIR', '${PACKAGE_PREFIX_DIR}/@0@/@1@'.format(cmake_install_includedir, meson.project_name()))
+ cmake_config.set('HARFBUZZ_VERSION', meson.project_version())
+ cmake_config.set('HB_HAVE_GOBJECT', have_gobject ? 'YES' : 'NO')
++cmake_config.set('HB_HAVE_ICU_MODULE', have_icu and not have_icu_builtin ? 'YES' : 'NO')
+ cmake_config.set('HB_LIBRARY_TYPE', get_option('default_library') == 'static' ? 'STATIC' : 'SHARED')
+ cmake_config.set('HB_HAS_IMPORT_LIBRARY', 'NO')
+ cmake_config.set('HB_IMPLIB_PREFIX', '')
+--- a/src/harfbuzz-config.cmake.in
++++ b/src/harfbuzz-config.cmake.in
+@@ -19,11 +19,13 @@
+   INTERFACE_INCLUDE_DIRECTORIES "@PACKAGE_INCLUDE_INSTALL_DIR@")
+ _harfbuzz_set_imported_library(harfbuzz::harfbuzz harfbuzz)
+ 
+-add_library(harfbuzz::icu @HB_LIBRARY_TYPE@ IMPORTED)
+-set_target_properties(harfbuzz::icu PROPERTIES
+-  INTERFACE_INCLUDE_DIRECTORIES "@PACKAGE_INCLUDE_INSTALL_DIR@"
+-  INTERFACE_LINK_LIBRARIES "harfbuzz::harfbuzz")
+-_harfbuzz_set_imported_library(harfbuzz::icu harfbuzz-icu)
++if (@HB_HAVE_ICU_MODULE@)
++  add_library(harfbuzz::icu @HB_LIBRARY_TYPE@ IMPORTED)
++  set_target_properties(harfbuzz::icu PROPERTIES
++    INTERFACE_INCLUDE_DIRECTORIES "@PACKAGE_INCLUDE_INSTALL_DIR@"
++    INTERFACE_LINK_LIBRARIES "harfbuzz::harfbuzz")
++  _harfbuzz_set_imported_library(harfbuzz::icu harfbuzz-icu)
++endif ()
+ 
+ add_library(harfbuzz::subset @HB_LIBRARY_TYPE@ IMPORTED)
+ set_target_properties(harfbuzz::subset PROPERTIES

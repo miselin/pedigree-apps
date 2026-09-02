@@ -28,6 +28,12 @@ class EnvironmentTest(unittest.TestCase):
         env = environment.generate_environment("amd64", recurse=False)
         self.assertEqual(env["CROSS_TARGET"], "x86_64-pedigree")
         self.assertEqual(env["CROSS_BASE"], "/opt/pedigree")
+        self.assertEqual(
+            env["CROSS_LD"],
+            "/opt/pedigree/bin/x86_64-pedigree-ld",
+        )
+        self.assertEqual(env["TARGET_CONFIG_SITE"], "/workspace/config.site")
+        self.assertNotIn("CONFIG_SITE", env)
         self.assertTrue(env["OUTPUT_BASE"].endswith("/newpacks/x86_64"))
         self.assertTrue(env["CCACHE_DIR"].endswith("/.build/x86_64/ccache"))
 

@@ -1,12 +1,124 @@
 import importlib.util
 import logging
 import os
+import shlex
+import stat
 import subprocess
 
 from . import steps
 
 
 log = logging.getLogger(__name__)
+
+
+# The target image contract requires these two packages before ordinary ports
+# are installed. Keeping the baseline narrow avoids cycles such as bash ->
+# readline -> ncurses -> /bin/sh while leaving other interpreters as explicit
+# runtime dependencies.
+BASE_RUNTIME_PACKAGES = ("bash", "coreutils")
+_BASE_SCRIPT_INTERPRETERS = {"bash", "sh"}
+_SCRIPT_INTERPRETER_PROVIDERS = {
+    "awk": "gawk",
+    "gawk": "gawk",
+    "lua": "lua",
+    "perl": "perl",
+    "python": "python3",
+    "python3": "python3",
+}
+
+
+def _interpreter_name(words):
+    interpreter_path = words[0]
+    if not interpreter_path.startswith(("/bin/", "/usr/bin/")):
+        raise RuntimeError(
+            "non-FHS executable script interpreter: %s" % interpreter_path
+        )
+    interpreter = os.path.basename(interpreter_path)
+    if interpreter != "env":
+        return interpreter
+
+    arguments = words[1:]
+    index = 0
+    while index < len(arguments):
+        argument = arguments[index]
+        if argument == "--":
+            index += 1
+            break
+        if argument in ("-u", "--unset", "-C", "--chdir"):
+            index += 2
+            continue
+        if argument == "-S" or argument == "--split-string":
+            index += 1
+            break
+        if argument.startswith("-") or (
+            "=" in argument and not argument.startswith("/")
+        ):
+            index += 1
+            continue
+        break
+    if index >= len(arguments):
+        raise RuntimeError("/usr/bin/env shebang has no interpreter")
+    interpreter_path = arguments[index]
+    if "/" in interpreter_path and not interpreter_path.startswith(
+        ("/bin/", "/usr/bin/")
+    ):
+        raise RuntimeError(
+            "non-FHS executable script interpreter: %s" % interpreter_path
+        )
+    return os.path.basename(interpreter_path)
+
+
+def _script_runtime_provider(first_line):
+    try:
+        words = shlex.split(first_line[2:].decode("utf-8"))
+    except (UnicodeDecodeError, ValueError) as error:
+        raise RuntimeError("invalid executable script shebang") from error
+    if not words:
+        raise RuntimeError("executable script shebang has no interpreter")
+
+    interpreter = _interpreter_name(words)
+    if interpreter in _BASE_SCRIPT_INTERPRETERS:
+        return None
+    if interpreter.startswith("python3.") and interpreter[8:].isdigit():
+        return "python3"
+    try:
+        return _SCRIPT_INTERPRETER_PROVIDERS[interpreter]
+    except KeyError as error:
+        raise RuntimeError(
+            "unsupported executable script interpreter: %s" % interpreter
+        ) from error
+
+
+def check_script_runtime(package, deploydir):
+    for root, _, filenames in os.walk(deploydir):
+        for filename in filenames:
+            path = os.path.join(root, filename)
+            if os.path.islink(path):
+                continue
+            relative = os.path.relpath(path, deploydir).replace(os.sep, "/")
+            if relative.startswith("usr/share/doc/"):
+                continue
+            mode = stat.S_IMODE(os.stat(path).st_mode)
+            if not mode & 0o111:
+                continue
+            with open(path, "rb") as artifact:
+                first_line = artifact.readline(4096)
+            if not first_line.startswith(b"#!"):
+                continue
+
+            try:
+                provider = _script_runtime_provider(first_line)
+            except RuntimeError as error:
+                raise RuntimeError("%s in %s" % (error, relative)) from error
+            if (
+                provider
+                and provider != package.name()
+                and provider not in package.install_deps()
+            ):
+                raise RuntimeError(
+                    "executable script %s requires runtime provider %s"
+                    % (relative, provider)
+                )
 
 
 class OptionalError(NotImplementedError):
@@ -63,7 +175,7 @@ class Package:
             patch_path = os.path.join(self._path, "patches", patch)
             with open(patch_path, "rb") as patch_file:
                 subprocess.check_call(
-                    [env["PATCH"], "-p1"],
+                    [env["PATCH"], "--batch", "--fuzz=0", "-p1"],
                     stdin=patch_file,
                     cwd=srcdir,
                     env=env,
@@ -118,6 +230,7 @@ class Package:
             "include",
             "libraries",
             "support",
+            "system",
         }
         found_legacy = legacy_roots.intersection(os.listdir(deploydir))
         if found_legacy:
@@ -136,6 +249,73 @@ class Package:
                     "package installed non-FHS /usr paths: %s"
                     % ", ".join(sorted(found_legacy_usr))
                 )
+
+        check_script_runtime(self, deploydir)
+
+        forbidden_paths = tuple(
+            path
+            for path in (env.get("APPS_BASE"), env.get("CROSS_BASE"))
+            if path
+        )
+        readelf = os.path.join(
+            env.get("CROSS_BASE", ""),
+            "bin",
+            env.get("CROSS_TARGET", "") + "-readelf",
+        )
+        for root, _, filenames in os.walk(deploydir):
+            for filename in filenames:
+                path = os.path.join(root, filename)
+                if os.path.islink(path):
+                    target = os.readlink(path)
+                    leaked = [
+                        value for value in forbidden_paths if value in target
+                    ]
+                    if leaked:
+                        raise RuntimeError(
+                            "package symlink contains build path in %s: %s"
+                            % (path, target)
+                        )
+                    continue
+                with open(path, "rb") as artifact:
+                    prefix = artifact.read(4)
+                metadata = prefix.startswith(b"#!") or (
+                    filename.endswith((".la", ".pc", ".cmake"))
+                    or filename.endswith("-config")
+                )
+                if metadata:
+                    with open(path, "rb") as artifact:
+                        content = artifact.read()
+                    leaked = [
+                        value for value in forbidden_paths
+                        if value.encode() in content
+                    ]
+                    if leaked:
+                        raise RuntimeError(
+                            "package metadata contains build paths in %s: %s"
+                            % (path, ", ".join(leaked))
+                        )
+
+                if not forbidden_paths:
+                    continue
+                if prefix != b"\x7fELF":
+                    continue
+                dynamic = subprocess.run(
+                    [readelf, "-d", path],
+                    check=False,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                    text=True,
+                    env=env,
+                )
+                for line in dynamic.stdout.splitlines():
+                    if "(RPATH)" not in line and "(RUNPATH)" not in line:
+                        continue
+                    leaked = [value for value in forbidden_paths if value in line]
+                    if leaked:
+                        raise RuntimeError(
+                            "package ELF contains build RPATH in %s: %s"
+                            % (path, line.strip())
+                        )
 
 def load_packages(env):
     packages = {}
@@ -157,7 +337,7 @@ def load_packages(env):
 
         disabled_reason = getattr(module, "DISABLED_REASON", None)
         if disabled_reason:
-            log.warning("%s is disabled: %s", entry, disabled_reason)
+            log.debug("%s is disabled: %s", entry, disabled_reason)
             continue
 
         candidates = [(value, False) for value in vars(module).values()]

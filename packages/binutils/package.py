@@ -1,49 +1,8 @@
+UPSTREAM_VERSION = "2.46.1"
 
-import os
-
-from support import buildsystem
-from support import steps
-
-
-class BinutilsPackage(buildsystem.Package):
-
-    def __init__(self, *args, **kwargs):
-        super(BinutilsPackage, self).__init__(*args, **kwargs)
-        self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
-
-    def name(self):
-        return 'binutils'
-
-    def version(self):
-        return '2.32'
-
-    def build_requires(self):
-        return ['libtool', 'libiconv', 'gettext']
-
-    def patches(self, env, srcdir):
-        return ['2.24/pedigree-binutils.diff']
-
-    def options(self):
-        return self._options
-
-    def download(self, env, target):
-        url = 'http://ftp.gnu.org/gnu/%(package)s/%(package)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        pass
-
-    def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env,
-                            extra_config=('--disable-werror',))
-
-    def build(self, env, srcdir):
-        steps.make(srcdir, env)
-
-    def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+DISABLED_REASON = (
+    "Binutils is supplied by the bootstrapped cross-toolchain. The legacy "
+    "Pedigree target patches stop at 2.32; a self-hosted 2.46.1 package needs "
+    "those BFD, GAS, and linker definitions rebased and validated independently "
+    "from bootstrap."
+)

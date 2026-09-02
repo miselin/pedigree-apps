@@ -1,10 +1,8 @@
 diff --git a/Utilities/cmlibuv/CMakeLists.txt b/Utilities/cmlibuv/CMakeLists.txt
-index 56f7308a4..067f28b84 100644
+index f095c301d..a6206fa46 100644
 --- a/Utilities/cmlibuv/CMakeLists.txt
 +++ b/Utilities/cmlibuv/CMakeLists.txt
-@@ -212,8 +212,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-     src/unix/sysinfo-loadavg.c
-     src/unix/sysinfo-memory.c
+@@ -214,6 +214,24 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
      )
  endif()
 
@@ -30,7 +28,7 @@ index 56f7308a4..067f28b84 100644
    list(APPEND uv_libraries
      )
 diff --git a/Utilities/cmlibuv/include/uv/unix.h b/Utilities/cmlibuv/include/uv/unix.h
-index d20181b39..fb8fe6d33 100644
+index 93daee711..d95ce83bd 100644
 --- a/Utilities/cmlibuv/include/uv/unix.h
 +++ b/Utilities/cmlibuv/include/uv/unix.h
 @@ -50,6 +50,8 @@
@@ -43,10 +41,10 @@ index d20181b39..fb8fe6d33 100644
  # include "linux.h"
  #elif defined (__MVS__)
 diff --git a/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c b/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c
-index 6cde9bc88..81973dd22 100644
+index 6829e2a85..776dedbc2 100644
 --- a/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c
 +++ b/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c
-@@ -26,7 +26,8 @@
+@@ -27,7 +27,8 @@
 
  #include <ifaddrs.h>
  #include <net/if.h>
@@ -56,7 +54,7 @@ index 6cde9bc88..81973dd22 100644
  #include <net/if_dl.h>
  #endif
 
-@@ -39,7 +40,8 @@ static int uv__ifaddr_exclude(struct ifaddrs *ent, int exclude_type) {
+@@ -40,7 +41,8 @@ static int uv__ifaddr_exclude(struct ifaddrs *ent, int exclude_type) {
      return 1;
    if (ent->ifa_addr == NULL)
      return 1;
@@ -66,7 +64,7 @@ index 6cde9bc88..81973dd22 100644
    /*
     * If `exclude_type` is `UV__EXCLUDE_IFPHYS`, return whether `sa_family`
     * equals `AF_LINK`. Otherwise, the result depends on the operating
-@@ -116,7 +117,8 @@ int uv_interface_addresses(uv_interface_address_t** addresses, int* count) {
+@@ -130,7 +132,8 @@ int uv_interface_addresses(uv_interface_address_t** addresses, int* count) {
      address++;
    }
 
@@ -78,7 +76,7 @@ index 6cde9bc88..81973dd22 100644
      int i;
 diff --git a/Utilities/cmlibuv/src/unix/pedigree.c b/Utilities/cmlibuv/src/unix/pedigree.c
 new file mode 100644
-index 000000000..c789b34bc
+index 000000000..0fc7f240f
 --- /dev/null
 +++ b/Utilities/cmlibuv/src/unix/pedigree.c
 @@ -0,0 +1,42 @@
@@ -125,7 +123,7 @@ index 000000000..c789b34bc
 +  return uv_get_free_memory();
 +}
 diff --git a/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c b/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c
-index db2b1bafd..c22d9caf0 100644
+index ebad0e89d..deabb15f1 100644
 --- a/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c
 +++ b/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c
 @@ -28,7 +28,12 @@

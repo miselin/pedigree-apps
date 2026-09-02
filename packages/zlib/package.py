@@ -8,7 +8,7 @@ class ZlibPackage(buildsystem.Package):
     def __init__(self, *args, **kwargs):
         super(ZlibPackage, self).__init__(*args, **kwargs)
         self._options = buildsystem.Options()
-        self.tarfile_format = 'gz'
+        self._options.tarfile_format = 'xz'
 
     def name(self):
         return 'zlib'
@@ -17,6 +17,9 @@ class ZlibPackage(buildsystem.Package):
         return '1.3.2'
 
     def build_requires(self):
+        return []
+
+    def install_deps(self):
         return []
 
     def options(self):
@@ -34,7 +37,7 @@ class ZlibPackage(buildsystem.Package):
         env['LD'] = env['CROSS_LD']
         env['LDSHARED'] = (
             '%s -shared %s -Wl,-soname,libz.so.1,--version-script,zlib.map'
-            % (env['CROSS_LD'], env['LDFLAGS'])
+            % (env['CROSS_CC'], env['LDFLAGS'])
         )
         steps.run_configure(self, srcdir, env, host=False,
             paths=('prefix', 'libdir', 'includedir'))
