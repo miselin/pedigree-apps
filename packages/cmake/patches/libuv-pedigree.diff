@@ -1,0 +1,144 @@
+diff --git a/Utilities/cmlibuv/CMakeLists.txt b/Utilities/cmlibuv/CMakeLists.txt
+index 56f7308a4..067f28b84 100644
+--- a/Utilities/cmlibuv/CMakeLists.txt
++++ b/Utilities/cmlibuv/CMakeLists.txt
+@@ -212,8 +212,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+     src/unix/sysinfo-loadavg.c
+     src/unix/sysinfo-memory.c
+     )
+ endif()
+
++if(CMAKE_SYSTEM_NAME STREQUAL "Pedigree")
++  list(APPEND uv_headers
++    include/uv/posix.h
++    )
++  list(APPEND uv_defines _GNU_SOURCE)
++  list(APPEND uv_sources
++    src/unix/bsd-ifaddrs.c
++    src/unix/no-fsevents.c
++    src/unix/no-proctitle.c
++    src/unix/pedigree.c
++    src/unix/posix-hrtime.c
++    src/unix/posix-poll.c
++    src/unix/procfs-exepath.c
++    src/unix/sysinfo-loadavg.c
++    src/unix/sysinfo-memory.c
++    )
++endif()
++
+ if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+   list(APPEND uv_libraries
+     )
+diff --git a/Utilities/cmlibuv/include/uv/unix.h b/Utilities/cmlibuv/include/uv/unix.h
+index d20181b39..fb8fe6d33 100644
+--- a/Utilities/cmlibuv/include/uv/unix.h
++++ b/Utilities/cmlibuv/include/uv/unix.h
+@@ -50,6 +50,8 @@
+ # if defined(__APPLE__)
+ #  include <TargetConditionals.h>
+ # endif
++#elif defined(__pedigree__)
++# include "posix.h"
+ #elif defined(__linux__)
+ # include "linux.h"
+ #elif defined (__MVS__)
+diff --git a/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c b/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c
+index 6cde9bc88..81973dd22 100644
+--- a/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c
++++ b/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c
+@@ -26,7 +26,8 @@
+
+ #include <ifaddrs.h>
+ #include <net/if.h>
+-#if !defined(__CYGWIN__) && !defined(__MSYS__) && !defined(__GNU__)
++#if !defined(__CYGWIN__) && !defined(__MSYS__) && !defined(__GNU__) && \
++    !defined(__pedigree__)
+ #include <net/if_dl.h>
+ #endif
+
+@@ -39,7 +40,8 @@ static int uv__ifaddr_exclude(struct ifaddrs *ent, int exclude_type) {
+     return 1;
+   if (ent->ifa_addr == NULL)
+     return 1;
+-#if !defined(__CYGWIN__) && !defined(__MSYS__) && !defined(__GNU__)
++#if !defined(__CYGWIN__) && !defined(__MSYS__) && !defined(__GNU__) && \
++    !defined(__pedigree__)
+   /*
+    * If `exclude_type` is `UV__EXCLUDE_IFPHYS`, return whether `sa_family`
+    * equals `AF_LINK`. Otherwise, the result depends on the operating
+@@ -116,7 +117,8 @@ int uv_interface_addresses(uv_interface_address_t** addresses, int* count) {
+     address++;
+   }
+
+-#if !(defined(__CYGWIN__) || defined(__MSYS__)) && !defined(__GNU__)
++#if !(defined(__CYGWIN__) || defined(__MSYS__)) && !defined(__GNU__) && \
++    !defined(__pedigree__)
+   /* Fill in physical addresses for each interface */
+   for (ent = addrs; ent != NULL; ent = ent->ifa_next) {
+     int i;
+diff --git a/Utilities/cmlibuv/src/unix/pedigree.c b/Utilities/cmlibuv/src/unix/pedigree.c
+new file mode 100644
+index 000000000..c789b34bc
+--- /dev/null
++++ b/Utilities/cmlibuv/src/unix/pedigree.c
+@@ -0,0 +1,42 @@
++/* Minimal platform services for libuv's portable poll backend on Pedigree. */
++
++#include "uv.h"
++#include "internal.h"
++
++#include <errno.h>
++#include <sys/resource.h>
++#include <time.h>
++
++int uv_resident_set_memory(size_t* rss) {
++  struct rusage usage;
++
++  if (getrusage(RUSAGE_SELF, &usage) < 0)
++    return UV__ERR(errno);
++
++  *rss = usage.ru_maxrss * 1024;
++  return 0;
++}
++
++int uv_uptime(double* uptime) {
++  struct timespec now;
++
++  if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
++    return UV__ERR(errno);
++
++  *uptime = now.tv_sec + now.tv_nsec / 1e9;
++  return 0;
++}
++
++int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count) {
++  *cpu_infos = NULL;
++  *count = 0;
++  return UV_ENOSYS;
++}
++
++uint64_t uv_get_constrained_memory(void) {
++  return 0;
++}
++
++uint64_t uv_get_available_memory(void) {
++  return uv_get_free_memory();
++}
+diff --git a/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c b/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c
+index db2b1bafd..c22d9caf0 100644
+--- a/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c
++++ b/Utilities/cmlibuv/src/unix/sysinfo-loadavg.c
+@@ -28,7 +28,12 @@
+ void uv_loadavg(double avg[3]) {
+   struct sysinfo info;
+
+-  if (sysinfo(&info) < 0) return;
++  if (sysinfo(&info) < 0) {
++    avg[0] = 0;
++    avg[1] = 0;
++    avg[2] = 0;
++    return;
++  }
+
+   avg[0] = (double) info.loads[0] / 65536.0;
+   avg[1] = (double) info.loads[1] / 65536.0;

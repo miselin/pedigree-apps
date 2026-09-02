@@ -1,27 +1,48 @@
-FROM ubuntu
-MAINTAINER github/miselin
+ARG PEDIGREE_BUILDER_IMAGE=ghcr.io/miselin/pedigree-builder@sha256:14bf372f9d20b6bedda051265e8b6b0bcd98cf429626b55f7d05ce55c2252f75
+FROM ${PEDIGREE_BUILDER_IMAGE}
 
-RUN apt-get update
-RUN apt-get install -y python-pip
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Don't use dash, use bash. This is crucial for e.g. libtool.
-RUN echo "dash dash/sh boolean false" | debconf-set-selections
-RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        autoconf \
+        automake \
+        bzip2 \
+        ccache \
+        file \
+        gperf \
+        help2man \
+        libtool \
+        make \
+        patch \
+        perl \
+        pkg-config \
+        python3-pip \
+        python3-venv \
+        tar \
+        unzip \
+        xz-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /tmp
-ADD requirements.txt /tmp/requirements.txt
-ADD install_deps_debian.sh /tmp/install_deps_debian.sh
-ADD pup /tmp/pup
+RUN python3 -m venv /opt/pedigree-apps \
+    && /opt/pedigree-apps/bin/pip install --no-cache-dir --upgrade pip
 
-RUN pip install -r ./requirements.txt
-RUN DEBIAN_FRONTEND=noninteractive ./install_deps_debian.sh
+COPY requirements.txt /tmp/pedigree-apps/requirements.txt
+COPY pup /tmp/pedigree-apps/pup
+RUN /opt/pedigree-apps/bin/pip install --no-cache-dir \
+        -r /tmp/pedigree-apps/requirements.txt \
+        /tmp/pedigree-apps/pup \
+    && rm -rf /tmp/pedigree-apps
 
-RUN pip install -q --upgrade /tmp/pup
+ENV PATH="/opt/pedigree-apps/bin:/opt/pedigree/bin:${PATH}" \
+    PEDIGREE_APPS_CONTAINER=1 \
+    PEDIGREE_APPS_ROOT=/workspace \
+    PEDIGREE_SOURCE_ROOT=/pedigree \
+    PEDIGREE_TOOLCHAIN_ROOT=/opt/pedigree
 
-# Volumes we'll expose to the container when we run a build. Most of these are
-# to be read-only.
-VOLUME /cross /pedigree_src /pedigree_apps /download /patches /package_repo
+WORKDIR /workspace
 
-WORKDIR /
+LABEL org.opencontainers.image.source="https://github.com/miselin/pedigree-apps" \
+      org.opencontainers.image.description="Local FHS ports builder for Pedigree"
 
-CMD /bin/true
+CMD ["python3", "buildPackages.py", "--help"]

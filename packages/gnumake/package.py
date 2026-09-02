@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -16,7 +14,7 @@ class GnumakePackage(buildsystem.Package):
         return 'gnumake'
 
     def version(self):
-        return '3.82'
+        return '4.4.1'
 
     def build_requires(self):
         return []
@@ -28,12 +26,11 @@ class GnumakePackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://ftp.gnu.org/gnu/%(urlpackage)s/%(urlpackage)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-            'urlpackage': 'make',
-        }
-        steps.download(url, target)
+        steps.download(
+            'https://ftp.gnu.org/gnu/make/make-%s.tar.gz' % self.version(),
+            target,
+            sha256='dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3',
+        )
 
     def prebuild(self, env, srcdir):
         pass

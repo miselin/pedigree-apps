@@ -21,7 +21,8 @@ import argparse
 import logging
 import sys
 
-from pedigree_updater.commands import base
+# Subclass discovery below only sees command modules imported into this process.
+from pedigree_updater.commands import base, create, install, register, sync
 from pedigree_updater.lib import util
 
 log = logging.getLogger()

@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -16,25 +14,28 @@ class ZlibPackage(buildsystem.Package):
         return 'zlib'
 
     def version(self):
-        return '1.2.8'
+        return '1.3.2'
 
     def build_requires(self):
-        return ['libtool']
+        return []
 
     def options(self):
         return self._options
 
     def download(self, env, target):
-        url = 'http://zlib.net/%s-%s.tar.gz' % (self.name(), self.version())
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
+        steps.download(
+            'https://zlib.net/zlib-%s.tar.xz' % self.version(),
+            target,
+            sha256='d7a0654783a4da529d1bb793b7ad9c3318020af77667bcae35f95d0e42a792f3',
+        )
 
     def configure(self, env, srcdir):
         env['CC'] = env['CROSS_CC']
         env['LD'] = env['CROSS_LD']
-        env['LDSHARED'] = '%s -shared -Wl,-soname,libz.so.1,--version-script,zlib.map' % env['CROSS_LD']
+        env['LDSHARED'] = (
+            '%s -shared %s -Wl,-soname,libz.so.1,--version-script,zlib.map'
+            % (env['CROSS_LD'], env['LDFLAGS'])
+        )
         steps.run_configure(self, srcdir, env, host=False,
             paths=('prefix', 'libdir', 'includedir'))
 
@@ -46,6 +47,6 @@ class ZlibPackage(buildsystem.Package):
         steps.make(srcdir, env, 'install')
 
     def links(self, env, deploydir, cross_dir):
-        libs = ['libz.a', 'libz.so', 'libz.so.1', 'libz.so.1.2.8']
+        libs = ['libz.a', 'libz.so', 'libz.so.1', 'libz.so.1.3.2']
         headers = ['zconf.h', 'zlib.h']
         steps.symlinks(deploydir, cross_dir, libs=libs, headers=headers)

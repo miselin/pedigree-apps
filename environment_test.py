@@ -24,6 +24,13 @@ class EnvironmentTest(unittest.TestCase):
         self.assertEqual(d['foo'], 'bar')
         self.assertTrue(d.has_overrides())
 
+    def test_fhs_environment(self):
+        env = environment.generate_environment("amd64", recurse=False)
+        self.assertEqual(env["CROSS_TARGET"], "x86_64-pedigree")
+        self.assertEqual(env["CROSS_BASE"], "/opt/pedigree")
+        self.assertTrue(env["OUTPUT_BASE"].endswith("/newpacks/x86_64"))
+        self.assertTrue(env["CCACHE_DIR"].endswith("/.build/x86_64/ccache"))
+
 
 if __name__ == '__main__':
     unittest.main()

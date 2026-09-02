@@ -26,6 +26,14 @@ from . import base
 log = logging.getLogger(__name__)
 
 
+def _root_owned(member):
+    member.uid = 0
+    member.gid = 0
+    member.uname = "root"
+    member.gname = "root"
+    return member
+
+
 class CreatePackageCommand(base.PupCommand):
     def name(self):
         return "create"
@@ -75,10 +83,20 @@ class CreatePackageCommand(base.PupCommand):
             print(f'Package path "{args.path}" is empty.')
             return 1
 
-        with tarfile.open(package_file, "w:gz") as tar:
-            for entry in entries:
-                log.debug(f'{package_name}: add "{entry}"')
-                tar.add(entry, arcname=os.path.basename(entry))
+        temporary_file = package_file + ".tmp"
+        try:
+            with tarfile.open(temporary_file, "w:gz") as tar:
+                for entry in entries:
+                    log.debug(f'{package_name}: add "{entry}"')
+                    tar.add(
+                        entry,
+                        arcname=os.path.basename(entry),
+                        filter=_root_owned,
+                    )
+            os.replace(temporary_file, package_file)
+        finally:
+            if os.path.exists(temporary_file):
+                os.unlink(temporary_file)
 
         print(f'Package "{package_name}" is now created at {package_file}.')
         print(

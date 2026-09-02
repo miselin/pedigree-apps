@@ -1,6 +1,4 @@
 
-import os
-
 from support import buildsystem
 from support import steps
 
@@ -16,10 +14,13 @@ class LibpngPackage(buildsystem.Package):
         return 'libpng'
 
     def version(self):
-        return '1.5.4'
+        return '1.6.58'
 
     def build_requires(self):
-        return ['libtool', 'zlib']
+        return ['zlib']
+
+    def install_deps(self):
+        return ['zlib']
 
     def patches(self, env, srcdir):
         return []
@@ -28,22 +29,28 @@ class LibpngPackage(buildsystem.Package):
         return self._options
 
     def download(self, env, target):
-        url = 'http://download.sourceforge.net/%(package)s/%(package)s-%(version)s.tar.gz' % {
-            'package': self.name(),
-            'version': self.version(),
-        }
-        steps.download(url, target)
-
-    def prebuild(self, env, srcdir):
-        steps.libtoolize(srcdir, env)
-        steps.autoreconf(srcdir, env)
+        steps.download(
+            'https://download.sourceforge.net/libpng/libpng-%s.tar.xz'
+            % self.version(),
+            target,
+            sha256='28eb403f51f0f7405249132cecfe82ea5c0ef97f1b32c5a65828814ae0d34775',
+        )
 
     def configure(self, env, srcdir):
-        steps.run_configure(self, srcdir, env)
+        steps.cmake_configure(
+            self,
+            srcdir,
+            env,
+            extra_config=(
+                '-DPNG_SHARED=ON',
+                '-DPNG_STATIC=ON',
+                '-DPNG_TESTS=OFF',
+                '-DPNG_TOOLS=ON',
+            ),
+        )
 
     def build(self, env, srcdir):
-        steps.make(srcdir, env)
+        steps.cmake_build(srcdir, env)
 
     def deploy(self, env, srcdir, deploydir):
-        env['DESTDIR'] = deploydir
-        steps.make(srcdir, env, target='install')
+        steps.cmake_install(srcdir, env, deploydir)

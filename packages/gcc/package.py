@@ -7,6 +7,12 @@ from support import buildsystem
 from support import steps
 
 
+DISABLED_REASON = (
+    'the legacy GCC 8 recipe requires obsolete host Autoconf and Automake; '
+    'use the Docker builder cross-toolchain'
+)
+
+
 class GccPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):

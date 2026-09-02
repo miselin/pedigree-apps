@@ -5,6 +5,11 @@ from support import buildsystem
 from support import steps
 
 
+DISABLED_REASON = (
+    'the legacy MPC 0.8 recipe requires obsolete host Autoconf and Automake'
+)
+
+
 class LibmpcPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):

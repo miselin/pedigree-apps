@@ -41,7 +41,7 @@ class CurlPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         steps.run_configure(self, srcdir, env, extra_config=(
-            '--enable-shared', '--with-random=dev»/urandom'))
+            '--enable-shared', '--with-random=/dev/urandom'))
 
     def build(self, env, srcdir):
         steps.make(srcdir, env)

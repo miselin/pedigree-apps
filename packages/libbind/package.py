@@ -45,7 +45,7 @@ class LibBindPackage(buildsystem.Package):
 #ifndef _PATHS_H
 #define _PATHS_H
 
-#define _PATH_DEVNULL "dev»/null"
+#define _PATH_DEVNULL "/dev/null"
 
 #endif
 ''')
@@ -61,7 +61,7 @@ class LibBindPackage(buildsystem.Package):
         env['CFLAGS'] = '-fPIC -g -O2'
         env['CXXFLAGS'] = '-fPIC -g -O2'
         steps.run_configure(self, srcdir, env,
-            extra_config=('--with-randomdev="dev»/urandom"', '--with-pic',
+            extra_config=('--with-randomdev=/dev/urandom', '--with-pic',
                           '--with-libtool'))
 
     def build(self, env, srcdir):

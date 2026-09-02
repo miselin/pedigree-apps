@@ -6,20 +6,21 @@
  # so take care if INSTALL_TOP is not an absolute path.
 -INSTALL_TOP= /usr/local
 -INSTALL_BIN= $(INSTALL_TOP)/bin
-+INSTALL_TOP= 
-+INSTALL_BIN= $(INSTALL_TOP)/applications
- INSTALL_INC= $(INSTALL_TOP)/include
++INSTALL_TOP=
++INSTALL_BIN= $(INSTALL_TOP)/usr/bin
+-INSTALL_INC= $(INSTALL_TOP)/include
 -INSTALL_LIB= $(INSTALL_TOP)/lib
 -INSTALL_MAN= $(INSTALL_TOP)/man/man1
-+INSTALL_LIB= $(INSTALL_TOP)/libraries
-+INSTALL_MAN= $(INSTALL_TOP)/support/lua/man
++INSTALL_INC= $(INSTALL_TOP)/usr/include
++INSTALL_LIB= $(INSTALL_TOP)/usr/lib
++INSTALL_MAN= $(INSTALL_TOP)/usr/share/man/man1
  #
  # You probably want to make INSTALL_LMOD and INSTALL_CMOD consistent with
  # LUA_ROOT, LUA_LDIR, and LUA_CDIR in luaconf.h (and also with etc/lua.pc).
 -INSTALL_LMOD= $(INSTALL_TOP)/share/lua/$V
 -INSTALL_CMOD= $(INSTALL_TOP)/lib/lua/$V
-+INSTALL_LMOD= $(INSTALL_TOP)/support/lua/$V
-+INSTALL_CMOD= $(INSTALL_LIB)/lua/$V
++INSTALL_LMOD= $(INSTALL_TOP)/usr/share/lua/$V
++INSTALL_CMOD= $(INSTALL_TOP)/usr/lib/lua/$V
  
  # How to install. If your install program does not support "-p", then you
  # may have to run ranlib on the installed liblua.a (do "make ranlib").

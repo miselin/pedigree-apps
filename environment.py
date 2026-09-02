@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import functools
 import os
@@ -7,22 +7,17 @@ from support.util import expand
 
 
 class OverridableDict(dict):
-
     def __init__(self, *args, **kwargs):
         self._overrides = set()
         self._tracking = False
-        super(OverridableDict, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __setitem__(self, key, value):
         if self._tracking:
-            # Track overridden keys.
             self._overrides.add(key)
-            super(OverridableDict, self).__setitem__(key, value)
+            super().__setitem__(key, value)
         elif key not in self._overrides:
-            super(OverridableDict, self).__setitem__(key, value)
-        else:
-            value = self.get(key, value)
-            super(OverridableDict, self).__setitem__(key, value)
+            super().__setitem__(key, value)
 
     def track(self, tracking=True):
         self._tracking = tracking
@@ -32,113 +27,95 @@ class OverridableDict(dict):
 
 
 def generate_environment(target_arch, env=None, recurse=True):
+    if target_arch != "amd64":
+        raise ValueError("only the maintained amd64 target is supported")
+
     if env is None:
         env = OverridableDict()
 
-    # Simplify expansion.
     _expand = functools.partial(expand, env)
+    apps_base = os.environ.get("PEDIGREE_APPS_ROOT", "/workspace")
+    pedigree_base = os.environ.get("PEDIGREE_SOURCE_ROOT", "/pedigree")
+    toolchain_root = os.environ.get("PEDIGREE_TOOLCHAIN_ROOT", "/opt/pedigree")
+    jobs = os.environ.get("PEDIGREE_APPS_JOBS", str(os.cpu_count() or 1))
 
-    # Remove any existing $MAKEFLAGS - a lot of builds don't handle concurrency
-    # very well at all, and we don't want to pull in things like -k/-i/-B.
-    env['MAKEFLAGS'] = '-j1'
+    env["ARCH_TARGET"] = "x86_64"
+    env["ARCH_BITS"] = "64"
+    env["CROSS_TARGET"] = "x86_64-pedigree"
 
-    # Wipe out $LD_LIBRARY_PATH. None of the build hosts need this, and an
-    # $LD_LIBRARY_PATH that contains '.' will cause a ton of weirdness.
-    env['LD_LIBRARY_PATH'] = ''
+    env["PEDIGREE_BASE"] = pedigree_base
+    env["APPS_BASE"] = apps_base
+    env["CROSS_BASE"] = toolchain_root
+    env["TARGET_SYSROOT"] = _expand("$CROSS_BASE/$CROSS_TARGET")
+    env["OUTPUT_BASE"] = _expand("$APPS_BASE/newpacks/$ARCH_TARGET")
+    env["SOURCE_BASE"] = _expand("$APPS_BASE/packages")
+    env["DOWNLOAD_TEMP"] = _expand("$APPS_BASE/downloads")
+    env["BUILD_BASE"] = _expand("$APPS_BASE/.build/$ARCH_TARGET")
+    env["HOME"] = os.environ.get("HOME", "/tmp")
+    env["CCACHE_DIR"] = os.environ.get(
+        "CCACHE_DIR", _expand("$BUILD_BASE/ccache")
+    )
+    env["CCACHE_BASEDIR"] = apps_base
+    env["CCACHE_COMPILERCHECK"] = "content"
+    env["PACKMAN_TARGET_ARCH"] = target_arch
+    env["PACKMAN_PATH"] = _expand("$APPS_BASE/pup")
+    env["PACKMAN_SCRIPT"] = "/opt/pedigree-apps/bin/pup"
+    env["PACKMAN_REPO"] = _expand("$APPS_BASE/pup/package_repo")
+    env["PACKMAN_CONFIG"] = _expand("$BUILD_BASE/pup.conf")
 
-    # User to setuid() back to when dropping privileges.
-    env['UNPRIVILEGED_UID'] = '0'
-    env['UNPRIVILEGED_GID'] = '0'
+    env["CROSS_CC"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-gcc")
+    env["CROSS_CXX"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-g++")
+    env["CROSS_CPP"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-cpp")
+    env["CROSS_AS"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-as")
+    env["CROSS_LD"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-gcc")
+    env["CROSS_AR"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-ar")
+    env["CROSS_RANLIB"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-ranlib")
+    env["CROSS_STRIP"] = _expand("$CROSS_BASE/bin/$CROSS_TARGET-strip")
 
-    # Architecture-specific pieces.
-    if target_arch == 'amd64':
-        env['ARCH_TARGET'] = 'x86_64'
-        env['ARCH_BITS'] = _expand('64')
-        env['CROSS_CFLAGS'] = _expand('-O3 -m$ARCH_BITS -march=k8 -msse2')
-        env['CROSS_CXXFLAGS'] = env['CROSS_CFLAGS']
-        env['CROSS_TARGET'] = _expand('$ARCH_TARGET-pedigree')
-    elif target_arch == 'arm':
-        env['ARCH_TARGET'] = 'arm'
-        env['ARCH_BITS'] = '64'
-        env['CROSS_CFLAGS'] = _expand('-O3 -mcpu=cortex-a8 -mtune=cortex-a8 '
-                                      '-mfpu=vfp')
-        env['CROSS_CXXFLAGS'] = _expand('$CROSS_CFLAGS')
-        env['CROSS_TARGET'] = _expand('$ARCH_TARGET-pedigree')
+    env["CC"] = env["CROSS_CC"]
+    env["CXX"] = env["CROSS_CXX"]
+    env["CPP"] = env["CROSS_CPP"]
+    env["AS"] = env["CROSS_AS"]
+    env["LD"] = env["CROSS_LD"]
+    env["AR"] = env["CROSS_AR"]
+    env["RANLIB"] = env["CROSS_RANLIB"]
+    env["STRIP"] = env["CROSS_STRIP"]
 
-    # Generic system setup. Overrides come from the
-    # local_environment.modify_environment function if it exists.
-    env['PEDIGREE_BASE'] = _expand('$HOME/src/pedigree')
-    env['APPS_BASE'] = _expand('$HOME/src/pedigree-apps')
-    env['CROSS_BASE'] = _expand('$PEDIGREE_BASE/compilers/dir')
-    env['OUTPUT_BASE'] = _expand('$APPS_BASE/newpacks/$ARCH_TARGET')
-    env['SOURCE_BASE'] = _expand('$APPS_BASE/packages')
-    env['DOWNLOAD_TEMP'] = _expand('$APPS_BASE/downloads')
-    env['BUILD_BASE'] = _expand('$SOURCE_BASE/builds')
-    env['CHROOT_BASE'] = _expand('$BUILD_BASE/chroot')
-    env['DEPLOY_BASE'] = _expand('$BUILD_BASE/__deploy')
+    common_flags = "-O2 -pipe -m64 -march=x86-64 -D__PEDIGREE__"
+    c_flags = common_flags + " -std=gnu17"
+    page_flags = "-Wl,-z,max-page-size=4096 -Wl,-z,common-page-size=4096"
+    # GCC 15 defaults to C23, but several current GNU releases still use
+    # pre-C23 empty-parameter declarations in their portability sources.
+    env["CROSS_CFLAGS"] = c_flags
+    env["CROSS_CXXFLAGS"] = common_flags
+    env["CFLAGS"] = c_flags
+    env["CXXFLAGS"] = common_flags
+    env["CPPFLAGS"] = ""
+    env["LDFLAGS"] = page_flags
+    env["LIBS"] = ""
+    env["MAKEFLAGS"] = "-j%s" % jobs
+    env["LD_LIBRARY_PATH"] = ""
 
-    # Package manager.
-    env['PACKMAN_TARGET_ARCH'] = target_arch
-    env['PACKMAN_PATH'] = _expand('$APPS_BASE/pup')
-    env['PACKMAN_SCRIPT'] = _expand('$VIRTUAL_ENV/bin/pup')
-    env['PACKMAN_REPO'] = _expand('$APPS_BASE/pup/package_repo')
+    env["PATH"] = _expand("$CROSS_BASE/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
+    env["MAKE"] = "/usr/bin/make"
+    env["PATCH"] = "/usr/bin/patch"
+    env["AUTOCONF"] = "/usr/bin/autoconf"
+    env["AUTORECONF"] = "/usr/bin/autoreconf"
+    env["ACLOCAL"] = "/usr/bin/aclocal"
+    env["LIBTOOLIZE"] = "/usr/bin/libtoolize"
+    env["TAR"] = "/usr/bin/tar"
+    env["CCACHE"] = "/usr/bin/ccache"
+    env["CMAKE"] = "/usr/bin/cmake"
+    env["NINJA"] = "/usr/bin/ninja"
+    env["PKG_CONFIG"] = "/usr/bin/pkg-config"
 
-    # Cross-toolchain.
-    env['CROSS_CC'] = _expand('$ARCH_TARGET-pedigree-gcc')
-    env['CROSS_CXX'] = _expand('$ARCH_TARGET-pedigree-g++')
-    env['CROSS_CPP'] = _expand('$ARCH_TARGET-pedigree-cpp')
-    env['CROSS_AS'] = _expand('$ARCH_TARGET-pedigree-as')
-    env['CROSS_LD'] = _expand('$ARCH_TARGET-pedigree-gcc')
-    env['CROSS_AR'] = _expand('$ARCH_TARGET-pedigree-ar')
-    env['CROSS_RANLIB'] = _expand('$ARCH_TARGET-pedigree-ranlib')
-    env['LIBS'] = _expand('')
-
-    # ccache cache directory (in the chroot).
-    env['CCACHE_DIR'] = _expand('/ccache')
-
-    # Actual ccache cache directory (it's bind-mounted into the chroot).
-    env['CCACHE_TARGET_DIR'] = _expand('$BUILD_BASE/_ccache')
-
-    # pkg-config magic (inside chroot).
-    env['PKG_CONFIG_LIBDIR'] = _expand('/libraries/pkgconfig')
-
-    # Add local binary paths to $PATH.
-    cross_bin = _expand('$CROSS_BASE/bin')
-    if cross_bin not in os.environ['PATH']:
-        env['PATH'] = _expand('%s:$PATH' % cross_bin)
-    apps_bin = _expand('$APPS_BASE/bin')
-    if apps_bin not in os.environ['PATH']:
-        env['PATH'] = _expand('%s:$PATH' % apps_bin)
-
-    # Build system tools.
-    env['MAKE'] = '/usr/bin/make'
-    env['PATCH'] = '/usr/bin/patch'
-    env['MOUNT'] = '/bin/mount'
-    env['UMOUNT'] = '/bin/umount'
-    env['AUTOCONF'] = '/usr/bin/autoconf'
-    env['AUTORECONF'] = '/usr/bin/autoreconf'
-    env['ACLOCAL'] = '/usr/bin/aclocal'
-    env['TAR'] = '/bin/tar'
-    env['CCACHE'] = '/usr/bin/ccache'
-
-    # Pull in pup's upload key if it's in the environment.
-    if 'UPLOAD_KEY' in os.environ:
-        env['UPLOAD_KEY'] = os.environ['UPLOAD_KEY']
-
-    # Pull in any local changes that the local system requires.
     if recurse:
         try:
             from local_environment import modify_environment
 
-            # Start tracking 'damage' to the environment to figure out what
-            # the local environment changes are.
             env.track()
             modify_environment(env)
             env.track(tracking=False)
-
-            # If anything was changed in modify_environment, we need to
-            # actually re-generate the environment so we can pick up new
-            # expansions.
             if env.has_overrides():
                 generate_environment(target_arch, env=env, recurse=False)
         except ImportError:

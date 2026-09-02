@@ -185,7 +185,7 @@ def pup():
     try:
         version = int(request.form.get("version", ""))
         contents = base64.b64decode(request.form.get("blob", ""), validate=True)
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         return invalid_parameters()
     if not contents:
         return invalid_parameters()

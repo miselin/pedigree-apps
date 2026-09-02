@@ -1,93 +1,132 @@
-pedigree-apps
-=
+# pedigree-apps
 
-The purpose for pedigree-apps is mainly to provide a central location for all files and folders relating to ported applications for Pedigree (https://www.pedigree-project.org)
+> [!NOTE]
+> This is the active development repository. It is receiving substantial
+> AI-assisted maintenance to address long-standing bugs, modernize the tooling,
+> and improve stability. For the pre-AI historical snapshot, see
+> [`miselin/pedigree-apps-legacy`](https://github.com/miselin/pedigree-apps-legacy).
 
-A buildbot (http://build.pedigree-project.org) builds this repository nightly, deploying built packages to the main pup repository at http://pup.pedigree-project.org.
+This repository contains application ports and the Pedigree UPdater (`pup`)
+package tooling for [Pedigree](https://www.pedigree-project.org/).
 
-The layout of this repository is as follows:
+The maintained build path is local Docker. It uses Pedigree's current amd64
+cross-toolchain and creates packages with the FHS layout used by the operating
+system: `/usr/bin`, `/usr/lib`, `/usr/include`, `/etc`, `/var`, and
+`/usr/share`.
 
-- packages
-    - Package definitions and scripts.
-- newpacks
-    - Output from builds will go here, under an architecture-specific directory.
-- downloads
-    - Download cache - delete a file if it exists here to force a redownload for
-    the next build.
-- environment.py
-    - Standard environment configuration.
+## Build locally
 
-Each package contains a single script, `package.py`, in which hooks are defined for each particular build phase. The `package.py` also describes additional steps such as the download of the package's source archive, and metadata such as the package name and version (and dependencies).
+Install Docker, then run builds from the repository root. No host Python
+environment, chroot, or `sudo` setup is needed.
 
-Builds are performed in a chroot and therefore dependencies should be listed correctly to ensure the necessary headers and libraries for your packages are present at the time of your build.
-
-Getting Started
-=
-
-You'll need the following to make `pedigree-apps` work:
-
-* Python `virtualenv` (check for system packages or otherwise `pip install virtualenv`).
-* A working Pedigree installation, that builds in full. This is needed to extract `libc` and other libraries from the build.
-* libfakechroot.so
-
-First-time installation may need to create a file, `local_environment.py`, alongside `environment.py`; this might look like:
-
-```
-import functools
-
-from support.util import expand
-
-
-def modify_environment(env):
-    _expand = functools.partial(expand, env)
-
-    env['PEDIGREE_BASE'] = _expand('$HOME/stuff/pedigree')
-    env['APPS_BASE'] = _expand('$HOME/stuff/pedigree-apps')
-
-    env['UNPRIVILEGED_UID'] = '10000'
-    env['UNPRIVILEGED_GID'] = '10000'
-
-    env['CCACHE_TARGET_DIR'] = '/mnt/ram/ccache'
+```sh
+./buildPackages.sh --list
+./buildPackages.sh --dry-run --only-depends cmake
+./buildPackages.sh --only-depends libpng
 ```
 
-This is simply overriding the defaults set in `environment.py` with the correct configuration for your environment.
+`--only-depends` builds the requested packages and their transitive build
+dependencies. `--only` builds only the named packages and expects their
+dependency artifacts to exist already.
 
-You will also need a virtualenv:
+The first run builds `pedigree-apps-builder:local` from a pinned published
+Pedigree builder image. Rebuild that derived image after changing its
+Dockerfile, Python dependencies, or the bundled PUP source:
 
-`$ virtualenv venv --system-site-packages`
-
-Then, you simply need to:
-
+```sh
+./buildPackages.sh --rebuild-image --only-depends cmake
 ```
-$ source venv/bin/activate
-$ ./buildPackages.sh [target]
+
+The default parallelism is eight jobs. Override it when useful:
+
+```sh
+PEDIGREE_APPS_JOBS=4 ./buildPackages.sh --only cmake
 ```
 
-`[target]` can be `amd64` or `arm`, the support for which depends on which architecture your Pedigree build was made for.
+CMake-based ports use a persistent compiler cache under `.build/ccache`.
 
-This will:
+Docker runs the amd64 builder explicitly, including on Apple Silicon hosts.
+Only the amd64 Pedigree target is maintained by this workflow today.
 
-* Install needed Python packages (via `pip`, in the virtualenv - this doesn't touch your system Python)
-* Install `pup` to the virtualenv for package creation and registration
-* Create a build chroot (this step requires `sudo` elevation)
-* Perform the build
+## Build from the current Pedigree checkout
 
-The build itself will figure out what to build and build packages. If you have `pydot` installed, this will emit `dependencies.dot` which shows the dependencies between packages.
+The default base image is pinned so repeated local builds start from the same
+known toolchain. To test against a newer sibling `pedigree` checkout, build its
+builder image first:
 
-Each built package will have the general form `$package-$version.pup` and be deposited in `pup/package_repo`, alongside a `packages.pupdb` database which stores metadata about packages. The `package_repo` directory is designed to be able to be published via HTTP and then used as a repository for `pup` installations.
+```sh
+./scripts/build-pedigree-builder.sh
+PEDIGREE_BUILDER_IMAGE=pedigree-builder:local \
+  ./buildPackages.sh --rebuild-image --only-depends cmake
+```
 
-pup
-=
+Set `PEDIGREE_SOURCE` if the Pedigree checkout is not at `../pedigree`:
 
-This repository also contains the main source for the Pedigree UPdater, or pup for short. pup provides a cross-platform way to install packages, and is especially useful for creating disk images for Pedigree cross-builds with.
+```sh
+PEDIGREE_SOURCE=/path/to/pedigree ./scripts/build-pedigree-builder.sh
+```
 
-A utility script, `run_pup.sh`, is provided to facilitate running `pup` by hand.
+This intentionally remains a local workflow. Reproducible release promotion
+and automated builders can be layered on later without changing package build
+hooks.
 
-Python tests
-=
-Much of pedigree-apps is implemented using custom Python scripts. These can be tested by running `./runtests.sh` which will also do a full lint of the Python source code.
+## Outputs
 
-SUPPORT
-=
+A successful build writes:
 
-For support with the pedigree-apps repository, add a tracker item at http://www.pedigree-project.org/projects/pedigree-apps or alternatively raise your question in `#pedigree` on irc.freenode.net.
+- staged FHS roots to `newpacks/x86_64/<package>/<version>/root`;
+- PUP archives to `pup/package_repo`;
+- source downloads to `downloads`;
+- per-package build logs to `.build/x86_64/logs`.
+
+Current revived examples include zlib 1.3.2, libpng 1.6.58, GNU Make 4.4.1,
+and CMake 4.4.3. Updated ports use HTTPS downloads with pinned SHA-256 hashes.
+The legacy GCC 8 and MPC 0.8 recipes remain in-tree but are deferred because
+they require obsolete host Autoconf and Automake versions; the Docker builder
+supplies the maintained Pedigree cross-toolchain instead.
+
+## Publish explicitly
+
+Local builds never upload by default. With a valid PUP upload key already in
+the environment, upload completed artifacts explicitly without rebuilding:
+
+```sh
+./buildPackages.sh --only cmake --upload-only
+```
+
+Use `--upload` instead to build the complete selected wave first and upload it
+only after every build succeeds. The wrapper runs the build without the key,
+then starts a separate upload-only container so package build processes cannot
+read the credential.
+
+If `UPLOAD_KEY` is not already available, the publication helper retrieves it
+from the legacy GCP project using an authenticated `gcloud` account:
+
+```sh
+./scripts/publish-packages.py cmake gnumake zlib
+```
+
+The direct build command exits before building if `UPLOAD_KEY` is not set;
+the helper obtains it without printing or copying it into a command line.
+The legacy PUP service does not store runtime dependency metadata, so the
+builder refuses to upload a package that declares runtime dependencies.
+
+## Package definitions
+
+Each `packages/<name>/package.py` defines its source, checksum, dependency
+metadata, patches, and build phases. Common Autoconf and CMake helpers install
+under FHS paths and stage dependency roots for each package without modifying
+the Pedigree toolchain sysroot.
+
+`pup` is also kept in this repository. Use `run_pup.sh` to run it in the same
+builder image when working with the local repository by hand.
+
+## Tests
+
+Run the Python builder tests and syntax checks on the host:
+
+```sh
+./runtests.sh
+```
+
+For support, open an issue in this repository.

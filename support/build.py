@@ -1,189 +1,113 @@
-
+import copy
 import logging
 import os
 import shutil
-import subprocess
-import sys
 import tarfile
+from pathlib import PurePosixPath
 
 from . import buildsystem
-from . import deps
 from . import steps
-from . import toolchain
 
 
 log = logging.getLogger(__name__)
 
 
-def build_package(package, env):
-    """Builds the given package."""
-    package_id = '%s-%s' % (package.name(), package.version())
-    env = env.copy()
+def _safe_members(archive):
+    members = archive.getmembers()
+    paths = [PurePosixPath(member.name) for member in members]
+    first_components = {path.parts[0] for path in paths if path.parts}
+    strip_root = None
+    if len(first_components) == 1 and any(len(path.parts) > 1 for path in paths):
+        strip_root = next(iter(first_components))
 
-    download_filename = '_%s' % package_id
-    download_target = os.path.join(env['DOWNLOAD_TEMP'], download_filename)
-    srcdir = os.path.join(env['CHROOT_BASE'], 'src')
+    for member in members:
+        path = PurePosixPath(member.name)
+        parts = path.parts[1:] if strip_root else path.parts
+        if not parts:
+            continue
+        if path.is_absolute() or ".." in parts:
+            raise RuntimeError("unsafe archive member: %s" % member.name)
+        if member.isdev() or member.isfifo():
+            raise RuntimeError("unsupported archive member: %s" % member.name)
 
-    pass0_steps = ('download',)
-    pass3_steps = ('repository',)
+        extracted = copy.copy(member)
+        extracted.name = str(PurePosixPath(*parts))
+        yield extracted
 
-    if (package.options().always_download or
-            not os.path.isfile(download_target)):
-        for step in pass0_steps:
-            log.info('== %s %s step ==', package_id, step)
-            method = getattr(package, step)
 
-            try:
-                method(env.copy(), download_target)
-            except buildsystem.OptionalError:
-                download_target = None
-
-    # Prepare to fill a chroot with the necessary files, now that we have the
-    # source tarball downloaded and ready to extract.
-    log.info('== %s chroot step ==', package_id)
-
-    # Drop in patches as well.
+def _run_optional(package, method_name, *args):
     try:
-        patches = package.patches(env, srcdir)
+        getattr(package, method_name)(*args)
     except buildsystem.OptionalError:
-        patches = []
-
-    for patch in patches:
-        target_dir = os.path.join(env['CHROOT_BASE'], 'patches')
-        if '/' in patch:
-            dirname = os.path.join(target_dir, os.path.dirname(patch))
-            if not os.path.isdir(dirname):
-                os.makedirs(dirname)
-
-        shutil.copy2(os.path.join(package._path, 'patches', patch),
-                     os.path.join(target_dir, patch))
-
-    # Log path for the child. We open it in the parent so the child just gets
-    # a file descriptor, without having to have the file present inside the
-    # chroot proper.
-    logdir = os.path.join(env['BUILD_BASE'], 'logs')
-    if not os.path.isdir(logdir):
-        os.makedirs(logdir)
-    child_logpath = os.path.join(logdir, 'build-%s.log' % package_id)
-    log_file = open(child_logpath, 'w')
-
-    log.info('== %s log file is %s ==', package_id, child_logpath)
-
-    # Clean up our handles before forking.
-    sys.stdout.flush()
-    sys.stderr.flush()
-    child = os.fork()
-    if child:
-        # Close our reference to the log file, we don't care anymore.
-        log_file.close()
-        log_file = None
-
-        # Wait for the forked child to complete, get its status.
-        _, status = os.waitpid(child, 0)
-
-        # Child finished, flush output before continuing.
-        sys.stdout.flush()
-        sys.stderr.flush()
-
-        if status:
-            raise Exception('build failed inside chroot')
-
-        # Complete final steps.
-        for step in pass3_steps:
-            log.info('== %s %s step ==', package_id, step)
-            method = getattr(package, step)
-
-            try:
-                method(env.copy(), srcdir, None)
-                pass
-            except buildsystem.OptionalError:
-                pass
-
-        return
-
-    # Before entering chroot, redirect output to the build log file.
-    log_fd = log_file.fileno()
-    os.dup2(log_fd, sys.stdout.fileno())
-    os.dup2(log_fd, sys.stderr.fileno())
-
-    # Build parameters for the Docker invocation (including volumes to share).
-    args = [
-        '/usr/bin/env', 'docker', 'run',
-    ]
-    args += steps.get_volumes(env)
-    args += [
-        'miselin/pedigree:latest',
-        '/usr/bin/env', 'python', '/pedigree_apps/buildInChroot.py',
-        '--package=' + package.name(), '--filename=' + download_filename,
-        '--target=' + env['PACKMAN_TARGET_ARCH'],
-    ]
-
-    # Run the in-chroot builder now.
-    os.execv(args[0], args)
+        return False
+    return True
 
 
-def in_chroot(env, packages, package, package_id, download_filename):
-    # Drop in support files from Pedigree build.
-    toolchain.pedigree_into_chroot(env, '/')
+def build_package(package, env):
+    package_id = "%s-%s" % (package.name(), package.version())
+    env = env.copy()
+    os.makedirs(env["DOWNLOAD_TEMP"], exist_ok=True)
+    os.makedirs(env["BUILD_BASE"], exist_ok=True)
+    os.makedirs(env["OUTPUT_BASE"], exist_ok=True)
 
-    # Install our build_requires packages to the chroot path.
-    deps.install_dependent_packages(dict(packages), package, env)
+    download_target = os.path.join(env["DOWNLOAD_TEMP"], package_id + ".source")
+    build_root = os.path.join(env["BUILD_BASE"], "work", package_id)
+    srcdir = os.path.join(build_root, "src")
+    deploy_base = os.path.join(
+        env["OUTPUT_BASE"], package.name(), package.version()
+    )
+    deploydir = os.path.join(deploy_base, "root")
+    staging_deploydir = os.path.join(deploy_base, "root.incomplete")
+    completion_marker = os.path.join(deploy_base, ".complete")
+    logdir = os.path.join(env["BUILD_BASE"], "logs")
+    os.makedirs(logdir, exist_ok=True)
+    env["BUILD_LOG"] = os.path.join(logdir, "build-%s.log" % package_id)
+    with open(env["BUILD_LOG"], "w", encoding="utf-8") as build_log:
+        build_log.write("Building %s\n" % package_id)
 
-    pass1_steps = ('patch', 'prebuild', 'configure', 'build')
-    pass2_steps = ('deploy', 'postdeploy', 'check', 'repository_prep')
+    if package.options().always_download and os.path.isfile(download_target):
+        os.unlink(download_target)
+    log.info("== %s download ==", package_id)
+    try:
+        package.download(env.copy(), download_target)
+    except buildsystem.OptionalError:
+        download_target = None
 
-    download_target = os.path.join('/download', download_filename)
-    deploydir = '/__deploy'
-    srcdir = '/src'
+    shutil.rmtree(build_root, ignore_errors=True)
+    shutil.rmtree(staging_deploydir, ignore_errors=True)
+    os.makedirs(srcdir)
+    os.makedirs(staging_deploydir)
 
-    if not os.path.isdir(srcdir):
-        os.makedirs(srcdir)
+    try:
+        if download_target:
+            log.info("== %s extract ==", package_id)
+            with tarfile.open(download_target) as archive:
+                archive.extractall(srcdir, members=_safe_members(archive), filter="data")
 
-    # Extract the given tarball.
-    if os.path.exists(download_target):
-        # tar --strip=1
-        def check_strip(tarinfo):
-            return '/' in tarinfo.path
+        for phase in ("patch", "prebuild", "configure", "build"):
+            log.info("== %s %s ==", package_id, phase)
+            _run_optional(package, phase, env.copy(), srcdir)
 
-        def strip_first(tarinfo):
-            stripped = tarinfo.path.split('/')[1:]
-            tarinfo.path = os.path.join(*stripped)
-            return tarinfo
+        for phase in ("deploy", "postdeploy", "check", "repository_prep"):
+            log.info("== %s %s ==", package_id, phase)
+            _run_optional(
+                package, phase, env.copy(), srcdir, staging_deploydir
+            )
+    except BaseException:
+        shutil.rmtree(staging_deploydir, ignore_errors=True)
+        if (
+            download_target
+            and os.path.isfile(download_target)
+            and not tarfile.is_tarfile(download_target)
+        ):
+            os.unlink(download_target)
+        raise
 
-        try:
-            try:
-                tar = tarfile.open(download_target)
-                tar.extractall(path=srcdir,
-                               members=(strip_first(x) for x in tar
-                                        if check_strip(x)))
-                tar.close()
-            except tarfile.ReadError:
-                # Can't do it in-process, shell out.
-                subprocess.check_call([env['TAR'], '--strip', '1', '-xf',
-                                       download_target], cwd=srcdir, env=env)
-        except:
-            # Wipe out the download if extraction failed.
-            if os.path.exists(download_target):
-                os.unlink(download_target)
+    shutil.rmtree(deploydir, ignore_errors=True)
+    os.replace(staging_deploydir, deploydir)
+    marker_temporary = completion_marker + ".tmp"
+    with open(marker_temporary, "w", encoding="utf-8") as marker:
+        marker.write(package_id + "\n")
+    os.replace(marker_temporary, completion_marker)
 
-            raise
-
-    for step in pass1_steps:
-        log.info('== %s %s step ==', package_id, step)
-        method = getattr(package, step)
-
-        try:
-            method(env.copy(), srcdir)
-        except buildsystem.OptionalError:
-            pass
-
-    for step in pass2_steps:
-        log.info('== %s %s step ==', package_id, step)
-        method = getattr(package, step)
-
-        try:
-            method(env.copy(), srcdir, deploydir)
-        except buildsystem.OptionalError:
-            pass
-
-    return 0
+    return env["BUILD_LOG"]

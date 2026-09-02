@@ -26,8 +26,9 @@ class Pedigree_develPackage(buildsystem.Package):
         pedigree_image = os.path.join(env['PEDIGREE_BASE'], 'images')
         pedigree_build = os.path.join(env['PEDIGREE_BASE'], 'build')
 
-        gcc_vers = steps.cmd_output([env['CROSS_CC'], '-dumpversion'], env=env)
-        gcc_vers = gcc_vers.strip()
+        gcc_vers = steps.cmd_output(
+            [env['CROSS_CC'], '-dumpversion'], env=env, text=True
+        ).strip()
 
         copies = [
             # Libraries

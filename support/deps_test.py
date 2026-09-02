@@ -1,131 +1,81 @@
-
 import os
+import tempfile
 import unittest
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from . import deps
 
 
 class DepsTest(unittest.TestCase):
-
-    def setUp(self):
-        self.env = {
-            'PACKMAN_TARGET_ARCH': 'amd64',
-            'PACKMAN_REPO': 'packman',
-            'CHROOT_BASE': 'chroot',
-        }
+    def package(self, name, requires=(), version="1.0"):
+        package = mock.MagicMock()
+        package.name.return_value = name
+        package.version.return_value = version
+        package.build_requires.return_value = list(requires)
+        return package
 
     def test_simple_deps(self):
-        package1 = mock.MagicMock()
-        package2 = mock.MagicMock()
-
-        package1.name.return_value = 'package1'
-        package1.build_requires.return_value = []
-
-        package2.name.return_value = 'package2'
-        package2.build_requires.return_value = ['package1']
-
         packages = {
-            'package1': package1,
-            'package2': package2,
+            "package1": self.package("package1"),
+            "package2": self.package("package2", ("package1",)),
         }
-
-        sorted_deps = [first for first, _ in deps.sort_dependencies(packages)]
-        self.assertEqual(sorted_deps, ['package1', 'package2'])
-
-    def test_no_deps(self):
-        package1 = mock.MagicMock()
-        package2 = mock.MagicMock()
-
-        package1.name.return_value = 'package1'
-        package1.build_requires.return_value = []
-
-        package2.name.return_value = 'package2'
-        package2.build_requires.return_value = []
-
-        packages = {
-            'package1': package1,
-            'package2': package2,
-        }
-
-        actual = set([first for first, _ in deps.sort_dependencies(packages)])
-        desired = set(['package1', 'package2'])
-        self.assertEqual(actual & desired, desired)
+        self.assertEqual(
+            [name for name, _ in deps.sort_dependencies(packages)],
+            ["package1", "package2"],
+        )
 
     def test_cyclic_deps(self):
-        package1 = mock.MagicMock()
-        package2 = mock.MagicMock()
-
-        package1.name.return_value = 'package1'
-        package1.build_requires.return_value = ['package2']
-
-        package2.name.return_value = 'package2'
-        package2.build_requires.return_value = ['package1']
-
         packages = {
-            'package1': package1,
-            'package2': package2,
+            "package1": self.package("package1", ("package2",)),
+            "package2": self.package("package2", ("package1",)),
         }
-
-        with self.assertRaises(Exception):
+        with self.assertRaisesRegex(ValueError, "dependency cycle"):
             deps.sort_dependencies(packages)
 
     def test_implicit_deps(self):
-        package1 = mock.MagicMock()
-        package2 = mock.MagicMock()
-        package3 = mock.MagicMock()
-
-        package1.name.return_value = 'package1'
-        package1.build_requires.return_value = []
-
-        package2.name.return_value = 'package2'
-        package2.build_requires.return_value = ['package1']
-
-        package3.name.return_value = 'package3'
-        package3.build_requires.return_value = ['package2']
-
         packages = {
-            'package1': package1,
-            'package2': package2,
-            'package3': package3,
+            "package1": self.package("package1"),
+            "package2": self.package("package2", ("package1",)),
+            "package3": self.package("package3", ("package2",)),
         }
+        selected = deps.select_with_dependencies(packages, ("package3",))
+        self.assertEqual(
+            [name for name, _ in selected],
+            ["package1", "package2", "package3"],
+        )
 
-        sorted_deps = [first for first, _ in deps.sort_dependencies(packages)]
-        self.assertEqual(sorted_deps, ['package1', 'package2', 'package3'])
+    def test_prepare_sysroot_stages_dependency(self):
+        dependency = self.package("dependency")
+        package = self.package("package", ("dependency",))
+        packages = {"dependency": dependency, "package": package}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = os.path.join(
+                temporary, "output", "dependency", "1.0", "root", "usr", "include"
+            )
+            os.makedirs(root)
+            with open(
+                os.path.join(temporary, "output", "dependency", "1.0", ".complete"),
+                "w",
+                encoding="utf-8",
+            ) as marker:
+                marker.write("dependency-1.0\n")
+            with open(os.path.join(root, "dependency.h"), "w", encoding="utf-8") as f:
+                f.write("/* dependency */\n")
+            env = {
+                "BUILD_BASE": os.path.join(temporary, "build"),
+                "OUTPUT_BASE": os.path.join(temporary, "output"),
+                "LDFLAGS": "-Wl,test",
+            }
+            prepared = deps.prepare_sysroot(packages, package, env)
+            self.assertTrue(
+                os.path.isfile(
+                    os.path.join(
+                        prepared["PORTS_SYSROOT"], "usr", "include", "dependency.h"
+                    )
+                )
+            )
+            self.assertIn(prepared["PORTS_SYSROOT"], prepared["CPPFLAGS"])
 
-    def test_dependent_extract(self):
-        package1 = mock.MagicMock()
-        package2 = mock.MagicMock()
 
-        package1.name.return_value = 'package1'
-        package1.version.return_value = '1.0'
-        package1.build_requires.return_value = []
-
-        package2.name.return_value = 'package2'
-        package2.build_requires.return_value = ['package1']
-
-        packages = {
-            'package1': package1,
-            'package2': package2,
-        }
-
-        deps._pup = mock.MagicMock()
-        deps._pup.return_value = None
-
-        deps.install_dependent_packages(packages, package2, self.env)
-
-        deps._pup.assert_has_calls([
-            mock.call(self.env, 'sync'),
-            mock.call(self.env, 'install', 'package1'),
-        ])
-
-        sorted_deps = [first for first, _ in deps.sort_dependencies(packages)]
-        self.assertEqual(sorted_deps, ['package1', 'package2'])
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

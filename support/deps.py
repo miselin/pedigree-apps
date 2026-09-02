@@ -1,99 +1,112 @@
-
 import os
-import networkx
-import subprocess
+import shutil
 
 
-def collect_dependences(known_packages, package):
-    """Collect dependencies for the given package.
+def collect_dependencies(known_packages, package):
+    result = []
+    visited = set()
 
-    Returns:
-        A list of Package objects that are required for the given package.
-    """
-    # Traverse the dependency chain, pulling in dependencies of our
-    # dependencies and so on. This is important as we may have implicit
-    # dependencies.
-    def traverse_depends(depends, pkg):
-        package_depends = pkg.build_requires()
-        for dependency in package_depends:
-            dependent_package = known_packages[dependency]
-            depends.append(dependent_package)
-            traverse_depends(depends, dependent_package)
+    def visit(name):
+        if name in visited:
+            return
+        if name not in known_packages:
+            raise KeyError(
+                'package "%s" requires unknown package "%s"'
+                % (package.name(), name)
+            )
+        visited.add(name)
+        dependency = known_packages[name]
+        for child in dependency.build_requires():
+            visit(child)
+        result.append(dependency)
 
-    depends = []
-    traverse_depends(depends, package)
-
-    return depends
-
-
-def _pup(env, *args):
-    # Chroot?
-    if os.path.exists('/pedigree_apps'):
-        config_file = '/pedigree_apps/pup/pup-docker.conf'
-    else:
-        config_file = os.path.join(env['APPS_BASE'], 'pup.conf')
-
-    env = env.copy()
-    env['PYTHONPATH'] = env['PACKMAN_PATH']
-
-    subprocess.check_call([env['PACKMAN_SCRIPT'], '--config=' + config_file] +
-                          list(args))
-
-
-def install_dependent_packages(all_packages, package, env):
-    """Installs dependent packages into env['CHROOT_BASE']."""
-    depends = collect_dependences(all_packages, package)
-
-    # Sync pup in case we need to download anything.
-    _pup(env, 'sync')
-
-    # Now, install the dependent packages.
-    for package in set([dep.name() for dep in depends]):
-        _pup(env, 'install', package)
-
-
-def build_package_graph(packages):
-    """Build a networkx.DiGraph from the given set of packages."""
-    graph = networkx.DiGraph()
-
-    for package_name, package in packages.items():
-        requires = package.build_requires()
-        if not requires:
-            graph.add_node(package_name)
-
-        for dependency in requires:
-            graph.add_edge(package_name, dependency)
-
-    return graph
+    for dependency_name in package.build_requires():
+        visit(dependency_name)
+    return result
 
 
 def sort_dependencies(packages):
-    """Sorts the given packages based on dependencies.
+    result = []
+    permanent = set()
+    temporary = []
 
-    Returns:
-        An iterable of (package_name, package) tuples.
-    """
-    graph = build_package_graph(packages)
+    def visit(name):
+        if name in permanent:
+            return
+        if name in temporary:
+            cycle = temporary[temporary.index(name) :] + [name]
+            raise ValueError("dependency cycle: %s" % " -> ".join(cycle))
+        if name not in packages:
+            raise KeyError('unknown package dependency "%s"' % name)
 
-    # Write out a nice dot graph if we can.
-    try:
-        networkx.write_dot(graph, 'dependencies.dot')
-    except:
-        pass
+        temporary.append(name)
+        for dependency in packages[name].build_requires():
+            visit(dependency)
+        temporary.pop()
+        permanent.add(name)
+        result.append((name, packages[name]))
 
-    # Walk the tree to figure out the correct dependency order.
-    result = networkx.topological_sort(graph, reverse=True)
-    return [(package, packages[package]) for package in result]
+    for package_name in sorted(packages):
+        visit(package_name)
+    return result
+
+
+def select_with_dependencies(packages, requested):
+    selected = set()
+    for name in requested:
+        if name not in packages:
+            raise KeyError('unknown package "%s"' % name)
+        selected.add(name)
+        selected.update(dep.name() for dep in collect_dependencies(packages, packages[name]))
+    return [item for item in sort_dependencies(packages) if item[0] in selected]
+
+
+def prepare_sysroot(known_packages, package, env):
+    sysroot = os.path.join(env["BUILD_BASE"], "sysroots", package.name())
+    shutil.rmtree(sysroot, ignore_errors=True)
+    os.makedirs(sysroot)
+
+    for dependency in collect_dependencies(known_packages, package):
+        package_root = os.path.join(
+            env["OUTPUT_BASE"], dependency.name(), dependency.version(), "root"
+        )
+        completion_marker = os.path.join(
+            os.path.dirname(package_root), ".complete"
+        )
+        if not os.path.isdir(package_root) or not os.path.isfile(completion_marker):
+            raise RuntimeError(
+                'dependency "%s" has not completed a build; expected %s and %s'
+                % (dependency.name(), package_root, completion_marker)
+            )
+        shutil.copytree(
+            package_root, sysroot, dirs_exist_ok=True, symlinks=True
+        )
+
+    result = env.copy()
+    result["PORTS_SYSROOT"] = sysroot
+    include_dir = os.path.join(sysroot, "usr", "include")
+    library_dir = os.path.join(sysroot, "usr", "lib")
+    result["CPPFLAGS"] = "-I%s" % include_dir
+    result["LDFLAGS"] = "%s -L%s -Wl,-rpath-link,%s" % (
+        env["LDFLAGS"],
+        library_dir,
+        library_dir,
+    )
+    result["PKG_CONFIG_SYSROOT_DIR"] = sysroot
+    result["PKG_CONFIG_LIBDIR"] = os.pathsep.join(
+        (
+            os.path.join(library_dir, "pkgconfig"),
+            os.path.join(sysroot, "usr", "share", "pkgconfig"),
+        )
+    )
+    return result
 
 
 def get_final_packages(packages):
-    """Gets the list of packages that nothing depends upon for building.
-
-    Returns:
-        An iterable of package name strings.
-    """
-    graph = build_package_graph(packages)
-
-    for node in graph.nodes():
-        if not graph.predecessors(node):
-            yield node
+    dependencies = {
+        dependency
+        for package in packages.values()
+        for dependency in package.build_requires()
+    }
+    for name in sorted(set(packages) - dependencies):
+        yield name

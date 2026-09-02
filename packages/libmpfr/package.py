@@ -42,7 +42,7 @@ class LibmpfrPackage(buildsystem.Package):
 
     def configure(self, env, srcdir):
         build_cc_machine = subprocess.check_output(
-            ['/usr/bin/gcc', '-dumpmachine'])
+            ['/usr/bin/gcc', '-dumpmachine'], text=True).strip()
         steps.run_configure(self, srcdir, env, inplace=False, extra_config=(
                                 '--build=%s' % build_cc_machine,))
 

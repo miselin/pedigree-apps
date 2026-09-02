@@ -46,8 +46,4 @@ class LuaPackage(buildsystem.Package):
 
     def deploy(self, env, srcdir, deploydir):
         steps.make(srcdir, env, target='install', extra_opts=(
-            'INSTALL_TOP=%s' % deploydir,
-            'INSTALL_BIN=%s/applications' % deploydir,
-            'INSTALL_LIB=%s/libraries' % deploydir,
-            'INSTALL_LMOD=%s/support/lua/share/5.1' % deploydir,
-            'INSTALL_CMOD=%s/libraries/lua/5.1' % deploydir,))
+            'INSTALL_TOP=%s' % deploydir,))

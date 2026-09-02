@@ -53,13 +53,16 @@ class RegisterPackageCommand(base.PupCommand):
             help="architecture of the package to register",
         )
         parser.add_argument(
-            "--key", type=str, required=True, help="Upload key for the repository"
+            "--key",
+            type=str,
+            default=os.environ.get("PUP_UPLOAD_KEY"),
+            help="upload key for the repository (or set PUP_UPLOAD_KEY)",
         )
         parser.add_argument(
             "dependency",
             nargs="*",
             type=str,
-            help="packages this package should depend on",
+            help="reserved; legacy repository dependency storage is unavailable",
         )
 
     def run(self, args, config):
@@ -67,15 +70,22 @@ class RegisterPackageCommand(base.PupCommand):
         pup_filename = f"{package_name}.pup"
         package_file = os.path.join(config.local_cache, pup_filename)
         if not os.path.isfile(package_file):
-            print("No file exists for package %s.", package_file)
+            print(f"No file exists for package {package_file}.")
+            return 1
+
+        if not args.key:
+            print("No upload key was provided.")
+            return 1
+        if args.dependency:
+            print("The legacy repository cannot record runtime dependencies.")
             return 1
 
         log.info("register package %s [%s]", package_name, package_file)
 
-        url = f"{config.upload_url}/upload"
         if not config.upload_url:
             print("No upload URL is configured in the config file.")
             return 1
+        url = f"{config.upload_url}/upload"
 
         h = hashlib.sha1()
         with open(package_file, "rb") as f:
@@ -88,12 +98,16 @@ class RegisterPackageCommand(base.PupCommand):
         }
 
         # Obtain an upload URL.
-        r = requests.get(url, params=get_params)
+        try:
+            r = requests.get(url, params=get_params, timeout=30)
+        except requests.RequestException:
+            print("Failed to get upload URL.")
+            return 1
         if r.status_code != 200:
             print("Failed to get upload URL.")
             return 1
 
-        upload_url = r.text
+        upload_url = r.text.strip()
 
         # Upload the package to the given upload URL.
         postdata = {
@@ -102,10 +116,19 @@ class RegisterPackageCommand(base.PupCommand):
             "arch": args.architecture,
             "sha1": digest,
         }
-        with open(package_file, "rb") as f:
-            r = requests.post(upload_url, data=postdata, files={"file": f})
+        try:
+            with open(package_file, "rb") as f:
+                r = requests.post(
+                    upload_url,
+                    data=postdata,
+                    files={"file": f},
+                    timeout=300,
+                )
+        except requests.RequestException:
+            print(f'Registering package "{package_name}" failed.')
+            return 1
 
-        result = r.text
+        result = r.text.strip()
         if result != "ok":
             print(f'Registering package "{package_name}" failed: {result}')
             return 1

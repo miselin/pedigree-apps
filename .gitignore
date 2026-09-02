@@ -1,5 +1,6 @@
 downloads/*
 newpacks/*
+.build/
 .DS_Store
 status.log
 environment.sh

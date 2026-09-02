@@ -1,13 +1,13 @@
 import argparse
 import base64
 import hashlib
+import json
 import os
 import subprocess
 import zipfile
 from pathlib import Path
 from urllib.parse import urljoin
-
-import requests
+from urllib.request import Request, urlopen
 
 DEFAULT_PROJECT = "the-pedigree-project"
 DEFAULT_REPOSITORY = "https://pup.pedigree-project.org/"
@@ -15,12 +15,17 @@ REPOSITORY_HEADERS = {"User-Agent": "pup-release/1.0"}
 
 
 def upload_key_from_datastore(project):
-    token = subprocess.run(
-        ["gcloud", "auth", "print-access-token"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+    try:
+        token_result = subprocess.run(
+            ["gcloud", "auth", "print-access-token"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        detail = error.stderr.strip() or "gcloud access-token request failed"
+        raise RuntimeError(detail) from error
+    token = token_result.stdout.strip()
     if not token:
         raise RuntimeError("gcloud did not return an access token")
 
@@ -36,17 +41,21 @@ def upload_key_from_datastore(project):
             },
         }
     }
-    response = requests.post(
+    request = Request(
         f"https://datastore.googleapis.com/v1/projects/{project}:runQuery",
-        headers={"Authorization": f"Bearer {token}"},
-        json=query,
-        timeout=30,
+        data=json.dumps(query).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
     )
-    response.raise_for_status()
+    with urlopen(request, timeout=30) as response:
+        response_data = json.load(response)
 
     entities = [
         item["entity"]
-        for item in response.json().get("batch", {}).get("entityResults", [])
+        for item in response_data.get("batch", {}).get("entityResults", [])
     ]
     enabled_keys = []
     for entity in entities:
@@ -65,6 +74,8 @@ def upload_key_from_datastore(project):
 
 
 def current_release(repository):
+    import requests
+
     response = requests.get(
         urljoin(repository, "pup-version"),
         headers=REPOSITORY_HEADERS,
@@ -83,6 +94,8 @@ def validate_wheel(wheel_path):
 
 
 def upload_wheel(repository, key, wheel_path, release):
+    import requests
+
     contents = validate_wheel(wheel_path)
     response = requests.post(
         urljoin(repository, "pup.whl"),
@@ -101,6 +114,8 @@ def upload_wheel(repository, key, wheel_path, release):
 
 
 def verify_release(repository, wheel_path, release):
+    import requests
+
     if current_release(repository) != release:
         raise RuntimeError("repository did not publish the requested release serial")
 

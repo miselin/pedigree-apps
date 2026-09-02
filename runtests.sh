@@ -1,12 +1,24 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-if [ "x$COVERAGE" = "x" ]; then COVERAGE=coverage; fi
-
-$COVERAGE run --branch --source=. -m unittest discover -p '*_test.py'
-$COVERAGE html -d coverage_html
-
-if [ "x$VIRTUAL_ENV" != "x" ]; then pip install flake8; fi
-
-flake8 --exclude=./packages/builds,./newpacks,./i686,./venv,./downloads,./package-template,./packages,./pup/build,./standalone-*,'*_test.py' .
+python3 -m unittest -v \
+    buildPackages_test \
+    environment_test \
+    support.build_test \
+    support.buildsystem_test \
+    support.deps_test \
+    support.steps_test \
+    support.toolchain_test \
+    support.util_test \
+    pup.dist_test \
+    pup.pedigree_updater.commands.create_test
+python3 -m compileall -q \
+    buildPackages.py \
+    buildInChroot.py \
+    environment.py \
+    support \
+    packages \
+    scripts \
+    pup/pedigree_updater \
+    pup/http/pup_http
