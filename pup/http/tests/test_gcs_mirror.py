@@ -217,6 +217,7 @@ class ServiceConfigurationTests(unittest.TestCase):
     def test_worker_timeout_covers_large_package_mirroring(self):
         app_yaml = (Path(__file__).parents[1] / "app.yaml").read_text()
         self.assertIn("--timeout 600", app_yaml)
+        self.assertIn("inbound_services:\n- warmup", app_yaml)
 
 
 if __name__ == "__main__":

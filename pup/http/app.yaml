@@ -5,6 +5,9 @@ entrypoint: gunicorn -b :$PORT -w 2 --timeout 600 pup_http.wsgi:app
 automatic_scaling:
   max_instances: 2
 
+inbound_services:
+- warmup
+
 env_variables:
   PUP_PACKAGE_BUCKET: the-pedigree-project--pup
 

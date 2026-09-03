@@ -230,6 +230,11 @@ def index(extension=None):
     )
 
 
+@flask_app.get("/_ah/warmup")
+def warmup():
+    return text_response("ok")
+
+
 @flask_app.get("/packages.pupdb")
 def package_database():
     result = {}

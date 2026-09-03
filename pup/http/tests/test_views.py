@@ -267,6 +267,12 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"The Pedigree UPdater", response.data)
 
+    def test_warmup_endpoint_is_available(self):
+        response = self.client.get("/_ah/warmup")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, b"ok")
+
     def test_current_wheel_and_release_are_served_unchanged(self):
         latest = SimpleNamespace(pup_version=9, pup_contents=b"wheel bytes")
         query = QueryResult(result=latest)
