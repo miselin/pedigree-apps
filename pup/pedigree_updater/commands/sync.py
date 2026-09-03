@@ -49,6 +49,12 @@ def _valid_package_database(path):
             for field in required_fields
         ):
             return False
+        dependencies = package.get("dependencies", [])
+        if not isinstance(dependencies, list) or any(
+            not isinstance(dependency, str) or not dependency
+            for dependency in dependencies
+        ):
+            return False
         if key != "%s-%s" % (package["name"], package["architecture"]):
             return False
 

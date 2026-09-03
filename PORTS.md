@@ -55,6 +55,8 @@ PUP 1.2 installs its Python 3 client at `/usr/bin/pup`, its configuration at
 `/etc/pup/pup.conf`, and its local package database and cache under
 `/var/lib/pup`. The target client uses the Python standard library for HTTPS;
 its runtime closure explicitly includes Python 3 and the system trust bundle.
+Dependency-aware catalogs are resolved transitively in dependency-first order,
+while historical catalogs without that optional metadata remain readable.
 
 Mandoc 1.14.6 supplies the manual-page formatter, while man-db 2.13.1 owns
 `/usr/bin/man` and the manual-page database. The recipes avoid a file conflict
@@ -114,8 +116,10 @@ explicit.
 
 At the 2026-09-02 modernization snapshot:
 
-- All 247 unit tests invoked by `./runtests.sh` pass, and its Python syntax
+- All 258 unit tests invoked by `./runtests.sh` pass, and its Python syntax
   checks complete successfully.
+- All 28 focused PUP repository-service tests pass with the pinned App Engine
+  and Flask dependencies.
 - All 69 active recipes have exact versioned build roots, completion markers,
   and PUP archives that pass the full Docker artifact audit.
 - PUP, Mesa, binutils, GCC, mandoc, man-db, S-Lang, SDL2, APR, APR-util, and

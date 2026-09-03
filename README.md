@@ -136,13 +136,18 @@ from the legacy GCP project using an authenticated `gcloud` account:
 
 ```sh
 ./scripts/publish-packages.py zlib
+./scripts/publish-packages.py --all
 ```
 
-The direct build command exits before building if `UPLOAD_KEY` is not set;
-the helper obtains it without printing or copying it into a command line.
-The legacy PUP service does not store runtime dependency metadata, so the
-builder refuses the entire upload selection before registration if any
-selected package declares runtime dependencies.
+The helper audits the complete selection before retrieving the key, then
+publishes packages in runtime-dependency order. It requires the repository to
+advertise dependency-metadata support before requesting an upload URL and
+verifies each selected catalog record and downloaded archive after upload. A
+batch is not transactional: if a later package fails, packages already verified
+by the helper remain published.
+
+The direct build command exits before building if `UPLOAD_KEY` is not set. The
+helper obtains the key without printing it or copying it into a command line.
 
 ## Package definitions
 
@@ -164,16 +169,16 @@ builder checks this contract against staged executable scripts; documentation
 examples are not treated as installed commands.
 
 This baseline is an image-assembly invariant, not dependency information hidden
-inside a PUP archive. The legacy PUP format records none of the dependency
-metadata, so individual archives are not standalone root filesystems and
-publication remains unavailable for recipes with non-baseline runtime
-dependencies.
+inside a PUP archive. Individual PUP archives remain payload-only tar files;
+the repository catalog records each package's non-baseline runtime dependencies
+and the client installs that closure in dependency-first order.
 
 PUP 1.2 is also an active target port. It installs `/usr/bin/pup`, uses
 `/etc/pup/pup.conf`, stores its local database and package cache under
 `/var/lib/pup`, and declares Python 3 plus the system CA bundle as its runtime
-closure. Its client remains compatible with the legacy PUP v1 JSON database,
-SHA-1 catalog entries, tar archives, and multipart upload fields. Use
+closure. Its client accepts both dependency-aware and historical PUP v1 JSON
+databases, verifies the legacy SHA-1 catalog digest before extracting an
+archive, and detects missing or cyclic dependencies before installation. Use
 `run_pup.sh` to run the host copy in the builder image when working with the
 local repository by hand.
 

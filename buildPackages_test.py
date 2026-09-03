@@ -27,6 +27,13 @@ class BuildPackagesTest(unittest.TestCase):
         def version(self):
             return "1.0"
 
+    class RuntimePackage(buildsystem.Package):
+        def name(self):
+            return "runtime"
+
+        def version(self):
+            return "1.0"
+
     def test_wrapper_accepts_no_package_arguments(self):
         repository = os.path.dirname(__file__)
         with tempfile.TemporaryDirectory() as temporary:
@@ -148,10 +155,97 @@ class BuildPackagesTest(unittest.TestCase):
         build_all.assert_not_called()
         audit_packages.assert_called_once_with(ordered, build_env)
 
-    def test_upload_preflight_rejects_runtime_dependencies(self):
+    def test_upload_order_follows_runtime_dependencies(self):
         package = self.RuntimeDependentPackage(__file__)
-        packages = [(package.name(), package)]
-        self.assertFalse(buildPackages.upload_metadata_supported(packages))
+        runtime = self.RuntimePackage(__file__)
+        packages = [(package.name(), package), (runtime.name(), runtime)]
+
+        ordered = buildPackages.order_uploads(packages)
+
+        self.assertEqual([name for name, _ in ordered], ["runtime", "dependent"])
+
+    def test_upload_only_registers_in_runtime_dependency_order(self):
+        package = self.RuntimeDependentPackage(__file__)
+        runtime = self.RuntimePackage(__file__)
+        with tempfile.TemporaryDirectory() as temporary:
+            env = {
+                "OUTPUT_BASE": os.path.join(temporary, "output"),
+                "PACKMAN_REPO": os.path.join(temporary, "repo"),
+                "PACKMAN_TARGET_ARCH": "amd64",
+            }
+            os.makedirs(env["PACKMAN_REPO"])
+            for current in (package, runtime):
+                deploy_base = os.path.join(
+                    env["OUTPUT_BASE"], current.name(), current.version()
+                )
+                os.makedirs(os.path.join(deploy_base, "root"))
+                with open(os.path.join(deploy_base, ".complete"), "w"):
+                    pass
+                with open(
+                    os.path.join(
+                        env["PACKMAN_REPO"],
+                        "%s-%s-amd64.pup"
+                        % (current.name(), current.version()),
+                    ),
+                    "wb",
+                ):
+                    pass
+
+            uploaded = []
+            with mock.patch(
+                "buildPackages.steps.upload_package",
+                side_effect=lambda current, *unused: uploaded.append(
+                    current.name()
+                ),
+            ):
+                result = buildPackages.upload_all(
+                    [(package.name(), package), (runtime.name(), runtime)],
+                    env,
+                    "secret",
+                )
+
+        self.assertEqual(result, 0)
+        self.assertEqual(uploaded, ["runtime", "dependent"])
+
+    def test_upload_only_stops_on_first_registration_failure(self):
+        first = self.RuntimePackage(__file__)
+        second = self.UploadablePackage(__file__)
+        with tempfile.TemporaryDirectory() as temporary:
+            env = {
+                "OUTPUT_BASE": os.path.join(temporary, "output"),
+                "PACKMAN_REPO": os.path.join(temporary, "repo"),
+                "PACKMAN_TARGET_ARCH": "amd64",
+            }
+            os.makedirs(env["PACKMAN_REPO"])
+            for current in (first, second):
+                deploy_base = os.path.join(
+                    env["OUTPUT_BASE"], current.name(), current.version()
+                )
+                os.makedirs(os.path.join(deploy_base, "root"))
+                with open(os.path.join(deploy_base, ".complete"), "w"):
+                    pass
+                with open(
+                    os.path.join(
+                        env["PACKMAN_REPO"],
+                        "%s-%s-amd64.pup"
+                        % (current.name(), current.version()),
+                    ),
+                    "wb",
+                ):
+                    pass
+
+            with mock.patch(
+                "buildPackages.steps.upload_package",
+                side_effect=RuntimeError("verification failed"),
+            ) as upload:
+                result = buildPackages.upload_all(
+                    [(first.name(), first), (second.name(), second)],
+                    env,
+                    "secret",
+                )
+
+        self.assertEqual(result, 1)
+        self.assertEqual(upload.call_count, 1)
 
     def test_upload_only_requires_complete_artifacts(self):
         package = self.UploadablePackage(__file__)

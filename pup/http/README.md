@@ -47,3 +47,26 @@ gcloud app deploy app.yaml \
 
 Smoke-test the version-specific App Engine hostname before migrating traffic.
 The service continues to use the existing Datastore kinds and Blobstore data.
+
+The package upload callback accepts an optional `dependencies` form field
+containing a JSON array of package names. Dependencies are stored on `Package`
+entities and emitted in each `packages.pupdb` record. Existing entities need no
+Datastore migration: records without the property are served with an empty
+dependency list. Newly published versions carry dependency metadata; immutable
+historical versions remain unchanged.
+
+Deploy the service before using the dependency-aware uploader. The uploader can
+check `/capabilities.json` for `package_dependencies: 1` before sending any
+package bytes. Existing uploaders remain compatible because omitting the field
+means no dependencies for a new package and preserves metadata on an
+idempotent retry of an existing package.
+
+Published package versions are immutable. Re-uploading the same SHA-1 and
+dependency list is an idempotent success; attempting to change either for an
+existing name, version, and architecture returns HTTP 409 and retains the
+original blob. Publish corrected content under a new version.
+
+Catalog selection understands both current dotted versions and historical
+suffix forms. SQLite's old compact source versions are compared as grouped
+components, so `3090200` is treated as `3.9.2.0` rather than as version
+3,090,200.

@@ -449,12 +449,6 @@ def pup_package(package, deploydir, env, upload=False, upload_key=None):
     try:
         if upload:
             dependencies = package.install_deps()
-            if dependencies:
-                raise RuntimeError(
-                    "the legacy PUP service cannot record runtime dependencies; "
-                    "%s requires %s"
-                    % (package.name(), ", ".join(dependencies))
-                )
             if not upload_key:
                 raise RuntimeError("--upload requires UPLOAD_KEY")
             command_env["PUP_UPLOAD_KEY"] = upload_key
@@ -469,6 +463,7 @@ def pup_package(package, deploydir, env, upload=False, upload_key=None):
                     env["PACKMAN_TARGET_ARCH"],
                 )
             )
+            command.extend(dependencies)
         else:
             command.extend(
                 (

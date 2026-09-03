@@ -20,17 +20,24 @@ class InstallPackageCommandTest(unittest.TestCase):
             archive.addfile(member, io.BytesIO(contents))
         return output.getvalue(), contents
 
-    def configuration(self, temporary, digest, repositories):
+    @staticmethod
+    def package(name, digest, dependencies=None, architecture="amd64"):
+        package = {
+            "name": name,
+            "version": "1.2",
+            "architecture": architecture,
+            "sha1": digest,
+        }
+        if dependencies is not None:
+            package["dependencies"] = dependencies
+        return package
+
+    def configuration(self, temporary, digest, repositories, database=None):
+        if database is None:
+            database = {"example-amd64": self.package("example", digest)}
         return SimpleNamespace(
             architecture="amd64",
-            db={
-                "example-amd64": {
-                    "name": "example",
-                    "version": "1.2",
-                    "architecture": "amd64",
-                    "sha1": digest,
-                }
-            },
+            db=database,
             install_root=os.path.join(temporary, "root"),
             local_cache=os.path.join(temporary, "cache"),
             repo_urls=repositories,
@@ -152,6 +159,149 @@ class InstallPackageCommandTest(unittest.TestCase):
                 "rb",
             ) as installed:
                 self.assertEqual(installed.read(), installed_contents)
+
+    def test_dependencies_are_installed_first_once_in_stable_order(self):
+        valid_archive, _ = self.archive()
+        digest = hashlib.sha1(valid_archive).hexdigest()
+        database = {
+            "shared-amd64": self.package("shared", digest),
+            "middle-amd64": self.package("middle", digest, ["shared"]),
+            "first-amd64": self.package("first", digest, ["middle"]),
+            "second-amd64": self.package("second", digest, ["shared"]),
+        }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.configuration(
+                temporary,
+                digest,
+                ["https://repo.example"],
+                database,
+            )
+            os.makedirs(config.local_cache)
+
+            with (
+                mock.patch.object(
+                    install.pup_http,
+                    "copy_url",
+                    side_effect=lambda url, target: target.write(valid_archive),
+                ) as copy_url,
+                mock.patch("builtins.print"),
+            ):
+                result = install.InstallCommand().run(
+                    SimpleNamespace(
+                        package=["first", "second"], nodeps=False
+                    ),
+                    config,
+                )
+
+            self.assertIsNone(result)
+            self.assertEqual(
+                [call.args[0] for call in copy_url.call_args_list],
+                [
+                    "https://repo.example/shared-1.2-amd64.pup",
+                    "https://repo.example/middle-1.2-amd64.pup",
+                    "https://repo.example/first-1.2-amd64.pup",
+                    "https://repo.example/second-1.2-amd64.pup",
+                ],
+            )
+
+    def test_missing_same_architecture_dependency_fails_before_download(self):
+        valid_archive, _ = self.archive()
+        digest = hashlib.sha1(valid_archive).hexdigest()
+        database = {
+            "example-amd64": self.package("example", digest, ["library"]),
+            "library-arm64": self.package(
+                "library", digest, architecture="arm64"
+            ),
+        }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.configuration(
+                temporary,
+                digest,
+                ["https://repo.example"],
+                database,
+            )
+            os.makedirs(config.local_cache)
+
+            with (
+                mock.patch.object(install.pup_http, "copy_url") as copy_url,
+                mock.patch("builtins.print") as print_message,
+            ):
+                result = install.InstallCommand().run(self.arguments(), config)
+
+            self.assertEqual(result, 1)
+            copy_url.assert_not_called()
+            self.assertIn(
+                'The dependency "library" required by "example" is not '
+                'available for architecture "amd64".',
+                str(print_message.call_args.args[0]),
+            )
+
+    def test_dependency_cycle_fails_before_download(self):
+        valid_archive, _ = self.archive()
+        digest = hashlib.sha1(valid_archive).hexdigest()
+        database = {
+            "first-amd64": self.package("first", digest, ["second"]),
+            "second-amd64": self.package("second", digest, ["first"]),
+        }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.configuration(
+                temporary,
+                digest,
+                ["https://repo.example"],
+                database,
+            )
+            os.makedirs(config.local_cache)
+
+            with (
+                mock.patch.object(install.pup_http, "copy_url") as copy_url,
+                mock.patch("builtins.print") as print_message,
+            ):
+                result = install.InstallCommand().run(
+                    SimpleNamespace(package=["first"], nodeps=False), config
+                )
+
+            self.assertEqual(result, 1)
+            copy_url.assert_not_called()
+            self.assertEqual(
+                str(print_message.call_args.args[0]),
+                "Dependency cycle detected: first -> second -> first.",
+            )
+
+    def test_nodeps_keeps_legacy_root_only_install_behavior(self):
+        valid_archive, _ = self.archive()
+        digest = hashlib.sha1(valid_archive).hexdigest()
+        database = {
+            "example-amd64": self.package("example", digest, ["unavailable"]),
+        }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.configuration(
+                temporary,
+                digest,
+                ["https://repo.example"],
+                database,
+            )
+            os.makedirs(config.local_cache)
+
+            with (
+                mock.patch.object(
+                    install.pup_http,
+                    "copy_url",
+                    side_effect=lambda url, target: target.write(valid_archive),
+                ) as copy_url,
+                mock.patch("builtins.print"),
+            ):
+                result = install.InstallCommand().run(
+                    SimpleNamespace(package=["example"], nodeps=True), config
+                )
+
+            self.assertIsNone(result)
+            copy_url.assert_called_once_with(
+                "https://repo.example/example-1.2-amd64.pup", mock.ANY
+            )
 
 
 if __name__ == "__main__":

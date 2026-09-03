@@ -9,6 +9,7 @@ class Package(ndb.Model):
     architecture = ndb.StringProperty(indexed=True)
     version = ndb.StringProperty(indexed=False)
     sha1 = ndb.StringProperty(indexed=False)
+    dependencies = ndb.StringProperty(repeated=True, indexed=False)
     blob = ndb.BlobKeyProperty()
     uploaded_at = ndb.DateTimeProperty(auto_now=True, auto_now_add=True)
 

@@ -7,6 +7,10 @@ compilation and installation on Pedigree proper.
 The pup tool allows for package creation, registering of packages with
 repository databases, synchronisation of repository databases to the local host,
 and installation of packages based on the metadata in a repository database.
+Current catalogs may include an optional runtime dependency list. The client
+installs transitive dependencies first, rejects missing or cyclic dependency
+graphs before extraction, and remains compatible with historical catalogs that
+omit the field.
 
 Building
 --------
@@ -41,3 +45,13 @@ To publish the next serial, authenticate `gcloud` with access to the
 The script reads the legacy `upload` credential directly from Datastore using
 the active `gcloud` identity. It does not print or save the credential. For an
 environment without `gcloud`, provide it through `PUP_UPLOAD_KEY` instead.
+
+Normal package publication is handled from the repository root. The helper
+audits before loading credentials and verifies each uploaded catalog record and
+archive:
+
+    ./scripts/publish-packages.py zlib
+    ./scripts/publish-packages.py --all
+
+Deploy the dependency-aware service in `http/` before using this uploader; it
+refuses to mutate a repository that does not advertise the required capability.

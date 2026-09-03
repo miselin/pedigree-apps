@@ -20,24 +20,40 @@ LOGGING_FORMAT = (
 log = logging.getLogger(__name__)
 
 
-def upload_metadata_supported(packages):
-    supported = True
-    for name, package in packages:
-        dependencies = package.install_deps()
-        if not dependencies:
-            continue
-        log.error(
-            'cannot upload "%s": the legacy PUP service cannot record '
-            "runtime dependencies (%s)",
-            name,
-            ", ".join(dependencies),
-        )
-        supported = False
-    return supported
+def order_uploads(packages):
+    packages = list(packages)
+    selected = {name: package for name, package in packages}
+    result = []
+    permanent = set()
+    temporary = []
+
+    def visit(name):
+        if name in permanent:
+            return
+        if name in temporary:
+            cycle = temporary[temporary.index(name) :] + [name]
+            raise ValueError(
+                "runtime dependency cycle: %s" % " -> ".join(cycle)
+            )
+
+        temporary.append(name)
+        for dependency in selected[name].install_deps():
+            if dependency in selected:
+                visit(dependency)
+        temporary.pop()
+        permanent.add(name)
+        result.append((name, selected[name]))
+
+    for name, _ in packages:
+        visit(name)
+    return result
 
 
 def upload_all(packages, env, upload_key):
-    if not upload_metadata_supported(packages):
+    try:
+        packages = order_uploads(packages)
+    except ValueError as error:
+        log.error("cannot upload packages: %s", error)
         return 2
 
     artifacts = []

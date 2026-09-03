@@ -166,6 +166,33 @@ class SyncCommandTest(unittest.TestCase):
             with open(target, encoding="utf-8") as database_file:
                 self.assertEqual(json.load(database_file), old_database)
 
+    def test_dependency_metadata_is_optional_and_validated(self):
+        with tempfile.TemporaryDirectory() as cache:
+            database_path = os.path.join(cache, "packages.pupdb")
+
+            legacy_database = self.database()
+            self.write_database(database_path, legacy_database)
+            self.assertTrue(sync._valid_package_database(database_path))
+
+            database = self.database()
+            database["example-amd64"]["dependencies"] = [
+                "first",
+                "second",
+            ]
+            self.write_database(database_path, database)
+            self.assertTrue(sync._valid_package_database(database_path))
+
+            for dependencies in (
+                "first",
+                ["first", ""],
+                ["first", 2],
+                None,
+            ):
+                with self.subTest(dependencies=dependencies):
+                    database["example-amd64"]["dependencies"] = dependencies
+                    self.write_database(database_path, database)
+                    self.assertFalse(sync._valid_package_database(database_path))
+
 
 if __name__ == "__main__":
     unittest.main()

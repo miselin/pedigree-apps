@@ -176,7 +176,7 @@ class StepsTest(unittest.TestCase):
         self.assertNotIn("UPLOAD_KEY", command_env)
         self.assertEqual(command_env["PUP_UPLOAD_KEY"], "secret")
 
-    def test_rejected_upload_removes_temporary_config(self):
+    def test_upload_passes_dependencies_and_removes_temporary_config(self):
         package = mock.Mock()
         package.name.return_value = "dependent"
         package.version.return_value = "1.0"
@@ -189,14 +189,15 @@ class StepsTest(unittest.TestCase):
                 "PACKMAN_TARGET_ARCH": "amd64",
                 "BUILD_BASE": temporary,
             }
-            with self.assertRaisesRegex(RuntimeError, "runtime dependencies"):
-                steps.pup_package(
-                    package,
-                    "/tmp/root",
-                    env,
-                    upload=True,
-                    upload_key="secret",
-                )
+            steps.pup_package(
+                package,
+                "/tmp/root",
+                env,
+                upload=True,
+                upload_key="secret",
+            )
+            command = self.command.call_args.args[0]
+            self.assertEqual(command[-1], "runtime")
             self.assertEqual(
                 [name for name in os.listdir(temporary) if name.startswith("pup-")],
                 [],

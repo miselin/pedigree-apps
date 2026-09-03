@@ -33,6 +33,57 @@ from ..lib import http as pup_http
 log = logging.getLogger(__name__)
 
 
+class PackageResolutionError(Exception):
+    pass
+
+
+def _resolve_packages(package_names, database, architecture, include_dependencies):
+    """Build a stable, dependency-first installation plan."""
+    packages = []
+    states = {}
+    stack = []
+
+    def visit(package_name, required_by=None):
+        package_key = f"{package_name}-{architecture}"
+        package = database.get(package_key)
+        if package is None:
+            if required_by is None:
+                raise PackageResolutionError(
+                    f'The package "{package_name}" is not available. Try running '
+                    "`pup sync`?"
+                )
+            raise PackageResolutionError(
+                f'The dependency "{package_name}" required by "{required_by}" '
+                f'is not available for architecture "{architecture}". Try running '
+                "`pup sync`?"
+            )
+
+        state = states.get(package_key)
+        if state == "resolved":
+            return
+        if state == "resolving":
+            cycle_start = stack.index(package_key)
+            cycle = stack[cycle_start:] + [package_key]
+            cycle_names = [database[key]["name"] for key in cycle]
+            raise PackageResolutionError(
+                "Dependency cycle detected: {}.".format(" -> ".join(cycle_names))
+            )
+
+        states[package_key] = "resolving"
+        stack.append(package_key)
+        if include_dependencies:
+            for dependency in package.get("dependencies", []):
+                visit(dependency, package["name"])
+        stack.pop()
+        states[package_key] = "resolved"
+        packages.append(package)
+
+    for package_name in package_names:
+        visit(package_name)
+
+    return packages
+
+
 def _package_matches_sha1(path, expected):
     digest = hashlib.sha1()
     with open(path, "rb") as package:
@@ -93,21 +144,16 @@ class InstallCommand(base.PupCommand):
         if not os.path.isdir(config.install_root):
             os.makedirs(config.install_root)
 
-        # Do all the given packages exist?
-        packages = []
-        for package in args.package:
-            desired = f"{package}-{config.architecture}"
-
-            if desired not in config.db:
-                print(
-                    f'The package "{package}" is not available. Try running '
-                    " `pup sync`?"
-                )
-                return 1
-
-            # TODO(miselin): extract dependencies?
-
-            packages.append(config.db[desired])
+        try:
+            packages = _resolve_packages(
+                args.package,
+                config.db,
+                config.architecture,
+                include_dependencies=not args.nodeps,
+            )
+        except PackageResolutionError as error:
+            print(error)
+            return 1
 
         # OK, good to go.
         print(f"Installing {len(packages)} packages...")
