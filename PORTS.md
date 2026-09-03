@@ -145,6 +145,7 @@ At the 2026-09-02 modernization snapshot:
 - No target-runtime validation is claimed; the built binaries were not
   executed on Pedigree, and GCC was not run on target or used for a
   self-hosting rebuild.
-- Origin publication and verification are complete. The public KeyCDN edge
-  still serves the prior catalog, wheel, and version responses pending cache
-  purge or expiry.
+- Origin publication and verification are complete. The public repository now
+  serves immutable package archives from private Google Cloud Storage through
+  Cloud CDN; catalog, wheel, and control routes remain on App Engine. All 187
+  current and historical package objects were mirrored and verified.

@@ -17,10 +17,11 @@ boundary.
 At the 2026-09-02 snapshot, all 69 active ports have exact versioned build
 roots, completion markers, and PUP archives that pass the full Docker artifact
 audit. The audited set is published in the origin catalog with runtime
-dependency metadata. The public KeyCDN edge still serves the prior catalog,
-wheel, and version responses pending cache purge or expiry. This is cross-build,
-packaging, and origin-publication evidence; the binaries were not executed on
-Pedigree during this sweep.
+dependency metadata. The public repository now serves immutable package
+archives from private Google Cloud Storage through Cloud CDN, while catalog,
+wheel, and control routes remain on App Engine. This is cross-build, packaging,
+and publication evidence; the binaries were not executed on Pedigree during
+this sweep.
 
 The maintained build path is local Docker. It uses Pedigree's current amd64
 cross-toolchain and creates packages with the FHS layout used by the operating
@@ -152,12 +153,12 @@ by the helper remain published.
 The direct build command exits before building if `UPLOAD_KEY` is not set. The
 helper obtains the key without printing it or copying it into a command line.
 
-For the 2026-09-02 release, server version `pup-http-release-20260902` was
-promoted and Python 3 PUP wheel serial 10 was published and verified. All 69
+For the 2026-09-02 release, server version `pup-http-cdn-20260902` was promoted
+and Python 3 PUP wheel serial 10 was published and verified. All 69
 active package artifacts were audited and published with dependency metadata;
 an independent origin re-download verified every archive digest, covering
-351,615,019 bytes in total. The public KeyCDN edge still served the prior
-catalog, wheel, and version responses at the snapshot boundary.
+351,615,019 bytes in total. The Cloud CDN migration also mirrored and verified
+all 187 current and historical package objects, covering 1,481,147,119 bytes.
 
 ## Package definitions
 

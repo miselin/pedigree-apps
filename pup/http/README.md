@@ -87,3 +87,28 @@ Catalog selection understands both current dotted versions and historical
 suffix forms. SQLite's old compact source versions are compared as grouped
 components, so `3090200` is treated as `3.9.2.0` rather than as version
 3,090,200.
+
+## Public delivery
+
+`pup.pedigree-project.org` uses a global external Application Load Balancer.
+Root-level immutable `.pup` paths use the private
+`the-pedigree-project--pup` backend bucket with Cloud CDN. Catalog, wheel,
+dependency graph, upload, and site routes use the App Engine backend without
+CDN caching. HTTP redirects to HTTPS with status 308 so upload methods are
+preserved.
+
+Publishing continues to use `https://the-pedigree-project.appspot.com` as the
+upload and verification origin. Do not send uploads through the public CDN
+hostname. New package publication mirrors the archive to the bucket before it
+commits the catalog record.
+
+The public DNS records are:
+
+```text
+A     pup  8.233.83.102
+AAAA  pup  2600:1901:0:74da::
+```
+
+Keep the Certificate Manager DNS authorization CNAME in place for automatic
+certificate renewal. The immutable backend disables negative caching so a
+package URL requested before publication does not leave a sticky 404.
