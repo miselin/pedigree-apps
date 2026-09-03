@@ -116,14 +116,14 @@ explicit.
 
 At the 2026-09-02 modernization snapshot:
 
-- All 259 unit tests invoked by `./runtests.sh` pass, and its Python syntax
+- All 277 unit tests invoked by `./runtests.sh` pass, and its Python syntax
   checks complete successfully.
-- All 28 focused PUP repository-service tests pass with the pinned App Engine
+- All 38 focused PUP repository-service tests pass with the pinned App Engine
   and Flask dependencies.
 - All 69 active recipes have exact versioned build roots, completion markers,
   and PUP archives that pass the full Docker artifact audit. All 69 artifacts
   were published to the origin catalog with runtime dependency metadata.
-- Server version `pup-http-release-20260902` was promoted, and Python 3 PUP wheel
+- Server version `pup-http-cdn-20260902` was promoted, and Python 3 PUP wheel
   serial 10 was published and verified.
 - An independent origin re-download matched the digest of all 69 published
   archives, covering 351,615,019 bytes in total.
