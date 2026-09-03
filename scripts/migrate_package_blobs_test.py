@@ -198,6 +198,27 @@ class DownloadTest(unittest.TestCase):
                     artifact, "https://origin.example", Path(directory) / "payload", opener=opener
                 )
 
+    def test_stream_without_content_length_uses_final_size_and_digest(self):
+        contents = b"package"
+        artifact = migration.PackageArtifact(
+            "demo-1-amd64.pup",
+            hashlib.sha1(contents).hexdigest(),
+            "blob",
+            len(contents),
+        )
+        opener = lambda request, timeout: Response(contents)
+
+        with tempfile.TemporaryDirectory() as directory:
+            downloaded = migration.download_and_verify(
+                artifact,
+                "https://origin.example",
+                Path(directory) / "payload",
+                opener=opener,
+            )
+
+        self.assertEqual(downloaded.size, len(contents))
+        self.assertEqual(downloaded.sha1, artifact.sha1)
+
 
 class GcsClientTest(unittest.TestCase):
     def test_resumable_upload_is_create_only_and_resumes_after_transient_error(self):
@@ -386,6 +407,28 @@ class MigrationTest(unittest.TestCase):
         self.assertEqual(token, "secret-token")
         self.assertEqual(output.getvalue(), "")
         self.assertTrue(run.call_args.kwargs["capture_output"])
+
+    def test_gcs_token_can_use_a_bucket_limited_service_account(self):
+        with mock.patch.object(
+            migration.subprocess,
+            "run",
+            return_value=SimpleNamespace(stdout="secret-token\n"),
+        ) as run:
+            migration.active_gcloud_token(
+                "custom-gcloud",
+                "migration@example.iam.gserviceaccount.com",
+            )
+
+        self.assertEqual(
+            run.call_args.args[0],
+            [
+                "custom-gcloud",
+                "auth",
+                "print-access-token",
+                "--impersonate-service-account="
+                "migration@example.iam.gserviceaccount.com",
+            ],
+        )
 
     def test_main_requeries_manifest_after_migration(self):
         contents = b"package"

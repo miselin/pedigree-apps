@@ -77,11 +77,16 @@ class DatastoreManifest:
     blob_inventory: tuple
 
 
-def active_gcloud_token(gcloud="gcloud"):
+def active_gcloud_token(gcloud="gcloud", impersonate_service_account=None):
     """Return the active gcloud access token without exposing it to output."""
+    command = [gcloud, "auth", "print-access-token"]
+    if impersonate_service_account:
+        command.append(
+            "--impersonate-service-account=" + impersonate_service_account
+        )
     try:
         result = subprocess.run(
-            [gcloud, "auth", "print-access-token"],
+            command,
             check=True,
             capture_output=True,
             text=True,
@@ -374,17 +379,19 @@ def download_and_verify(
                         f"{_response_status(response)}"
                     )
                 length_header = response.headers.get("Content-Length")
-                try:
-                    content_length = int(length_header)
-                except (TypeError, ValueError) as error:
-                    raise MigrationError(
-                        f"{artifact.fullname}: origin omitted a valid Content-Length"
-                    ) from error
-                if content_length != artifact.size:
-                    raise MigrationError(
-                        f"{artifact.fullname}: Content-Length {content_length} does not "
-                        f"match __BlobInfo__ size {artifact.size}"
-                    )
+                if length_header is not None:
+                    try:
+                        content_length = int(length_header)
+                    except ValueError as error:
+                        raise MigrationError(
+                            f"{artifact.fullname}: origin returned an invalid "
+                            "Content-Length"
+                        ) from error
+                    if content_length != artifact.size:
+                        raise MigrationError(
+                            f"{artifact.fullname}: Content-Length {content_length} does "
+                            f"not match __BlobInfo__ size {artifact.size}"
+                        )
 
                 sha1 = hashlib.sha1(usedforsecurity=False)
                 md5 = hashlib.md5(usedforsecurity=False)
@@ -708,6 +715,10 @@ def parse_args(argv=None):
     parser.add_argument("--bucket", default=DEFAULT_BUCKET)
     parser.add_argument("--origin", default=DEFAULT_ORIGIN)
     parser.add_argument("--gcloud", default="gcloud")
+    parser.add_argument(
+        "--gcs-impersonate-service-account",
+        help="use a separate, bucket-limited service account for GCS access",
+    )
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument(
@@ -727,8 +738,14 @@ def main(argv=None):
     args = parse_args(argv)
     if not 1 <= args.workers <= 32:
         raise SystemExit("--workers must be between 1 and 32")
-    token = active_gcloud_token(args.gcloud)
-    datastore = DatastoreClient(args.project, token)
+    datastore_token = active_gcloud_token(args.gcloud)
+    gcs_token = datastore_token
+    if args.gcs_impersonate_service_account:
+        gcs_token = active_gcloud_token(
+            args.gcloud,
+            args.gcs_impersonate_service_account,
+        )
+    datastore = DatastoreClient(args.project, datastore_token)
     packages = datastore.query_all("Package")
     blobs = datastore.query_all("__BlobInfo__")
     initial_manifest = snapshot_manifest(packages, blobs)
@@ -736,7 +753,7 @@ def main(argv=None):
     print(
         f"Preflight found {len(manifest)} packages and {len(blobs)} BlobInfo entities."
     )
-    gcs = GcsClient(args.bucket, token)
+    gcs = GcsClient(args.bucket, gcs_token)
     results = migrate_all(
         manifest,
         args.origin,
