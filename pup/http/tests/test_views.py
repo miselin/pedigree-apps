@@ -152,6 +152,9 @@ class RouteTests(unittest.TestCase):
     def setUp(self):
         views.flask_app.config.update(TESTING=True)
         self.client = views.flask_app.test_client()
+        mirror_patcher = mock.patch.object(views, "mirror_package")
+        self.mirror_package = mirror_patcher.start()
+        self.addCleanup(mirror_patcher.stop)
 
     def test_catalog_contract(self):
         packages = [
@@ -302,6 +305,10 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["X-AppEngine-BlobKey"], "blob-key")
         self.assertEqual(response.content_type, "application/octet-stream")
+        self.assertEqual(
+            response.headers["Cache-Control"],
+            "public, max-age=31536000, immutable",
+        )
 
     def test_dependency_graph_route_wins_over_package_fallback(self):
         dependency = SimpleNamespace(deps_contents=b"<svg></svg>")
@@ -374,6 +381,12 @@ class RouteTests(unittest.TestCase):
             blob="new-blob-key",
         )
         created.put.assert_called_once_with()
+        self.mirror_package.assert_called_once_with(
+            uploaded,
+            "zlib-1.2.8-amd64.pup",
+            "digest",
+            verify_source=True,
+        )
 
     def test_package_upload_stores_dependency_order(self):
         uploaded = SimpleNamespace(key=lambda: "new-blob-key")
@@ -451,8 +464,75 @@ class RouteTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b"ok")
+        self.mirror_package.assert_called_once_with(
+            uploaded,
+            "example-1.0-amd64.pup",
+            "digest",
+            verify_source=False,
+        )
         get_blob.assert_called_once_with("new-blob-key")
         new_blob.delete.assert_called_once_with()
+
+    def test_mirror_failure_does_not_publish_catalog_record(self):
+        uploaded = SimpleNamespace(key=lambda: "new-blob-key")
+        uploaded_blob = mock.Mock()
+        package_model = mock.MagicMock()
+        package_model.query.return_value = QueryResult(result=None)
+        self.mirror_package.side_effect = RuntimeError("storage offline")
+
+        with (
+            mock.patch.object(views, "Package", package_model),
+            mock.patch.object(
+                views.blobstore.BlobstoreUploadHandler,
+                "get_uploads",
+                return_value=[uploaded],
+            ),
+            mock.patch.object(views.blobstore, "get", return_value=uploaded_blob),
+        ):
+            response = self.client.post(
+                "/blobstore",
+                data={
+                    "name": "example",
+                    "arch": "amd64",
+                    "vers": "1.0",
+                    "sha1": "digest",
+                },
+            )
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.data, b"Package storage is temporarily unavailable.")
+        package_model.assert_not_called()
+        uploaded_blob.delete.assert_called_once_with()
+
+    def test_digest_mismatch_is_rejected_before_catalog_publish(self):
+        uploaded = SimpleNamespace(key=lambda: "new-blob-key")
+        uploaded_blob = mock.Mock()
+        package_model = mock.MagicMock()
+        package_model.query.return_value = QueryResult(result=None)
+        self.mirror_package.side_effect = views.MirrorDigestMismatch("mismatch")
+
+        with (
+            mock.patch.object(views, "Package", package_model),
+            mock.patch.object(
+                views.blobstore.BlobstoreUploadHandler,
+                "get_uploads",
+                return_value=[uploaded],
+            ),
+            mock.patch.object(views.blobstore, "get", return_value=uploaded_blob),
+        ):
+            response = self.client.post(
+                "/blobstore",
+                data={
+                    "name": "example",
+                    "arch": "amd64",
+                    "vers": "1.0",
+                    "sha1": "digest",
+                },
+            )
+
+        self.assertEqual(response.status_code, 400)
+        package_model.assert_not_called()
+        uploaded_blob.delete.assert_called_once_with()
 
     def test_legacy_idempotent_upload_preserves_known_dependencies(self):
         uploaded = SimpleNamespace(key=lambda: "new-blob-key")

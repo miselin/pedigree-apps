@@ -66,6 +66,23 @@ dependency list is an idempotent success; attempting to change either for an
 existing name, version, and architecture returns HTTP 409 and retains the
 original blob. Publish corrected content under a new version.
 
+Accepted uploads keep Blobstore as the repository source and mirror package
+bytes to the bucket named by `PUP_PACKAGE_BUCKET` before publishing a new
+Datastore record. The mirror streams through a private staging name while
+checking the package SHA-1, then copies to the root-level package filename with
+create-only generation preconditions. The final object is
+`application/octet-stream` with a one-year immutable cache policy. An
+idempotent upload also repairs a missing mirror for an existing catalog record.
+If mirroring fails, the callback returns an error and does not publish a new
+catalog record.
+
+The App Engine service account needs object create and read access in the
+package bucket. Limit its object delete access to `.pup-incoming/`, which is the
+only prefix the service cleans up. Configure a short lifecycle rule for that
+prefix as a final guard if a request is interrupted after staging but before
+normal deletion. Final package objects are never overwritten or deleted by the
+service.
+
 Catalog selection understands both current dotted versions and historical
 suffix forms. SQLite's old compact source versions are compared as grouped
 components, so `3090200` is treated as `3.9.2.0` rather than as version

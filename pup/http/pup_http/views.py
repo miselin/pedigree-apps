@@ -9,6 +9,7 @@ from io import BytesIO
 from flask import Flask, Response, render_template, request
 from google.appengine.ext import blobstore
 
+from .gcs_mirror import MirrorConflict, MirrorDigestMismatch, mirror_package
 from .models import Authorisation, DepsModel, Package, PupModel
 
 flask_app = Flask(__name__, static_folder=None)
@@ -190,6 +191,30 @@ def delete_uploaded_blobs(uploads):
             flask_app.logger.exception("failed to delete rejected uploaded blob")
 
 
+def mirror_uploaded_package(upload, fullname, sha1, verify_source=True):
+    try:
+        mirror_package(
+            upload,
+            fullname,
+            sha1,
+            verify_source=verify_source,
+        )
+    except MirrorDigestMismatch:
+        delete_uploaded_blobs([upload])
+        return text_response("Uploaded package does not match its SHA-1.", status=400)
+    except MirrorConflict:
+        delete_uploaded_blobs([upload])
+        return text_response(
+            "Package version already exists with different contents.",
+            status=409,
+        )
+    except Exception:
+        flask_app.logger.exception("failed to mirror uploaded package")
+        delete_uploaded_blobs([upload])
+        return text_response("Package storage is temporarily unavailable.", status=503)
+    return None
+
+
 @flask_app.get("/")
 @flask_app.get("/index.<extension>")
 def index(extension=None):
@@ -249,6 +274,7 @@ def download_package(requested_package):
         blob_info,
     )
     headers["Content-Type"] = "application/octet-stream"
+    headers["Cache-Control"] = "public, max-age=31536000, immutable"
     return "", headers
 
 
@@ -294,14 +320,26 @@ def package_upload_blobstore():
         uploaded_dependencies = (
             known_dependencies if dependencies is None else dependencies
         )
-        delete_uploaded_blobs(uploads)
         if known_package.sha1 == sha1 and known_dependencies == uploaded_dependencies:
+            mirror_error = mirror_uploaded_package(
+                uploads[0],
+                fullname,
+                sha1,
+                verify_source=False,
+            )
+            if mirror_error:
+                return mirror_error
+            delete_uploaded_blobs(uploads)
             return text_response("ok")
+        delete_uploaded_blobs(uploads)
         return text_response(
             "Package version already exists with different contents or metadata.",
             status=409,
         )
     else:
+        mirror_error = mirror_uploaded_package(uploads[0], fullname, sha1)
+        if mirror_error:
+            return mirror_error
         Package(
             fullname=fullname,
             package_name=name,
