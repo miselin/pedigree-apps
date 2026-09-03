@@ -173,6 +173,8 @@ class RouteTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
+        self.assertEqual(response.headers["Cache-Control"], "no-store")
+        self.assertEqual(response.headers["Expires"], "0")
         self.assertEqual(
             json.loads(response.data),
             {
@@ -267,12 +269,20 @@ class RouteTests(unittest.TestCase):
         query = QueryResult(result=latest)
         with mock.patch.object(views.PupModel, "query", return_value=query):
             version_response = self.client.get("/pup-version")
+            version_head = self.client.head("/pup-version")
             wheel_response = self.client.get("/pup.whl")
 
         self.assertEqual(version_response.data, b"9")
         self.assertEqual(version_response.content_type, "text/plain")
+        self.assertEqual(version_response.headers["Cache-Control"], "no-store")
+        self.assertEqual(version_response.headers["Expires"], "0")
+        self.assertEqual(version_head.status_code, 200)
+        self.assertEqual(version_head.data, b"")
+        self.assertEqual(version_head.headers["Cache-Control"], "no-store")
         self.assertEqual(wheel_response.data, b"wheel bytes")
         self.assertEqual(wheel_response.content_type, "application/octet-stream")
+        self.assertEqual(wheel_response.headers["Cache-Control"], "no-store")
+        self.assertEqual(wheel_response.headers["Expires"], "0")
 
     def test_package_download_uses_blobstore_response_header(self):
         stored_package = SimpleNamespace(blob="blob-key")

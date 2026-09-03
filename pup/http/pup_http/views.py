@@ -105,6 +105,13 @@ def text_response(body, status=200, content_type="text/plain"):
     return Response(body, status=status, content_type=content_type)
 
 
+def mutable_response(body, content_type="text/plain"):
+    response = text_response(body, content_type=content_type)
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Expires"] = "0"
+    return response
+
+
 def request_is_authorised():
     credential_name = request.values.get("key")
     credential_value = request.values.get("key_value")
@@ -211,7 +218,7 @@ def package_database():
             "dependencies": package_dependencies(package),
         }
 
-    return text_response(json.dumps(result), content_type="application/json")
+    return mutable_response(json.dumps(result), content_type="application/json")
 
 
 @flask_app.get("/capabilities.json")
@@ -311,13 +318,13 @@ def package_upload_blobstore():
 @flask_app.route("/pup.whl", methods=["GET", "POST"])
 @flask_app.route("/pup-version", methods=["GET", "POST"])
 def pup():
-    if request.method == "GET":
+    if request.method in ("GET", "HEAD"):
         latest_pup = PupModel.query().order(-PupModel.pup_version).get()
         if not latest_pup:
             return text_response("pup is not present", status=404)
         if request.path == "/pup-version":
-            return text_response(str(latest_pup.pup_version))
-        return text_response(
+            return mutable_response(str(latest_pup.pup_version))
+        return mutable_response(
             latest_pup.pup_contents,
             content_type="application/octet-stream",
         )
