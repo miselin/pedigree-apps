@@ -150,6 +150,23 @@ class StepsTest(unittest.TestCase):
             ["pup", "--key", "<redacted>"],
         )
 
+    def test_package_uploads_verify_against_uncached_origin(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            env = {
+                "BUILD_BASE": temporary,
+                "PACKMAN_CONFIG": os.path.join(temporary, "pup.conf"),
+                "PACKMAN_REPO": os.path.join(temporary, "repo"),
+                "PACKMAN_TARGET_ARCH": "amd64",
+            }
+            steps.prepare_package_manager(env)
+            with open(env["PACKMAN_CONFIG"], encoding="utf-8") as config:
+                contents = config.read()
+
+        self.assertIn("server=https://pup.pedigree-project.org", contents)
+        self.assertIn(
+            "upload=https://the-pedigree-project.appspot.com", contents
+        )
+
     def test_upload_key_is_passed_outside_command_line(self):
         package = mock.Mock()
         package.name.return_value = "example"

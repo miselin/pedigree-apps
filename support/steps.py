@@ -428,7 +428,7 @@ arch=%(PACKMAN_TARGET_ARCH)s
 
 [remotes]
 server=https://pup.pedigree-project.org
-upload=https://pup.pedigree-project.org
+upload=https://the-pedigree-project.appspot.com
 """
             % env
         )
