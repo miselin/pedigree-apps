@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "source": "../../.build/language-ports/v8/abseil-qualify",
+      "destination": "/usr/bin/v8-abseil-qualify",
+      "mode": "0755"
+    }
+  ],
+  "cases": [
+    {
+      "name": "v8-abseil",
+      "command": "/usr/bin/v8-abseil-qualify",
+      "markers": ["V8-ABSEIL: PASS clocks notifications mutex threads"]
+    }
+  ]
+}

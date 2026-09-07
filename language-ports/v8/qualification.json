@@ -1,0 +1,107 @@
+{
+  "date": "2026-09-07",
+  "version": "13.6.233.17",
+  "kernel_commit": "6cb21345c075b9a66eb55863b874afcbd8b0abfc",
+  "iso_sha256": "ff36e9f334ef026d637f0455c2da638b7c62c9902cb4c4a9e4a0661c2b7103dd",
+  "source_disk_sha256": "51452cb278dfb7400dbc0fc873f8cc5961783ed44279b43c2f240b0fb857829d",
+  "archive_sha256": "8836a8b15e7c9fdec9be8103d572548a32edbca92ae702ea3efded825f3922d7",
+  "probe_sha256": "2cb27cae8482adc5175b6e5fa8aae64d84825387e9eaebef3ce7b9d1b6684d4f",
+  "pup_sha256": "0f054e456dc6bf9dc5029d0d0c1be52673c301ed0f00a837c834ed1b040d76c1",
+  "gyp_include_sha256": "c3aa561fc4044e1df97ba9968544b5bda181b798dc84dcfa6088fe71b7d99bcc",
+  "clock_patch_sha256": "2c04429fe2eb345516b8b23fddfbf54e6f1ddc716f108a0f4104d5eb0d2a4f8e",
+  "guest_runs": [
+    {
+      "directory": ".build/language-ports/v8/abseil-1cpu",
+      "cpus": 1,
+      "memory_mib": 2048,
+      "cases": [
+        "v8-abseil"
+      ],
+      "payload_sha256": "72c04f6ebc705322380b4a8974770d547575a7f3976efe3cf800532aca969008",
+      "serial_sha256": "814b8e7b1b4f38ea166d1fe6e25e60a73bad1a0e59d7c1021545a5e6e58f51ae",
+      "status": "pass",
+      "reason": "all case statuses and markers verified",
+      "elapsed_seconds": 31.21,
+      "qemu_exit_status": 0
+    },
+    {
+      "directory": ".build/language-ports/v8/abseil-4cpu",
+      "cpus": 4,
+      "memory_mib": 2048,
+      "cases": [
+        "v8-abseil"
+      ],
+      "payload_sha256": "72c04f6ebc705322380b4a8974770d547575a7f3976efe3cf800532aca969008",
+      "serial_sha256": "c1043d0984496b2bae2082e811de8d23d5602768683296e8183462116d64b5a0",
+      "status": "pass",
+      "reason": "all case statuses and markers verified",
+      "elapsed_seconds": 31.99,
+      "qemu_exit_status": 0
+    },
+    {
+      "directory": ".build/language-ports/v8/qemu-1cpu-final",
+      "cpus": 1,
+      "memory_mib": 2048,
+      "cases": [
+        "v8-jitless",
+        "v8-jit",
+        "v8-jit-default"
+      ],
+      "payload_sha256": "2cb27cae8482adc5175b6e5fa8aae64d84825387e9eaebef3ce7b9d1b6684d4f",
+      "serial_sha256": "c8a75ad6b54942bb6cfc8af5c594ee2ca45846cb0c2bc0440af3612db267b8c6",
+      "status": "pass",
+      "reason": "all case statuses and markers verified",
+      "elapsed_seconds": 96.64,
+      "qemu_exit_status": 0
+    },
+    {
+      "directory": ".build/language-ports/v8/qemu-4cpu-final",
+      "cpus": 4,
+      "memory_mib": 2048,
+      "cases": [
+        "v8-jitless",
+        "v8-jit",
+        "v8-jit-default"
+      ],
+      "payload_sha256": "2cb27cae8482adc5175b6e5fa8aae64d84825387e9eaebef3ce7b9d1b6684d4f",
+      "serial_sha256": "ec4ae6888072639d5d95559385205dd2e622be638baab82dd2e637e6af72d7b8",
+      "status": "pass",
+      "reason": "all case statuses and markers verified",
+      "elapsed_seconds": 115.91,
+      "qemu_exit_status": 0
+    }
+  ],
+  "artifact_audit": {
+    "status": "pass",
+    "log": ".build/v8-audit-final.log"
+  },
+  "linux_reference": {
+    "status": "pass",
+    "log": ".build/language-ports/v8/linux-reference-final.log"
+  },
+  "repository_tests": {
+    "status": "pass",
+    "count": 291,
+    "log": ".build/v8-publication/commit-tests.log",
+    "scope": "isolated staged V8 commit tree"
+  },
+  "scope": "Serial guest execution of cross-built probes; PUP payload audited, guest PUP installation and native compilation not exercised.",
+  "publication": {
+    "verified_at": "2026-09-07T20:32:46.430162+00:00",
+    "repository": "https://pup.pedigree-project.org/",
+    "archive_url": "https://pup.pedigree-project.org/v8-13.6.233.17-amd64.pup",
+    "catalog": {
+      "architecture": "amd64",
+      "version": "13.6.233.17",
+      "name": "v8",
+      "sha1": "8f25ca8d6e1ea7a9e501a68032f554f96b30088a",
+      "dependencies": []
+    },
+    "http_status": 200,
+    "bytes": 40929183,
+    "sha1": "8f25ca8d6e1ea7a9e501a68032f554f96b30088a",
+    "sha256": "0f054e456dc6bf9dc5029d0d0c1be52673c301ed0f00a837c834ed1b040d76c1",
+    "upload_log": ".build/v8-publication/publish.log",
+    "public_verification_log": ".build/v8-publication/public-verification.log"
+  }
+}

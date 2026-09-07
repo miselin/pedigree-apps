@@ -1,0 +1,26 @@
+{
+  "files": [
+    {
+      "source": "../../.build/language-ports/v8/v8-qualify",
+      "destination": "/usr/bin/v8-qualify",
+      "mode": "0755"
+    }
+  ],
+  "cases": [
+    {
+      "name": "v8-jitless",
+      "command": "/usr/bin/v8-qualify jitless",
+      "markers": ["V8-QUALIFY: PASS jitless (2 isolates)"]
+    },
+    {
+      "name": "v8-jit",
+      "command": "/usr/bin/v8-qualify jit",
+      "markers": ["V8-QUALIFY: PASS jit (2 isolates)"]
+    },
+    {
+      "name": "v8-jit-default",
+      "command": "/usr/bin/v8-qualify jit-default",
+      "markers": ["V8-QUALIFY: PASS jit-default (2 isolates)"]
+    }
+  ]
+}

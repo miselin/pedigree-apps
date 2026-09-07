@@ -1,0 +1,11 @@
+{
+  "version": "13.6.233.17",
+  "source": {
+    "url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0.tar.xz",
+    "sha256": "2732fc3f588dd335cd6779c06864f7cd424bb1b5ff9a1743059a66c54f9ca4a1"
+  },
+  "linux_headers": {
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/linux-headers-6.6-r1.apk",
+    "sha256": "775cfa57ca5475d6dd87527a9889f6934e1dda11331060b7aee761d54a7c9949"
+  }
+}

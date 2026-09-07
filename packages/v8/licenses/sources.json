@@ -1,0 +1,8 @@
+{
+  "musl-1.2.6-COPYRIGHT.txt": {
+    "url": "https://musl.libc.org/releases/musl-1.2.6.tar.gz",
+    "member": "musl-1.2.6/COPYRIGHT",
+    "archive_sha256": "d585fd3b613c66151fc3249e8ed44f77020cb5e6c1e635a616d3f9f82460512a",
+    "sha256": "b870108ec5e7790e9f9919064f1b9421d62d5f9b0e6c230c6adf7ea2da62e97b"
+  }
+}

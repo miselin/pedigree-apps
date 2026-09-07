@@ -9,7 +9,7 @@
 This repository contains application ports and the Pedigree UPdater (`pup`)
 package tooling for [Pedigree](https://www.pedigree-project.org/).
 
-The modernization catalog currently contains 73 active ports and 15 explicit
+The modernization catalog currently contains 74 active ports and 15 explicit
 disabled or deferred entries. See [`PORTS.md`](PORTS.md) for the complete
 version list, compatibility ceilings, deferrals, and the current verification
 boundary.
@@ -19,6 +19,12 @@ qualification, including a source-built ripgrep 15.2.0 port. See
 [`docs/language-ports.md`](docs/language-ports.md) for build commands, tested
 capabilities, and the separate native compiler milestones. Go, Rust, and
 ripgrep have audited PUP packages; native compiler builds remain experimental.
+
+V8 13.6.233.17 has a standalone embedding port with C++ headers, a static
+library, and an embedding example. Interpreter and baseline JIT profiles pass
+in QEMU on one and four CPUs, and its PUP passes the artifact audit. See
+[`docs/v8.md`](docs/v8.md) for build commands, the smaller Abseil test, and
+qualification limits. Node.js is a separate follow-up.
 
 Codex App Server snapshot 0.0.0.20260907 has an audited PUP and passes the
 one-CPU QEMU stdio RPC suite. SMP execution and authenticated agent sessions

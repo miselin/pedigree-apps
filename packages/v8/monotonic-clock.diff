@@ -1,0 +1,14 @@
+--- a/deps/v8/third_party/abseil-cpp/absl/base/internal/sysinfo.cc
++++ b/deps/v8/third_party/abseil-cpp/absl/base/internal/sysinfo.cc
+@@ -240,6 +240,11 @@
+   struct timespec t;
+ #ifdef CLOCK_MONOTONIC_RAW
+   int rc = clock_gettime(CLOCK_MONOTONIC_RAW, &t);
++  // Pedigree's musl headers expose RAW before the kernel implements it.
++  // The POSIX monotonic clock also supplies elapsed time for TSC calibration.
++  if (rc != 0 && errno == EINVAL) {
++    rc = clock_gettime(CLOCK_MONOTONIC, &t);
++  }
+ #else
+   int rc = clock_gettime(CLOCK_MONOTONIC, &t);
+ #endif
