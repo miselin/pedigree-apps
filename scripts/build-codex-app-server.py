@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cross-build the pinned Codex App Server with the Pedigree Linux-musl ABI."""
+"""Cross-build pinned Codex executables with the Pedigree Linux-musl ABI."""
 
 import argparse
 import importlib.util
@@ -24,22 +24,26 @@ rust = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rust)
 
 
-def source_tree(cache, offline):
+def source_tree(cache, offline, component="app-server"):
     archive = rust.fetch(SOURCE, "codex-" + REVISION + ".tar.gz", cache, offline)
-    source = cache / "source" / ("codex-" + REVISION)
+    patches = [PATCH]
+    if component == "cli":
+        patches.append(ROOT / "packages/codex-cli/patches/pedigree.diff")
+    source = cache / ("source-cli" if component == "cli" else "source") / ("codex-" + REVISION)
     marker = source / ".pedigree-patch-sha256"
-    patch_hash = rust.digest(PATCH)
+    patch_hash = "\n".join(rust.digest(patch) for patch in patches)
     if not marker.is_file() or marker.read_text().strip() != patch_hash:
         shutil.rmtree(source, ignore_errors=True)
         source.parent.mkdir(parents=True, exist_ok=True)
         with tarfile.open(archive) as bundle:
             bundle.extractall(source.parent, filter="data")
-        subprocess.run(["patch", "-p1", "-i", str(PATCH)], cwd=source, check=True)
+        for patch in patches:
+            subprocess.run(["patch", "--batch", "--fuzz=0", "-p1", "-i", str(patch)], cwd=source, check=True)
         marker.write_text(patch_hash + "\n")
     return source
 
 
-def build(cache, output, source, offline, jobs):
+def build(cache, output, source, offline, jobs, component="app-server"):
     if rust.host_target() != "x86_64-unknown-linux-gnu":
         raise RuntimeError("build this port in the linux/amd64 Docker builder")
     prefix = rust.provision(cache / "toolchain", offline, PINS)
@@ -56,7 +60,9 @@ def build(cache, output, source, offline, jobs):
         if not (headers / "usr/include/linux/random.h").is_file():
             raise RuntimeError("Linux UAPI archive is missing random.h")
         headers_marker.write_text(UAPI["sha256"] + "\n")
-    source = source_tree(cache, offline) if source is None else source
+    source = source_tree(cache, offline, component) if source is None else source
+    package = "codex-cli" if component == "cli" else "codex-app-server"
+    executable = "codex" if component == "cli" else "codex-app-server"
     workspace = source / "codex-rs"
     env = rust.environment(prefix, cache)
     env["GIT_CEILING_DIRECTORIES"] = str(source.parent)
@@ -115,26 +121,26 @@ def build(cache, output, source, offline, jobs):
     subprocess.run([cargo, "--config", str(vendor_config), "--config",
                     "source.vendored-sources.directory=" + json.dumps(str(vendor)),
                     "build", "--offline", "--locked",
-                    "--release", "--target", rust.TARGET, "-p", "codex-app-server",
-                    "--bin", "codex-app-server", "--no-default-features", "--features", "pedigree"],
+                    "--release", "--target", rust.TARGET, "-p", package,
+                    "--bin", executable, "--no-default-features", "--features", "pedigree"],
                    cwd=workspace, env=env, check=True)
     stage = output / "root"
     shutil.rmtree(stage, ignore_errors=True)
-    binary = stage / "usr/libexec/codex-app-server"
+    binary = stage / "usr/libexec" / executable
     binary.parent.mkdir(parents=True)
-    shutil.copy2(cache / "target" / rust.TARGET / "release/codex-app-server", binary)
-    launcher = stage / "usr/bin/codex-app-server"
+    shutil.copy2(cache / "target" / rust.TARGET / "release" / executable, binary)
+    launcher = stage / "usr/bin" / executable
     launcher.parent.mkdir(parents=True)
-    launcher.write_text('#!/bin/sh\nexec /usr/libexec/codex-app-server "$@"\n')
+    launcher.write_text('#!/bin/sh\nexec /usr/libexec/' + executable + ' "$@"\n')
     launcher.chmod(0o755)
-    defaults = stage / "usr/share/codex-app-server/defaults.toml"
+    defaults = stage / "usr/share" / package / "defaults.toml"
     defaults.parent.mkdir(parents=True)
     shutil.copy2(workspace / "config/defaults.toml", defaults)
-    docs = stage / "usr/share/doc/codex-app-server"
+    docs = stage / "usr/share/doc" / package
     docs.mkdir(parents=True)
     for name in ("LICENSE", "NOTICE"):
         shutil.copy2(source / name, docs / name)
-    shutil.copy2(ROOT / "packages/codex-app-server/README.md", docs / "PEDIGREE.md")
+    shutil.copy2(ROOT / "packages" / package / "README.md", docs / "PEDIGREE.md")
     shutil.copy2(workspace / "Cargo.lock", docs / "Cargo.lock")
     shutil.copytree(ROOT / "language-ports/codex-app-server/licenses",
                     docs / "dependencies/gcc-runtime-15.3.0")
@@ -174,8 +180,11 @@ def build(cache, output, source, offline, jobs):
         "c_compiler": subprocess.check_output([env["CC_x86_64_unknown_linux_musl"], "--version"], text=True).splitlines()[0],
         "release_profile": {"debug": 0, "lto": False, "strip": "symbols", "codegen_units": 16},
     }
+    if component == "cli":
+        provenance["component"] = "cli"
+        provenance["cli_patch_sha256"] = rust.digest(ROOT / "packages/codex-cli/patches/pedigree.diff")
     (docs / "build.json").write_text(json.dumps(provenance, indent=2) + "\n")
-    print("Codex App Server package root: " + str(stage), flush=True)
+    print(package + " package root: " + str(stage), flush=True)
 
 
 def state_probe(cache, output):
@@ -222,21 +231,27 @@ def state_probe(cache, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["build", "state-probe"])
+    parser.add_argument("--component", choices=["app-server", "cli"], default="app-server")
     parser.add_argument("--source", type=Path, help="already patched pinned Codex source root")
-    parser.add_argument("--output", type=Path, default=ROOT / ".build/codex-app-server/artifacts")
+    parser.add_argument("--output", type=Path)
     parser.add_argument("--cache", type=Path, default=ROOT / ".build/codex-app-server")
     parser.add_argument("--offline", action="store_true")
-    parser.add_argument("--jobs", type=int, default=4)
+    parser.add_argument("--jobs", type=int, help="compiler jobs (CLI: 1, App Server: 4)")
     args = parser.parse_args()
+    if args.jobs is None:
+        args.jobs = 1 if args.component == "cli" else 4
     if args.jobs < 1:
         parser.error("--jobs must be positive")
+    if args.action == "state-probe" and args.component != "app-server":
+        parser.error("state-probe supports only --component app-server")
+    output = args.output or ROOT / ".build" / ("codex-cli" if args.component == "cli" else "codex-app-server") / "artifacts"
     cache = args.cache.resolve()
     if args.action == "state-probe":
-        state_probe(cache, args.output.resolve())
+        state_probe(cache, output.resolve())
     else:
         cache.mkdir(parents=True, exist_ok=True)
-        build(cache, args.output.resolve(), args.source.resolve() if args.source else None,
-              args.offline, args.jobs)
+        build(cache, output.resolve(), args.source.resolve() if args.source else None,
+              args.offline, args.jobs, args.component)
 
 
 if __name__ == "__main__":

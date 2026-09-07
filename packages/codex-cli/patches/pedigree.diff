@@ -1,0 +1,80 @@
+--- a/codex-rs/Cargo.toml
++++ b/codex-rs/Cargo.toml
+@@ -169,7 +169,7 @@
+ codex-api = { path = "codex-api" }
+ codex-attachment-store = { path = "attachment-store" }
+ codex-aws-auth = { path = "aws-auth" }
+-codex-app-server = { path = "app-server" }
++codex-app-server = { path = "app-server", default-features = false }
+ codex-app-server-transport = { path = "app-server-transport" }
+ codex-app-server-daemon = { path = "app-server-daemon" }
+ codex-app-server-client = { path = "app-server-client" }
+--- a/codex-rs/cli/Cargo.toml
++++ b/codex-rs/cli/Cargo.toml
+@@ -21,6 +21,11 @@
+ 
+ [lints]
+ workspace = true
++
++[features]
++default = ["jemalloc"]
++jemalloc = ["dep:tikv-jemallocator", "codex-app-server/jemalloc"]
++pedigree = ["codex-arg0/pedigree", "codex-app-server/pedigree", "crossterm/libc"]
+ 
+ [dependencies]
+ anyhow = { workspace = true }
+@@ -102,7 +107,7 @@
+ which = { workspace = true }
+ 
+ [target.'cfg(all(target_os = "linux", target_env = "musl", any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
+-tikv-jemallocator = { workspace = true }
++tikv-jemallocator = { workspace = true, optional = true }
+ 
+ [target.'cfg(target_os = "windows")'.dependencies]
+ codex_windows_sandbox = { package = "codex-windows-sandbox", path = "../windows-sandbox-rs" }
+--- a/codex-rs/cli/src/main.rs
++++ b/codex-rs/cli/src/main.rs
+@@ -1,3 +1,5 @@
++#![recursion_limit = "256"]
++
+ use clap::Args;
+ use clap::CommandFactory;
+ use clap::Parser;
+@@ -47,6 +49,7 @@
+ use supports_color::Stream;
+ 
+ #[cfg(all(
++    feature = "jemalloc",
+     target_os = "linux",
+     target_env = "musl",
+     any(target_arch = "x86_64", target_arch = "aarch64")
+--- a/codex-rs/tui/src/lib.rs
++++ b/codex-rs/tui/src/lib.rs
+@@ -1,6 +1,7 @@
+ // Forbid accidental stdout/stderr writes in the *library* portion of the TUI.
+ // The standalone `codex-tui` binary prints a short help message before the
+ // alternate‑screen mode starts; that file opts‑out locally via `allow`.
++#![recursion_limit = "256"]
+ #![deny(clippy::print_stdout, clippy::print_stderr)]
+ #![deny(clippy::disallowed_methods)]
+ use crate::legacy_core::config::Config;
+--- a/codex-rs/exec/src/lib.rs
++++ b/codex-rs/exec/src/lib.rs
+@@ -2,6 +2,7 @@
+ //   stdout is the final message (if any).
+ // - In --json mode, stdout must be valid JSONL, one event per line.
+ // For both modes, any other output must be written to stderr.
++#![recursion_limit = "256"]
+ #![deny(clippy::print_stdout)]
+ 
+ mod cli;
+--- a/codex-rs/Cargo.lock
++++ b/codex-rs/Cargo.lock
+@@ -5599,6 +5599,7 @@
+  "derive_more 2.1.1",
+  "document-features",
+  "futures-core",
++ "libc",
+  "mio",
+  "parking_lot",
+  "rustix 1.1.4",

@@ -82,6 +82,11 @@ Pedigree's current UTS-only `unshare`. Bubblewrap is not included in this PUP.
 Sandbox helpers also use `/proc/self/exe`, which kernel commit `37ca72cd7`
 provides. The port retains upstream sandbox policy.
 
+On kernel `6cb21345c`, PTY-backed command execution also needs `TIOCSPTLCK`,
+which is not implemented. Codex's PTY creation paths reach musl `openpty()`
+and fail on that ioctl, without automatically falling back to pipes. Explicit
+`tty=false` commands use a separate pipe path that remains unqualified.
+
 ## Qualification
 
 Build the guest protocol probe with the Pedigree SDK:

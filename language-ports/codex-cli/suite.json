@@ -1,0 +1,32 @@
+{
+  "trees": [
+    {"source": "../../newpacks/x86_64/ncurses/6.6/root", "destination": "/"},
+    {"source": "../../newpacks/x86_64/readline/8.3.3/root", "destination": "/"},
+    {"source": "../../newpacks/x86_64/bash/5.3.15/root", "destination": "/"},
+    {"source": "../../newpacks/x86_64/ca-certificates/2026.08.13/root", "destination": "/"},
+    {"source": "../../newpacks/x86_64/codex-cli/0.0.0.20260907/root", "destination": "/"}
+  ],
+  "files": [
+    {"source": "../../.build/codex-cli/artifacts/codex-cli-qualify", "destination": "/usr/bin/codex-cli-qualify", "mode": "0755"},
+    {"source": "../../.build/codex-app-server/artifacts/codex-app-server-qualify", "destination": "/usr/bin/codex-app-server-qualify", "mode": "0755"},
+    {"source": "app-server.sh", "destination": "/usr/libexec/codex-cli-app-server", "mode": "0755"}
+  ],
+  "cases": [
+    {"name": "codex-cli-version", "command": "/usr/bin/codex-cli-qualify version", "markers": ["CODEX-CLI: PASS version"]},
+    {"name": "codex-cli-help", "command": "/usr/bin/codex-cli-qualify help", "markers": ["CODEX-CLI: PASS help"]},
+    {"name": "codex-cli-login-status", "command": "/usr/bin/codex-cli-qualify login-status", "markers": ["CODEX-CLI: PASS login-status"]},
+    {
+      "name": "codex-cli-embedded-app-server",
+      "command": "CODEX_APP_SERVER_QUALIFY_TIMEOUT_MS=1200000 /usr/bin/codex-app-server-qualify /usr/libexec/codex-cli-app-server",
+      "markers": [
+        "CODEX-APP-SERVER: PASS initialize",
+        "CODEX-APP-SERVER: PASS account-read",
+        "CODEX-APP-SERVER: PASS config-read",
+        "CODEX-APP-SERVER: PASS thread-list",
+        "CODEX-APP-SERVER: PASS fs-read-file",
+        "CODEX-APP-SERVER: PASS all (5 checks)"
+      ]
+    },
+    {"name": "codex-cli-pty-onboarding", "command": "CODEX_CLI_QUALIFY_TIMEOUT_MS=1200000 /usr/bin/codex-cli-qualify pty-onboarding", "markers": ["CODEX-CLI: PASS pty-onboarding"]}
+  ]
+}

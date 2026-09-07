@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 74 active Pedigree ports and 15 explicit disabled
+The current catalog contains 75 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -48,7 +48,7 @@ List the active catalog or inspect a dependency closure without building:
 | slang | 2.3.3 | sqlite | 3.53.4 | vim | 9.2.1031 |
 | vttest | 20251205 | wget | 1.25.0 | zlib | 1.3.2 |
 | go | 1.26.5 | ripgrep | 15.2.0 | rust | 1.85.1 |
-| codex-app-server | 0.0.0.20260907 | | | | |
+| codex-app-server | 0.0.0.20260907 | codex-cli | 0.0.0.20260907 | | |
 | v8 | 13.6.233.17 | | | | |
 
 The Go target and Rust cross toolchain have runtime qualification in QEMU on
@@ -66,11 +66,16 @@ passes the artifact audit. Build commands, the focused Abseil suite, and
 qualification limits are in [`docs/v8.md`](docs/v8.md). Node.js and npm remain
 separate follow-ups.
 
-Codex App Server snapshot 0.0.0.20260907 has an audited PUP and passes all five
-stdio RPC checks plus graceful shutdown in one-CPU QEMU. A four-CPU run faults
-during `config/read`; SMP and authenticated agent sessions remain experimental.
-Build instructions and the qualification scope are in
-[`docs/codex-app-server.md`](docs/codex-app-server.md).
+Codex App Server and Codex CLI snapshot 0.0.0.20260907 are published.
+App Server passes all five stdio RPC checks plus
+graceful shutdown in one-CPU QEMU on the repaired kernel. A four-CPU release
+run stalls during initialization with allocator lock contention; SMP remains
+unqualified. The matching Codex CLI port passes basic command checks and
+renders its terminal UI, but startup and embedded RPC qualification remain
+blocked by kernel failures. Build instructions and qualification records are in
+[`docs/codex-app-server.md`](docs/codex-app-server.md) and
+[`docs/codex-cli.md`](docs/codex-cli.md). Authenticated agent sessions and Code
+Mode remain separate milestones.
 
 Python 3.14.7 replaces the disabled Python 2 recipe and also provides
 `/usr/bin/python` as a compatibility link.

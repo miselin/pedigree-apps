@@ -9,7 +9,7 @@
 This repository contains application ports and the Pedigree UPdater (`pup`)
 package tooling for [Pedigree](https://www.pedigree-project.org/).
 
-The modernization catalog currently contains 74 active ports and 15 explicit
+The modernization catalog currently contains 75 active ports and 15 explicit
 disabled or deferred entries. See [`PORTS.md`](PORTS.md) for the complete
 version list, compatibility ceilings, deferrals, and the current verification
 boundary.
@@ -26,10 +26,13 @@ in QEMU on one and four CPUs, and its PUP passes the artifact audit. See
 [`docs/v8.md`](docs/v8.md) for build commands, the smaller Abseil test, and
 qualification limits. Node.js is a separate follow-up.
 
-Codex App Server snapshot 0.0.0.20260907 has an audited PUP and passes the
-one-CPU QEMU stdio RPC suite. SMP execution and authenticated agent sessions
-remain experimental. See [`docs/codex-app-server.md`](docs/codex-app-server.md)
-for build commands and the qualification scope.
+Codex App Server and Codex CLI snapshot 0.0.0.20260907 are published. App Server passes
+the one-CPU QEMU stdio RPC suite on the repaired kernel; SMP execution still
+stalls. CLI basic commands pass and its terminal UI renders, but startup and
+embedded RPC qualification remain blocked by kernel failures. See
+[`docs/codex-app-server.md`](docs/codex-app-server.md) and
+[`docs/codex-cli.md`](docs/codex-cli.md) for build commands and qualification
+records. Authenticated agent sessions and Code Mode remain separate milestones.
 
 At the 2026-09-02 snapshot, all 69 active ports have exact versioned build
 roots, completion markers, and PUP archives that pass the full Docker artifact
