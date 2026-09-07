@@ -5,7 +5,7 @@ from support import buildsystem, steps
 
 
 SOURCE_REVISION = "694b6319d3ad2399f6e435760a22d9b9357f0697"
-EXPERIMENTAL_REASON = "SMP config/read faults; authentication and sandboxed execution are unqualified."
+EXPERIMENTAL_REASON = "SMP startup stalls; authenticated sessions, agent tools, and sandbox enforcement are unqualified."
 
 
 class CodexAppServerPackage(buildsystem.Package):
