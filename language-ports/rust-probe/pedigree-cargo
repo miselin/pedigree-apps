@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /usr/bin/cargo --config /usr/lib/rustlib/pedigree-cargo.toml "$@"

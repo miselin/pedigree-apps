@@ -10,6 +10,7 @@ RUN apt-get update \
         binutils \
         bzip2 \
         ccache \
+        curl \
         file \
         gperf \
         help2man \
@@ -18,6 +19,7 @@ RUN apt-get update \
         make \
         ninja-build \
         patch \
+        patchelf \
         perl \
         pkg-config \
         python3-pip \

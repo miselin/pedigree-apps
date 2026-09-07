@@ -1,0 +1,8 @@
+[package]
+name = "rust-native-smoke"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "rust-native-smoke"
+path = "native.rs"

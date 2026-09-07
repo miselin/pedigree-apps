@@ -1,0 +1,40 @@
+{
+  "trees": [
+    {
+      "source": "../../newpacks/x86_64/ncurses/6.6/root",
+      "destination": "/"
+    },
+    {
+      "source": "../../newpacks/x86_64/readline/8.3.3/root",
+      "destination": "/"
+    },
+    {
+      "source": "../../newpacks/x86_64/bash/5.3.15/root",
+      "destination": "/"
+    },
+    {
+      "source": "../../newpacks/x86_64/libgmp/6.3.0/root",
+      "destination": "/"
+    },
+    {
+      "source": "../../newpacks/x86_64/coreutils/9.11/root",
+      "destination": "/"
+    },
+    {
+      "source": "../../.build/language-ports/go/native-root",
+      "destination": "/"
+    }
+  ],
+  "cases": [
+    {
+      "name": "go-runtime",
+      "command": "/usr/bin/go-qualify all",
+      "markers": ["GO-QUALIFY: PASS all (8 checks)"]
+    },
+    {
+      "name": "go-native",
+      "command": "sh /usr/share/go/native-smoke/run.sh",
+      "markers": ["GO-NATIVE: PASS compile-test-run"]
+    }
+  ]
+}

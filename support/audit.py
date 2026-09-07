@@ -538,7 +538,7 @@ def _check_program_headers(env, path, relative, elf_types, tags, mode):
         fields = line.split()
         if not fields or fields[0] != "GNU_STACK":
             continue
-        numeric_fields = fields[1:6] + fields[-1:]
+        numeric_fields = fields[1:6]
         flags = "".join(fields[6:-1])
         if (
             len(fields) < 7
@@ -546,6 +546,8 @@ def _check_program_headers(env, path, relative, elf_types, tags, mode):
                 re.fullmatch(r"0x[0-9A-Fa-f]+", value)
                 for value in numeric_fields
             )
+            # readelf prints zero segment alignment in decimal for LLD output.
+            or not re.fullmatch(r"(?:0x[0-9A-Fa-f]+|[0-9]+)", fields[-1])
             or not set(flags).issubset(set("RWE"))
         ):
             raise AuditError(

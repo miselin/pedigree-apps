@@ -1,0 +1,72 @@
+{
+  "files": [
+    {
+      "source": "../.build/language-ports/artifacts/rust-probe",
+      "destination": "/usr/bin/rust-probe",
+      "mode": "0755"
+    },
+    {
+      "source": "../.build/language-ports/artifacts/rg",
+      "destination": "/usr/bin/rg",
+      "mode": "0755"
+    }
+  ],
+  "cases": [
+    {
+      "name": "rust-basic",
+      "command": "/usr/bin/rust-probe basic",
+      "markers": [
+        "RUST-PROBE: PASS basic"
+      ]
+    },
+    {
+      "name": "rust-fs",
+      "command": "/usr/bin/rust-probe fs",
+      "markers": [
+        "RUST-PROBE: PASS fs"
+      ]
+    },
+    {
+      "name": "rust-threads",
+      "command": "/usr/bin/rust-probe threads",
+      "markers": [
+        "RUST-PROBE: PASS threads"
+      ]
+    },
+    {
+      "name": "rust-process",
+      "command": "/usr/bin/rust-probe process",
+      "markers": [
+        "RUST-PROBE: PASS process"
+      ]
+    },
+    {
+      "name": "rust-network",
+      "command": "/usr/bin/rust-probe network",
+      "markers": [
+        "RUST-PROBE: PASS network"
+      ]
+    },
+    {
+      "name": "ripgrep-version",
+      "command": "/usr/bin/rg --version",
+      "markers": [
+        "ripgrep 15.2.0"
+      ]
+    },
+    {
+      "name": "ripgrep-search",
+      "command": "printf 'Pedigree Rust port\nother data\n' > /tmp/rg-input && /usr/bin/rg -n 'Rust' /tmp/rg-input",
+      "markers": [
+        "1:Pedigree Rust port"
+      ]
+    },
+    {
+      "name": "ripgrep-recursive",
+      "command": "mkdir -p /tmp/rg-tree/sub && printf 'nested match\n' > /tmp/rg-tree/sub/a && /usr/bin/rg -n --threads 2 nested /tmp/rg-tree",
+      "markers": [
+        "/tmp/rg-tree/sub/a:1:nested match"
+      ]
+    }
+  ]
+}

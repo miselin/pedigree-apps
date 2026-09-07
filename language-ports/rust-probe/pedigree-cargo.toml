@@ -1,0 +1,3 @@
+[build]
+rustc = "/usr/bin/pedigree-rustc"
+target = "x86_64-unknown-linux-musl"

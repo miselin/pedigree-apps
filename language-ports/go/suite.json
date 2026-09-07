@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "source": "../../.build/language-ports/go/go-qualify",
+      "destination": "/usr/bin/go-qualify",
+      "mode": "0755"
+    }
+  ],
+  "cases": [
+    {
+      "name": "go-runtime",
+      "command": "/usr/bin/go-qualify all",
+      "markers": ["GO-QUALIFY: PASS all (8 checks)"]
+    }
+  ]
+}

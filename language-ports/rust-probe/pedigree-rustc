@@ -1,0 +1,7 @@
+#!/bin/sh
+exec /usr/bin/rustc --sysroot=/usr \
+    -C linker=/usr/lib/rustlib/x86_64-unknown-linux-musl/bin/rust-lld \
+    -C relocation-model=static -C target-feature=+crt-static \
+    -C link-self-contained=yes -C link-arg=--image-base=0x400000 \
+    -C link-arg=-z -C link-arg=max-page-size=4096 \
+    -C link-arg=-z -C link-arg=separate-loadable-segments "$@"

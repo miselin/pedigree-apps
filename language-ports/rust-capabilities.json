@@ -1,0 +1,23 @@
+{
+  "files": [
+    {
+      "source": "../.build/language-ports/artifacts/rust-probe",
+      "destination": "/usr/bin/rust-probe",
+      "mode": "0755"
+    },
+    {
+      "source": "../.build/language-ports/artifacts/rg",
+      "destination": "/usr/bin/rg",
+      "mode": "0755"
+    }
+  ],
+  "cases": [
+    {
+      "name": "rust-current-exe",
+      "command": "/usr/bin/rust-probe current-exe",
+      "markers": [
+        "RUST-PROBE: PASS current-exe"
+      ]
+    }
+  ]
+}

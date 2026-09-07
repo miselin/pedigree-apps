@@ -1,0 +1,58 @@
+{
+  "trees": [
+    {
+      "source": "../newpacks/x86_64/ncurses/6.6/root",
+      "destination": "/"
+    },
+    {
+      "source": "../newpacks/x86_64/readline/8.3.3/root",
+      "destination": "/"
+    },
+    {
+      "source": "../newpacks/x86_64/bash/5.3.15/root",
+      "destination": "/"
+    },
+    {
+      "source": "../newpacks/x86_64/libgmp/6.3.0/root",
+      "destination": "/"
+    },
+    {
+      "source": "../newpacks/x86_64/coreutils/9.11/root",
+      "destination": "/"
+    },
+    {
+      "source": "../.build/language-ports/artifacts/rust-native-normalized/usr",
+      "destination": "/usr"
+    }
+  ],
+  "files": [
+    {
+      "source": "rust-probe/native.rs",
+      "destination": "/usr/libexec/language-ports/rust-native.rs",
+      "mode": "0644"
+    }
+  ],
+  "cases": [
+    {
+      "name": "rustc-version",
+      "command": "/usr/bin/rustc --version",
+      "markers": [
+        "rustc 1.85.1 (4eb161250 2025-03-15)"
+      ]
+    },
+    {
+      "name": "cargo-version",
+      "command": "/usr/bin/cargo --version",
+      "markers": [
+        "cargo 1.85.1 (d73d2caf9 2024-12-31)"
+      ]
+    },
+    {
+      "name": "rustc-native",
+      "command": "/usr/bin/rustc --sysroot=/usr --edition=2024 --target=x86_64-unknown-linux-musl -C linker=/usr/lib/rustlib/x86_64-unknown-linux-musl/bin/rust-lld -C relocation-model=static -C target-feature=+crt-static -C link-self-contained=yes -C link-arg=--image-base=0x400000 -C link-arg=-z -C link-arg=max-page-size=4096 -C link-arg=-z -C link-arg=separate-loadable-segments /usr/libexec/language-ports/rust-native.rs -o /tmp/rust-native && /tmp/rust-native",
+      "markers": [
+        "RUST-NATIVE: PASS"
+      ]
+    }
+  ]
+}

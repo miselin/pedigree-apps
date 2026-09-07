@@ -517,6 +517,8 @@ ELF Header:
             "0x000000 0x000000 RWE 0x10\n",
             "GNU_STACK 0x000000 0x0000000000000000 0x0000000000000000 "
             "0x000000 0x000000 R E 0x10\n",
+            "GNU_STACK 0x000000 0x0000000000000000 0x0000000000000000 "
+            "0x000000 0x000000 RWE 0\n",
         )
         for program_headers in executable_stack_headers:
             with self.subTest(
@@ -547,6 +549,8 @@ ELF Header:
             "",
             "GNU_STACK 0x000000 0x0000000000000000 0x0000000000000000 "
             "0x000000 0x000000 RW 0x10\n",
+            "GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 "
+            "0x000000 0x000000 RW  0\n",
         )
         for program_headers in program_header_cases:
             with self.subTest(
@@ -567,6 +571,23 @@ ELF Header:
                 ):
                     audit.audit_package(
                         "example", self.FakePackage(__file__), env
+                    )
+
+    def test_rejects_malformed_gnu_stack_fields(self):
+        program_headers = (
+            "GNU_STACK 0x000000 0x0000000000000000 0x0000000000000000 "
+            "0x000000 0x000000 RW {}\n"
+        )
+        malformed = [program_headers.format(value) for value in ("-1", "0xgg", "none")]
+        malformed.append(program_headers.format("0").replace("0x000000 ", "0 ", 1))
+        for output in malformed:
+            with self.subTest(program_headers=output), mock.patch(
+                "support.audit._readelf", return_value=output
+            ):
+                with self.assertRaisesRegex(audit.AuditError, "malformed GNU_STACK"):
+                    audit._check_program_headers(
+                        {}, "/usr/bin/rg", "usr/bin/rg", ["EXEC"],
+                        {"SONAME": [], "NEEDED": []}, 0o755,
                     )
 
     def test_exec_type_requires_interpreter_even_with_so_filename(self):

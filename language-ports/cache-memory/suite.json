@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "source": "../../.build/memory-spike/probe/cache-spike",
+      "destination": "/usr/bin/cache-spike",
+      "mode": "0755"
+    }
+  ],
+  "trees": [
+    {
+      "source": "../../.build/memory-spike/probe/inputs",
+      "destination": "/usr/share/memory-spike/inputs"
+    }
+  ],
+  "cases": [
+    {
+      "name": "cache-growth",
+      "command": "/usr/bin/cache-spike /usr/share/memory-spike/inputs 256 64",
+      "markers": [
+        "CACHE-SPIKE: PASS files=256 passes=2 budget_mib=64"
+      ]
+    }
+  ]
+}

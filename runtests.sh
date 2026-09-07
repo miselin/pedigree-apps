@@ -66,7 +66,8 @@ python3 -m unittest -v \
     pup.pedigree_updater.lib.http_test \
     pup.pedigree_updater.lib.util_test \
     scripts.migrate_package_blobs_test \
-    scripts.publish_packages_test
+    scripts.publish_packages_test \
+    scripts.qualify_language_ports_test
 python3 -m compileall -q \
     buildPackages.py \
     buildInChroot.py \

@@ -1,0 +1,74 @@
+{
+  "version": "1.85.1",
+  "date": "2025-03-18",
+  "target": "x86_64-unknown-linux-musl",
+  "components": {
+    "rustc": {
+      "aarch64-apple-darwin": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c"
+      },
+      "x86_64-apple-darwin": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rustc-1.85.1-x86_64-apple-darwin.tar.xz",
+        "sha256": "d65d59e3687fd92d16bd69c92d4b5a2639ccafacba887d9bc0da1dea56b56018"
+      },
+      "x86_64-unknown-linux-gnu": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rustc-1.85.1-x86_64-unknown-linux-gnu.tar.xz",
+        "sha256": "92a5c532b9e87912190128704e0d65825912e3b08a6ee9203c4068d6d1df62c4"
+      },
+      "x86_64-unknown-linux-musl": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rustc-1.85.1-x86_64-unknown-linux-musl.tar.xz",
+        "sha256": "327d74ef87a7e57b5486b123b89e6c9112926b2edab5203d3168983e96a2eb6b"
+      }
+    },
+    "cargo": {
+      "aarch64-apple-darwin": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634"
+      },
+      "x86_64-apple-darwin": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/cargo-1.85.1-x86_64-apple-darwin.tar.xz",
+        "sha256": "70e4b8db358b35cfda0090010352f71485116ea2997e785037622f84d4121efb"
+      },
+      "x86_64-unknown-linux-gnu": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/cargo-1.85.1-x86_64-unknown-linux-gnu.tar.xz",
+        "sha256": "7373132c13e394755d15f01bda4374af59b4daef01b12a83cb3df3f3be38e289"
+      },
+      "x86_64-unknown-linux-musl": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/cargo-1.85.1-x86_64-unknown-linux-musl.tar.xz",
+        "sha256": "f0056f62d54ffcc039a6a68985947d56280fdbb0109f9faeaabcd53ef0f46e62"
+      }
+    },
+    "rust-std": {
+      "aarch64-apple-darwin": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67"
+      },
+      "x86_64-apple-darwin": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-std-1.85.1-x86_64-apple-darwin.tar.xz",
+        "sha256": "30d3324771063f7923ad5fe0695a09d5097d07234415a84019fe91fca912cf23"
+      },
+      "x86_64-unknown-linux-gnu": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-std-1.85.1-x86_64-unknown-linux-gnu.tar.xz",
+        "sha256": "0aaeffba85359503f874315cd08e0ae8490275d14b41470d36d4fa57fd085916"
+      },
+      "x86_64-unknown-linux-musl": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-std-1.85.1-x86_64-unknown-linux-musl.tar.xz",
+        "sha256": "a2a99b60e86214a836e53396f3a0716a48724902b9dd8c69f146897efc76691e"
+      }
+    },
+    "rust-src": {
+      "*": {
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-src-1.85.1.tar.xz",
+        "sha256": "b5a5539009d477a07c2535aefc39cd69ad526a74eab65886a26e2c3021020827"
+      }
+    }
+  },
+  "native_libgcc": {
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/libgcc-14.2.0-r4.apk",
+    "sha256": "8675867db77b5af11b88fd19186450333202d94cccd84a76a066dccd5b6e8cf1",
+    "version": "14.2.0-r4",
+    "license": "GPL-3.0-or-later WITH GCC-exception-3.1",
+    "source": "https://gitlab.alpinelinux.org/alpine/aports/-/tree/1a03a2a9c9e77f1a07d48b6f6805e72c8c63c03f/main/gcc"
+  }
+}

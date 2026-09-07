@@ -9,10 +9,16 @@
 This repository contains application ports and the Pedigree UPdater (`pup`)
 package tooling for [Pedigree](https://www.pedigree-project.org/).
 
-The modernization catalog currently contains 69 active ports and 15 explicit
+The modernization catalog currently contains 72 active ports and 15 explicit
 disabled or deferred entries. See [`PORTS.md`](PORTS.md) for the complete
 version list, compatibility ceilings, deferrals, and the current verification
 boundary.
+
+Go 1.26.5 and Rust 1.85.1 now have cross-compilation tools and QEMU runtime
+qualification, including a source-built ripgrep 15.2.0 port. See
+[`docs/language-ports.md`](docs/language-ports.md) for build commands, tested
+capabilities, and the separate native compiler milestones. Go, Rust, and
+ripgrep have audited PUP packages; native compiler builds remain experimental.
 
 At the 2026-09-02 snapshot, all 69 active ports have exact versioned build
 roots, completion markers, and PUP archives that pass the full Docker artifact
