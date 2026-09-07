@@ -1,0 +1,34 @@
+{
+  "version": "1.95.0",
+  "target": "x86_64-unknown-linux-musl",
+  "components": {
+    "rustc": {
+      "x86_64-unknown-linux-gnu": {
+        "url": "https://static.rust-lang.org/dist/rustc-1.95.0-x86_64-unknown-linux-gnu.tar.xz",
+        "sha256": "8426a3d170a5879f5682f5fbdd024a1779b3951e7baba685af2d6dc32a6dfc15"
+      }
+    },
+    "cargo": {
+      "x86_64-unknown-linux-gnu": {
+        "url": "https://static.rust-lang.org/dist/cargo-1.95.0-x86_64-unknown-linux-gnu.tar.xz",
+        "sha256": "e74edd2cf7d0f1f1383b4f00eb90c843750bc489e2ccf7214e6476678a907425"
+      }
+    },
+    "rust-std": {
+      "x86_64-unknown-linux-gnu": {
+        "url": "https://static.rust-lang.org/dist/rust-std-1.95.0-x86_64-unknown-linux-gnu.tar.xz",
+        "sha256": "047ea7098803d3500fa1072e9cee5392697e21525559e4458128a2bf874aa382"
+      },
+      "x86_64-unknown-linux-musl": {
+        "url": "https://static.rust-lang.org/dist/rust-std-1.95.0-x86_64-unknown-linux-musl.tar.xz",
+        "sha256": "aee540abf132920f791ef781489851a078d69dff493fb628d49c1d573f92bb3a"
+      }
+    },
+    "rust-src": {
+      "*": {
+        "url": "https://static.rust-lang.org/dist/rust-src-1.95.0.tar.xz",
+        "sha256": "67b09138c8db96afc4bbfc69ea771ac9a091fd777698acb43f6dfd9fb7dea363"
+      }
+    }
+  }
+}

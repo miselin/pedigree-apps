@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 72 active Pedigree ports and 15 explicit disabled
+The current catalog contains 73 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -48,6 +48,7 @@ List the active catalog or inspect a dependency closure without building:
 | slang | 2.3.3 | sqlite | 3.53.4 | vim | 9.2.1031 |
 | vttest | 20251205 | wget | 1.25.0 | zlib | 1.3.2 |
 | go | 1.26.5 | ripgrep | 15.2.0 | rust | 1.85.1 |
+| codex-app-server | 0.0.0.20260907 | | | | |
 
 The Go target and Rust cross toolchain have runtime qualification in QEMU on
 one and four CPUs. Rust currently uses the Linux-musl ABI; ripgrep is built
@@ -56,6 +57,12 @@ compiler qualification is tracked separately in
 [`docs/language-ports.md`](docs/language-ports.md).
 All three PUP packages pass the artifact audit. The native Go and Rust compiler
 packages remain experimental until guest application builds complete.
+
+Codex App Server snapshot 0.0.0.20260907 has an audited PUP and passes all five
+stdio RPC checks plus graceful shutdown in one-CPU QEMU. A four-CPU run faults
+during `config/read`; SMP and authenticated agent sessions remain experimental.
+Build instructions and the qualification scope are in
+[`docs/codex-app-server.md`](docs/codex-app-server.md).
 
 Python 3.14.7 replaces the disabled Python 2 recipe and also provides
 `/usr/bin/python` as a compatibility link.

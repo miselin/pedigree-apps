@@ -70,8 +70,8 @@ def fetch(pin, filename, cache, offline):
     return destination
 
 
-def component(name, target, cache, offline):
-    pin = PINS["components"][name][target]
+def component(name, target, cache, offline, pins=None):
+    pin = (PINS if pins is None else pins)["components"][name][target]
     archive = fetch(pin, pin["url"].rsplit("/", 1)[1], cache, offline)
     destination = cache / "extract" / archive.name.removesuffix(".tar.xz")
     marker = destination / ".pedigree-sha256"
@@ -84,19 +84,20 @@ def component(name, target, cache, offline):
     return destination
 
 
-def provision(cache, offline):
+def provision(cache, offline, pins=None):
+    pins = PINS if pins is None else pins
     host = host_target()
-    prefix = cache / ("rust-" + VERSION + "-" + host)
+    prefix = cache / ("rust-" + pins["version"] + "-" + host)
     wanted = [("rustc", host), ("cargo", host), ("rust-std", host),
               ("rust-std", TARGET), ("rust-src", "*")]
     marker = prefix / ".pedigree-toolchain.json"
-    identity = json.dumps({"pins": PINS, "host": host}, sort_keys=True)
+    identity = json.dumps({"pins": pins, "host": host}, sort_keys=True)
     if marker.is_file() and marker.read_text() == identity:
         write_wrappers(prefix)
         return prefix
     marker.unlink(missing_ok=True)
     for name, target in wanted:
-        source = component(name, target, cache, offline)
+        source = component(name, target, cache, offline, pins)
         # Each verified component already has its installed directory layout.
         # The global installer starts several shells per source file; copying
         # into this private prefix avoids that cost on Docker bind mounts.
@@ -135,7 +136,8 @@ def environment(prefix, cache):
     env["CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS"] = " ".join(FLAGS)
     # Parent package-builder C flags are for Pedigree, but build scripts and
     # proc macros execute on the build host.
-    for name in ("CC", "CXX", "AR", "CFLAGS", "CXXFLAGS", "LDFLAGS", "RUSTFLAGS"):
+    for name in ("CC", "CXX", "AR", "CPPFLAGS", "CFLAGS", "CXXFLAGS", "LDFLAGS", "RUSTFLAGS",
+                 "CARGO_ENCODED_RUSTFLAGS"):
         env.pop(name, None)
     return env
 

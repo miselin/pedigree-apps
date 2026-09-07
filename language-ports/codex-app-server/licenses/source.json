@@ -1,0 +1,10 @@
+{
+  "component": "GCC runtime libraries (libgcc and libstdc++)",
+  "version": "15.3.0",
+  "url": "https://ftp.gnu.org/gnu/gcc/gcc-15.3.0/gcc-15.3.0.tar.xz",
+  "sha256": "fa59c1beef8995f27c4d71c1df227587189315d3e6faff1bb4306e61b0c530eb",
+  "notices": {
+    "COPYING.RUNTIME": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+    "COPYING3": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+  }
+}

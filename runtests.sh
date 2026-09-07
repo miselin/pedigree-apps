@@ -67,6 +67,7 @@ python3 -m unittest -v \
     pup.pedigree_updater.lib.util_test \
     scripts.migrate_package_blobs_test \
     scripts.publish_packages_test \
+    scripts.codex_app_server_probe_test \
     scripts.qualify_language_ports_test
 python3 -m compileall -q \
     buildPackages.py \

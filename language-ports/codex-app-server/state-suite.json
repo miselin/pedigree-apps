@@ -1,0 +1,33 @@
+{
+  "trees": [
+    {
+      "source": "../../newpacks/x86_64/ncurses/6.6/root",
+      "destination": "/"
+    },
+    {
+      "source": "../../newpacks/x86_64/readline/8.3.3/root",
+      "destination": "/"
+    },
+    {
+      "source": "../../newpacks/x86_64/bash/5.3.15/root",
+      "destination": "/"
+    }
+  ],
+  "files": [
+    {
+      "source": "../../.build/codex-app-server/artifacts/codex-state-qualify",
+      "destination": "/usr/bin/codex-state-qualify",
+      "mode": "0755"
+    }
+  ],
+  "cases": [
+    {
+      "name": "codex-state-runtime",
+      "command": "/usr/bin/codex-state-qualify",
+      "markers": [
+        "CODEX-STATE: PASS identity preflight",
+        "CODEX-STATE: PASS"
+      ]
+    }
+  ]
+}

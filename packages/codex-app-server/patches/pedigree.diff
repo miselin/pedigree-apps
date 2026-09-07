@@ -1,0 +1,126 @@
+--- a/codex-rs/app-server/Cargo.toml
++++ b/codex-rs/app-server/Cargo.toml
+@@ -23,6 +23,11 @@
+ 
+ [lints]
+ workspace = true
++
++[features]
++default = ["jemalloc"]
++jemalloc = ["dep:tikv-jemallocator"]
++pedigree = ["codex-arg0/pedigree"]
+ 
+ [dependencies]
+ anyhow = { workspace = true }
+@@ -115,7 +120,7 @@
+ uuid = { workspace = true, features = ["serde", "v7"] }
+ 
+ [target.'cfg(all(target_os = "linux", target_env = "musl", any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
+-tikv-jemallocator = { workspace = true }
++tikv-jemallocator = { workspace = true, optional = true }
+ 
+ [target.'cfg(windows)'.dependencies]
+ codex-windows-sandbox = { workspace = true }
+--- a/codex-rs/app-server/src/main.rs
++++ b/codex-rs/app-server/src/main.rs
+@@ -1,3 +1,5 @@
++#![recursion_limit = "256"]
++
+ use clap::Parser;
+ use codex_app_server::AppServerCodeModeHostArgs;
+ use codex_app_server::AppServerRuntimeOptions;
+@@ -9,10 +11,13 @@
+ use codex_arg0::arg0_dispatch_or_else;
+ use codex_config::LoaderOverrides;
+ use codex_protocol::protocol::SessionSource;
++#[cfg(feature = "pedigree")]
++use codex_utils_absolute_path::AbsolutePathBuf;
+ use codex_utils_cli::CliConfigOverrides;
+ use std::path::PathBuf;
+ 
+ #[cfg(all(
++    feature = "jemalloc",
+     target_os = "linux",
+     target_env = "musl",
+     any(target_arch = "x86_64", target_arch = "aarch64")
+@@ -91,6 +96,14 @@
+                 .map(LoaderOverrides::with_managed_config_path_for_tests)
+                 .unwrap_or_default()
+         };
++        // Locate package defaults without depending on /proc/self/exe.
++        #[cfg(feature = "pedigree")]
++        let loader_overrides = LoaderOverrides {
++            packaged_defaults_path: Some(AbsolutePathBuf::from_absolute_path(
++                "/usr/share/codex-app-server/defaults.toml",
++            )?),
++            ..loader_overrides
++        };
+         let transport = listen;
+         let auth = auth.try_into_settings()?;
+         let mut runtime_options = AppServerRuntimeOptions {
+--- a/codex-rs/arg0/Cargo.toml
++++ b/codex-rs/arg0/Cargo.toml
+@@ -11,6 +11,9 @@
+ 
+ [lints]
+ workspace = true
++
++[features]
++pedigree = []
+ 
+ [dependencies]
+ anyhow = { workspace = true }
+--- a/codex-rs/arg0/src/lib.rs
++++ b/codex-rs/arg0/src/lib.rs
+@@ -225,7 +225,7 @@
+     // this executable. Admittedly, we could invoke `keep()` on it, but it
+     // would be nice to avoid leaving temporary directories behind, if possible.
+     let path_entry_guard = arg0_dispatch();
+-    let current_exe = std::env::current_exe().ok();
++    let current_exe = current_exe_path().ok();
+ 
+     // Regular invocation. Run the async entry point on a thread with the same
+     // stack budget as Tokio workers; `Runtime::block_on` otherwise runs the
+@@ -285,6 +285,24 @@
+     path_entry_guard
+         .and_then(|path_entry| path_entry.paths().codex_linux_sandbox_exe.clone())
+         .or(current_exe)
++}
++
++fn current_exe_path() -> std::io::Result<PathBuf> {
++    match std::env::current_exe() {
++        Ok(path) => Ok(path),
++        Err(error) => {
++            // Pedigree lacks /proc/self/exe; its package launcher supplies an
++            // absolute argv[0] so child helpers can re-execute the same binary.
++            #[cfg(feature = "pedigree")]
++            if let Some(path) = std::env::args_os().next().map(PathBuf::from)
++                && path.is_absolute()
++                && path.is_file()
++            {
++                return Ok(path);
++            }
++            Err(error)
++        }
++    }
+ }
+ 
+ fn build_runtime() -> anyhow::Result<tokio::runtime::Runtime> {
+@@ -392,7 +410,7 @@
+         #[cfg(unix)]
+         EXECVE_WRAPPER_ARG0,
+     ] {
+-        let exe = std::env::current_exe()?;
++        let exe = current_exe_path()?;
+ 
+         #[cfg(unix)]
+         {
+@@ -418,7 +436,7 @@
+     let updated_path_env_var = path_env_with_entry(path, existing_path);
+ 
+     let paths = Arg0DispatchPaths {
+-        codex_self_exe: std::env::current_exe().ok(),
++        codex_self_exe: current_exe_path().ok(),
+         codex_linux_sandbox_exe: {
+             #[cfg(target_os = "linux")]
+             {
