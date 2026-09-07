@@ -229,13 +229,20 @@ The recipes build or stage the same pinned toolchains used above:
 Package checks cover staging and artifact integrity; QEMU suites cover actual
 guest behavior. Keep both results with the release being qualified.
 The archives are `pup/package_repo/go-1.26.5-amd64.pup`,
-`rust-1.85.1-amd64.pup`, and `ripgrep-15.2.0-amd64.pup`. Install them through
-PUP after adding them to a package catalog; installation is catalog-driven.
+`rust-1.85.1-amd64.pup`, and `ripgrep-15.2.0-amd64.pup`. These amd64 packages
+were published to `https://pup.pedigree-project.org` on 2026-09-07. Install them
+with:
+
+```sh
+pup sync
+pup install go rust ripgrep
+```
+
+PUP resolves the Go and Rust packages' `ca-certificates` dependency automatically.
 The Rust package includes `rustc`, Cargo,
 `rustdoc`, the standard library, its runtime dependency, and the
 `pedigree-rustc` / `pedigree-cargo` wrappers. Compiler startup is qualified;
-native application compilation remains experimental. No packages have been
-published by this work.
+native application compilation remains experimental.
 
 The next gates are completed native Go compile/test/run, Rust compile/run and
 Cargo dependency builds in the guest, and durable
