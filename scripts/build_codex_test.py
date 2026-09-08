@@ -20,7 +20,7 @@ class BuildCodexTest(unittest.TestCase):
             root = Path(temporary).resolve()
             outputs = []
             jobs = []
-            for arguments in ([], ["--component", "cli"]):
+            for arguments in ([], ["--component", "cli"], ["--component", "code-mode-host"]):
                 with (
                     mock.patch.object(builder, "ROOT", root),
                     mock.patch.object(builder, "build") as build,
@@ -31,8 +31,9 @@ class BuildCodexTest(unittest.TestCase):
                 outputs.append(build.call_args.args[1])
                 jobs.append(build.call_args.args[4])
             self.assertEqual(outputs, [root / ".build/codex-app-server/artifacts",
-                                       root / ".build/codex-cli/artifacts"])
-            self.assertEqual(jobs, [4, 1])
+                                       root / ".build/codex-cli/artifacts",
+                                       root / ".build/codex-code-mode-host/artifacts"])
+            self.assertEqual(jobs, [4, 1, 1])
 
     def test_explicit_output_is_retained_for_cli(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -55,10 +56,12 @@ class BuildCodexTest(unittest.TestCase):
             root = Path(temporary).resolve()
             shared_patch = root / "packages/codex-app-server/patches/pedigree.diff"
             cli_patch = root / "packages/codex-cli/patches/pedigree.diff"
-            for patch in (shared_patch, cli_patch):
+            host_patch = root / "packages/codex-code-mode-host/patches/pedigree.diff"
+            for patch in (shared_patch, cli_patch, host_patch):
                 patch.parent.mkdir(parents=True)
             shared_patch.write_text("shared patch")
             cli_patch.write_text("CLI patch v1")
+            host_patch.write_text("host patch")
             archive = root / "source.tar.gz"
             with tarfile.open(archive, "w:gz") as bundle:
                 contents = b"upstream fixture"
@@ -85,6 +88,11 @@ class BuildCodexTest(unittest.TestCase):
                                  "upstream fixture\nshared patch")
                 self.assertEqual((cli_source / "fixture").read_text(),
                                  "upstream fixture\nshared patch\nCLI patch v1")
+                patch_run.reset_mock()
+                host_source = builder.source_tree(cache, True, "code-mode-host")
+                self.assertNotIn(host_source, (app_source, cli_source))
+                self.assertEqual((host_source / "fixture").read_text(), "upstream fixture\nhost patch")
+                patch_run.assert_called_once()
                 patch_run.reset_mock()
                 builder.source_tree(cache, True, "cli")
                 patch_run.assert_not_called()

@@ -9,7 +9,7 @@
 This repository contains application ports and the Pedigree UPdater (`pup`)
 package tooling for [Pedigree](https://www.pedigree-project.org/).
 
-The modernization catalog currently contains 75 active ports and 15 explicit
+The modernization catalog currently contains 77 active ports and 15 explicit
 disabled or deferred entries. See [`PORTS.md`](PORTS.md) for the complete
 version list, compatibility ceilings, deferrals, and the current verification
 boundary.
@@ -28,11 +28,21 @@ qualification limits. Node.js is a separate follow-up.
 
 Codex App Server and Codex CLI snapshot 0.0.0.20260907 are published. App Server passes
 the one-CPU QEMU stdio RPC suite on the repaired kernel; SMP execution still
-stalls. CLI basic commands pass and its terminal UI renders, but startup and
-embedded RPC qualification remain blocked by kernel failures. See
+stalls. CLI basic commands pass and its terminal UI renders, but earlier
+startup and embedded RPC runs failed in the kernel. See
 [`docs/codex-app-server.md`](docs/codex-app-server.md) and
 [`docs/codex-cli.md`](docs/codex-cli.md) for build commands and qualification
-records. Authenticated agent sessions and Code Mode remain separate milestones.
+records. Authenticated agent sessions remain unqualified.
+
+The published unified `codex` PUP combines the CLI, its embedded App Server and the
+Code Mode host and passes the package audit. The host passes all nine direct
+checks in QEMU on one and four CPUs with the absolute-futex and RAW-clock
+kernel extensions. Full CLI integration on Pedigree remains unqualified; the
+local scripted-provider integration passes on Linux. See
+[`docs/codex.md`](docs/codex.md) and
+[`docs/codex-code-mode-host.md`](docs/codex-code-mode-host.md) for the evidence
+and build commands. The host embeds its matching V8 15.0 engine; Node.js is
+not required.
 
 At the 2026-09-02 snapshot, all 69 active ports have exact versioned build
 roots, completion markers, and PUP archives that pass the full Docker artifact

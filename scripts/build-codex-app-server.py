@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import tarfile
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 REVISION = "694b6319d3ad2399f6e435760a22d9b9357f0697"
@@ -19,6 +20,7 @@ SOURCE = {
 PATCH = ROOT / "packages/codex-app-server/patches/pedigree.diff"
 PINS = json.loads((ROOT / "language-ports/codex-app-server/toolchain.json").read_text())
 UAPI = json.loads((ROOT / "language-ports/codex-app-server/linux-uapi.json").read_text())
+V8_PINS = ROOT / "packages/codex-code-mode-host/v8.json"
 spec = importlib.util.spec_from_file_location("rust_build", ROOT / "scripts/build-rust.py")
 rust = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rust)
@@ -26,10 +28,11 @@ spec.loader.exec_module(rust)
 
 def source_tree(cache, offline, component="app-server"):
     archive = rust.fetch(SOURCE, "codex-" + REVISION + ".tar.gz", cache, offline)
-    patches = [PATCH]
+    patches = [ROOT / "packages/codex-code-mode-host/patches/pedigree.diff"] if component == "code-mode-host" else [PATCH]
     if component == "cli":
         patches.append(ROOT / "packages/codex-cli/patches/pedigree.diff")
-    source = cache / ("source-cli" if component == "cli" else "source") / ("codex-" + REVISION)
+    source_directory = "source" if component == "app-server" else "source-" + component
+    source = cache / source_directory / ("codex-" + REVISION)
     marker = source / ".pedigree-patch-sha256"
     patch_hash = "\n".join(rust.digest(patch) for patch in patches)
     if not marker.is_file() or marker.read_text().strip() != patch_hash:
@@ -61,8 +64,8 @@ def build(cache, output, source, offline, jobs, component="app-server"):
             raise RuntimeError("Linux UAPI archive is missing random.h")
         headers_marker.write_text(UAPI["sha256"] + "\n")
     source = source_tree(cache, offline, component) if source is None else source
-    package = "codex-cli" if component == "cli" else "codex-app-server"
-    executable = "codex" if component == "cli" else "codex-app-server"
+    package = "codex-" + component
+    executable = "codex" if component == "cli" else package
     workspace = source / "codex-rs"
     env = rust.environment(prefix, cache)
     env["GIT_CEILING_DIRECTORIES"] = str(source.parent)
@@ -105,6 +108,20 @@ def build(cache, output, source, offline, jobs, component="app-server"):
         native_hashes[library] = rust.digest(native_runtime / library)
     flags = rust.FLAGS + ["-Lnative=" + str(native_runtime)]
     env["CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS"] = " ".join(flags)
+    v8_pins = None
+    if component == "code-mode-host":
+        v8_pins = json.loads(V8_PINS.read_text())
+        locked = tomllib.loads((workspace / "Cargo.lock").read_text())
+        versions = {package["version"] for package in locked["package"] if package["name"] == "v8"}
+        if versions != {v8_pins["crate_version"]}:
+            raise RuntimeError("Code Mode V8 archive/binding version does not match Cargo.lock")
+        for variable, key in (("RUSTY_V8_ARCHIVE", "archive"),
+                              ("RUSTY_V8_SRC_BINDING_PATH", "binding")):
+            pin = v8_pins[key]
+            env[variable] = str(rust.fetch(pin, pin["url"].rsplit("/", 1)[1], cache, offline))
+        # The archive already carries the exact sandbox-enabled V8 and libc++ ABI.
+        env.pop("V8_FROM_SOURCE", None)
+        env.pop("GN_ARGS", None)
     cargo = str(prefix / "bin/cargo")
     vendor = cache / "vendor"
     vendor_config = cache / "vendor.toml"
@@ -118,11 +135,12 @@ def build(cache, output, source, offline, jobs, component="app-server"):
                            cwd=workspace, env=env, stdout=config, check=True)
         marker.write_text(lock_hash + "\n")
     # The generated vendor configuration may have moved with a copied cache.
+    features = ["--features", "pedigree"] if component == "code-mode-host" else ["--no-default-features", "--features", "pedigree"]
     subprocess.run([cargo, "--config", str(vendor_config), "--config",
                     "source.vendored-sources.directory=" + json.dumps(str(vendor)),
                     "build", "--offline", "--locked",
                     "--release", "--target", rust.TARGET, "-p", package,
-                    "--bin", executable, "--no-default-features", "--features", "pedigree"],
+                    "--bin", executable, *features],
                    cwd=workspace, env=env, check=True)
     stage = output / "root"
     shutil.rmtree(stage, ignore_errors=True)
@@ -133,9 +151,10 @@ def build(cache, output, source, offline, jobs, component="app-server"):
     launcher.parent.mkdir(parents=True)
     launcher.write_text('#!/bin/sh\nexec /usr/libexec/' + executable + ' "$@"\n')
     launcher.chmod(0o755)
-    defaults = stage / "usr/share" / package / "defaults.toml"
-    defaults.parent.mkdir(parents=True)
-    shutil.copy2(workspace / "config/defaults.toml", defaults)
+    if component != "code-mode-host":
+        defaults = stage / "usr/share" / package / "defaults.toml"
+        defaults.parent.mkdir(parents=True)
+        shutil.copy2(workspace / "config/defaults.toml", defaults)
     docs = stage / "usr/share/doc" / package
     docs.mkdir(parents=True)
     for name in ("LICENSE", "NOTICE"):
@@ -183,6 +202,15 @@ def build(cache, output, source, offline, jobs, component="app-server"):
     if component == "cli":
         provenance["component"] = "cli"
         provenance["cli_patch_sha256"] = rust.digest(ROOT / "packages/codex-cli/patches/pedigree.diff")
+    elif component == "code-mode-host":
+        provenance.update(component=component, code_mode_host=True, v8=v8_pins,
+                          patch_sha256=rust.digest(ROOT / "packages/codex-code-mode-host/patches/pedigree.diff"))
+        notices = ROOT / "packages/codex-code-mode-host/licenses"
+        shutil.copytree(notices, docs / "dependencies/v8-runtime-150.4.0")
+        provenance["v8_notice_sha256"] = {
+            path.relative_to(notices).as_posix(): rust.digest(path)
+            for path in sorted(notices.rglob("*")) if path.is_file()
+        }
     (docs / "build.json").write_text(json.dumps(provenance, indent=2) + "\n")
     print(package + " package root: " + str(stage), flush=True)
 
@@ -231,20 +259,20 @@ def state_probe(cache, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["build", "state-probe"])
-    parser.add_argument("--component", choices=["app-server", "cli"], default="app-server")
+    parser.add_argument("--component", choices=["app-server", "cli", "code-mode-host"], default="app-server")
     parser.add_argument("--source", type=Path, help="already patched pinned Codex source root")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--cache", type=Path, default=ROOT / ".build/codex-app-server")
     parser.add_argument("--offline", action="store_true")
-    parser.add_argument("--jobs", type=int, help="compiler jobs (CLI: 1, App Server: 4)")
+    parser.add_argument("--jobs", type=int, help="compiler jobs (App Server: 4, other components: 1)")
     args = parser.parse_args()
     if args.jobs is None:
-        args.jobs = 1 if args.component == "cli" else 4
+        args.jobs = 4 if args.component == "app-server" else 1
     if args.jobs < 1:
         parser.error("--jobs must be positive")
     if args.action == "state-probe" and args.component != "app-server":
         parser.error("state-probe supports only --component app-server")
-    output = args.output or ROOT / ".build" / ("codex-cli" if args.component == "cli" else "codex-app-server") / "artifacts"
+    output = args.output or ROOT / ".build" / ("codex-" + args.component) / "artifacts"
     cache = args.cache.resolve()
     if args.action == "state-probe":
         state_probe(cache, output.resolve())

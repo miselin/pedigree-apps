@@ -1,0 +1,9 @@
+
+[package]
+authors = ["the Deno authors"]
+name = "deno_core_icudata"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/denoland/deno_core_icudata"
+version = "0.77.0"
+description = "Raw ICU data for use with deno_core"

@@ -1,0 +1,286 @@
+{
+  "rusty-v8-LICENSE": {
+    "url": "https://raw.githubusercontent.com/denoland/rusty_v8/v150.4.0/LICENSE",
+    "sha256": "1c6356fb751d45f0c53093ebf8a7f5e580e802f51999178e19d60f3ec39e147d",
+    "download_sha256": "1c6356fb751d45f0c53093ebf8a7f5e580e802f51999178e19d60f3ec39e147d",
+    "encoding": "identity"
+  },
+  "v8-LICENSE": {
+    "url": "https://raw.githubusercontent.com/v8/v8/15.0.245.2/LICENSE",
+    "sha256": "6ab33af8774a0f396ee3aeeb761e3229057682d6f9fa7f572e390c2cb3a6e509",
+    "download_sha256": "6ab33af8774a0f396ee3aeeb761e3229057682d6f9fa7f572e390c2cb3a6e509",
+    "encoding": "identity"
+  },
+  "libcxx-LICENSE.TXT": {
+    "url": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxx.git/+/5abc7f839700f0f17338434e1c1c6a8c87c00c11/LICENSE.TXT?format=TEXT",
+    "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+    "download_sha256": "2df883eed85d488ef641ac22f3ce8afb495508b6f87c38847af95ddbf94aea70",
+    "encoding": "base64"
+  },
+  "libcxxabi-LICENSE.TXT": {
+    "url": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxxabi.git/+/8f11bb1d4438d0239d0dfc1bd9456a9f31629dda/LICENSE.TXT?format=TEXT",
+    "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+    "download_sha256": "8d3456e92a31955fdaea9c32634e2e2d5abf87e32e862ca28f40b979e68ea612",
+    "encoding": "base64"
+  },
+  "llvm-libc-LICENSE.TXT": {
+    "url": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libc.git/+/9309c117ebae84dd2f9df1ef99de4782162527d5/LICENSE.TXT?format=TEXT",
+    "sha256": "ebcd9bbf783a73d05c53ba4d586b8d5813dcdf3bbec50265860ccc885e606f47",
+    "download_sha256": "0cced642a3b6d411a42ad6e8ebd7942b4768a530c6e063fa41455a3600a82887",
+    "encoding": "base64"
+  },
+  "icu-77-LICENSE": {
+    "url": "https://raw.githubusercontent.com/unicode-org/icu/release-77-1/LICENSE",
+    "sha256": "451167c55c0fa447cc2d5632714f5e3c567fe4f1e1badefab2c1333852198aca",
+    "download_sha256": "451167c55c0fa447cc2d5632714f5e3c567fe4f1e1badefab2c1333852198aca",
+    "encoding": "identity"
+  },
+  "abseil-LICENSE": {
+    "url": "https://raw.githubusercontent.com/abseil/abseil-cpp/20250814.0/LICENSE",
+    "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+    "download_sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+    "encoding": "identity"
+  },
+  "highway-LICENSE": {
+    "url": "https://raw.githubusercontent.com/google/highway/1.2.0/LICENSE",
+    "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+    "download_sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+    "encoding": "identity"
+  },
+  "v8-source/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/LICENSE",
+    "sha256": "6ab33af8774a0f396ee3aeeb761e3229057682d6f9fa7f572e390c2cb3a6e509"
+  },
+  "v8-source/LICENSE.fdlibm": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/LICENSE.fdlibm",
+    "sha256": "e7115e18444dae09d17f361ddc365fb1d342640fe500796209c63f7c80dfae10"
+  },
+  "v8-source/LICENSE.strongtalk": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/LICENSE.strongtalk",
+    "sha256": "6a585a9f466654abc8fc0829d56b1bc987e3a073d31faa03bba37d33640a23cd"
+  },
+  "v8-source/LICENSE.v8": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/LICENSE.v8",
+    "sha256": "4af93c12062c58058378de2397dc1c92bbff9ddfb1d583a01c84127557ce97ca"
+  },
+  "v8-source/test/js-perf-test/SixSpeed/LICENSE.sixspeed": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/test/js-perf-test/SixSpeed/LICENSE.sixspeed",
+    "sha256": "f915aef5cdb93903ae8850c4a1efb638ee1195b1380b6e446a583c1d0eef3ff7"
+  },
+  "v8-source/test/mjsunit/third_party/object-keys/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/test/mjsunit/third_party/object-keys/LICENSE",
+    "sha256": "b5e27ca8c92bf5748046345e3c5621a97542abd931ad5870b2057c4e20e2ece8"
+  },
+  "v8-source/test/mjsunit/third_party/regexp-pcre/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/test/mjsunit/third_party/regexp-pcre/LICENSE",
+    "sha256": "f55e9e4ba1ce2ae3b0f21577d9dfd3cea376123cb69e444b891f2f0fc1f9069a"
+  },
+  "v8-source/test/wasm-js/third_party/LICENSE.testharness": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/test/wasm-js/third_party/LICENSE.testharness",
+    "sha256": "5a7b465d39b5e018bc40cc34162176269f7c476989cb4dbcf0ec0b81701545a7"
+  },
+  "v8-source/third_party/colorama/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/colorama/LICENSE",
+    "sha256": "15137d6c822e3ab097093a33c3a39a9df699f373f6438867ad534ff60762a947"
+  },
+  "v8-source/third_party/fp16/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/fp16/LICENSE",
+    "sha256": "c91377adafa2f498211a4fe017788e20c38892124673860f068f2919c289193d"
+  },
+  "v8-source/third_party/glibc/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/glibc/LICENSE",
+    "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe"
+  },
+  "v8-source/third_party/highway/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/highway/LICENSE",
+    "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1"
+  },
+  "v8-source/third_party/inspector_protocol/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/inspector_protocol/LICENSE",
+    "sha256": "450ebb9e9e50c2809d9ca581931fc8946d8d5aa0c8c35aae9ac471342fe4a88e"
+  },
+  "v8-source/third_party/jsoncpp/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/jsoncpp/LICENSE",
+    "sha256": "76c45ece83a26117f86f4e349e7df118708e061e87225328fb478ce1e8b3eb86"
+  },
+  "v8-source/third_party/rapidhash-v8/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/rapidhash-v8/LICENSE",
+    "sha256": "db672df7faf793fbe28b8074fdd10822363e1525816b45c9627754885de842b0"
+  },
+  "v8-source/third_party/re2/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/re2/LICENSE",
+    "sha256": "6040cda75d90b1738292a631d89934c411ef7ffd543c4d6a1b7edfc8edf29449"
+  },
+  "v8-source/third_party/siphash/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/siphash/LICENSE",
+    "sha256": "36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673"
+  },
+  "v8-source/third_party/utf8-decoder/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/utf8-decoder/LICENSE",
+    "sha256": "3f712e5fbdfdbd5ee7d9b8c8152580220df55de47f4eba2f26c95c4de19ad096"
+  },
+  "v8-source/third_party/v8/builtins/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/v8/builtins/LICENSE",
+    "sha256": "b9a6d9320b8f2693e8d41e496ce56caadacaddcca9be2a64a61749278f425cf2"
+  },
+  "v8-source/third_party/v8/codegen/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/v8/codegen/LICENSE",
+    "sha256": "17e4f539024be2749ee729d1e2f01d24cef12ece8c9bf18e91a4349be29c80bf"
+  },
+  "v8-source/third_party/valgrind/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/valgrind/LICENSE",
+    "sha256": "ebf25b8ce59c9e8883acd1ca75b6fc121937ca034f666c4077d2be739d2e1622"
+  },
+  "v8-source/third_party/vtune/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/vtune/LICENSE",
+    "sha256": "02aea3ade0c02470335987f7d93ffaed877bcefc8414a416e2e548665bb0bfd0"
+  },
+  "v8-source/third_party/wasm-api/LICENSE": {
+    "source_archive": {
+      "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+      "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+    },
+    "source_path": "v8-15.0.245.2/third_party/wasm-api/LICENSE",
+    "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+  },
+  "icu-chromium-LICENSE": {
+    "url": "https://chromium.googlesource.com/chromium/deps/icu.git/+/a86a32e67b8d1384b33f8fa48c83a6079b86f8cd/LICENSE?format=TEXT",
+    "sha256": "451167c55c0fa447cc2d5632714f5e3c567fe4f1e1badefab2c1333852198aca",
+    "download_sha256": "c5a4698576c4195d3b5869d409cb3d4be7fca00201a5f15ecb5b03aae07b2e2e",
+    "encoding": "base64"
+  },
+  "fast-float-LICENSE-MIT": {
+    "url": "https://raw.githubusercontent.com/fastfloat/fast_float/v8.0.2/LICENSE-MIT",
+    "sha256": "e562f3f974ced7e69dd1db77b820b36bcf8f30377f1aa105723fba449c53c4e6",
+    "download_sha256": "e562f3f974ced7e69dd1db77b820b36bcf8f30377f1aa105723fba449c53c4e6",
+    "encoding": "identity"
+  },
+  "simdutf-LICENSE-MIT": {
+    "url": "https://raw.githubusercontent.com/simdutf/simdutf/v7.7.0/LICENSE-MIT",
+    "sha256": "fc8dbc04e03ad4efc08a647ffe7f995b811a95bc04c0e85a56d5277c6593fa5f",
+    "download_sha256": "fc8dbc04e03ad4efc08a647ffe7f995b811a95bc04c0e85a56d5277c6593fa5f",
+    "encoding": "identity"
+  },
+  "dragonbox-LICENSE-Apache2-LLVM": {
+    "url": "https://raw.githubusercontent.com/jk-jeon/dragonbox/beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44/LICENSE-Apache2-LLVM",
+    "sha256": "9e45e856bedccee9f67254082ca11851d954de2fed7448c4bed19ad9aab99a91",
+    "download_sha256": "9e45e856bedccee9f67254082ca11851d954de2fed7448c4bed19ad9aab99a91",
+    "encoding": "identity"
+  },
+  "deno-core-icudata-Cargo.toml": {
+    "crate": "deno_core_icudata",
+    "version": "0.77.0",
+    "crate_sha256": "a9efff8990a82c1ae664292507e1a5c6749ddd2312898cdf9cd7cb1fd4bc64c6",
+    "source_path": "Cargo.toml.orig",
+    "sha256": "424ad83d0fb170939e3be8d84ff3b3c46c8bbd860a85e82998427ca9dbb70db3"
+  },
+  "deno-core-icudata-README.md": {
+    "crate": "deno_core_icudata",
+    "version": "0.77.0",
+    "crate_sha256": "a9efff8990a82c1ae664292507e1a5c6749ddd2312898cdf9cd7cb1fd4bc64c6",
+    "source_path": "README.md",
+    "sha256": "3227421e62451436a2da8d5a35e0681b2b5eececb9be02fa8c59c9f77231a324"
+  },
+  "deno-core-icudata-lib.rs": {
+    "crate": "deno_core_icudata",
+    "version": "0.77.0",
+    "crate_sha256": "a9efff8990a82c1ae664292507e1a5c6749ddd2312898cdf9cd7cb1fd4bc64c6",
+    "source_path": "src/lib.rs",
+    "sha256": "3f4f335a36a7ec1101256ad5c7ace9e23e4049f8fc4066d16961384ff03db258"
+  },
+  "deno-core-icudata-LICENSE-MIT": {
+    "license": "MIT",
+    "authors": "the Deno authors",
+    "declared_in": "deno-core-icudata-Cargo.toml",
+    "license_text_source": "rusty-v8-LICENSE",
+    "sha256": "2092b32b236c3338e7149425fb41f52fb6216557002a301cd8f5932c51e36a7f"
+  }
+}

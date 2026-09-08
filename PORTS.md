@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 75 active Pedigree ports and 15 explicit disabled
+The current catalog contains 77 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -48,8 +48,8 @@ List the active catalog or inspect a dependency closure without building:
 | slang | 2.3.3 | sqlite | 3.53.4 | vim | 9.2.1031 |
 | vttest | 20251205 | wget | 1.25.0 | zlib | 1.3.2 |
 | go | 1.26.5 | ripgrep | 15.2.0 | rust | 1.85.1 |
-| codex-app-server | 0.0.0.20260907 | codex-cli | 0.0.0.20260907 | | |
-| v8 | 13.6.233.17 | | | | |
+| codex-app-server | 0.0.0.20260907 | codex-cli | 0.0.0.20260907 | codex | 0.0.0.20260907 |
+| v8 | 13.6.233.17 | codex-code-mode-host | 0.0.0.20260907 | | |
 
 The Go target and Rust cross toolchain have runtime qualification in QEMU on
 one and four CPUs. Rust currently uses the Linux-musl ABI; ripgrep is built
@@ -71,11 +71,22 @@ App Server passes all five stdio RPC checks plus
 graceful shutdown in one-CPU QEMU on the repaired kernel. A four-CPU release
 run stalls during initialization with allocator lock contention; SMP remains
 unqualified. The matching Codex CLI port passes basic command checks and
-renders its terminal UI, but startup and embedded RPC qualification remain
-blocked by kernel failures. Build instructions and qualification records are in
+renders its terminal UI, but earlier startup and embedded RPC runs failed
+in the kernel. Build instructions and qualification records are in
 [`docs/codex-app-server.md`](docs/codex-app-server.md) and
-[`docs/codex-cli.md`](docs/codex-cli.md). Authenticated agent sessions and Code
-Mode remain separate milestones.
+[`docs/codex-cli.md`](docs/codex-cli.md). Authenticated agent sessions remain
+unqualified.
+
+The published unified `codex` PUP includes the CLI and the matching Code Mode host,
+with an App Server command that uses the CLI's embedded server, and passes
+the package audit. The host passes all nine direct protocol/runtime checks
+in QEMU on one and four CPUs with the absolute-futex and RAW-clock kernel
+extensions. Full CLI integration on Pedigree remains unqualified; the local
+scripted-provider integration passes on Linux. The host embeds V8 15.0.245.2
+through Rust bindings 150.4.0; it has no Node.js or V8 13.6 runtime dependency.
+Build and qualification details are in
+[`docs/codex.md`](docs/codex.md) and
+[`docs/codex-code-mode-host.md`](docs/codex-code-mode-host.md).
 
 Python 3.14.7 replaces the disabled Python 2 recipe and also provides
 `/usr/bin/python` as a compatibility link.

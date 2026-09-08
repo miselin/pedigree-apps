@@ -1,0 +1,32 @@
+--- a/codex-rs/code-mode-host/Cargo.toml
++++ b/codex-rs/code-mode-host/Cargo.toml
+@@ -15,6 +15,9 @@
+ 
+ [lints]
+ workspace = true
++
++[features]
++pedigree = ["dep:openssl-sys"]
+ 
+ [dependencies]
+ anyhow = { workspace = true }
+@@ -36,6 +39,9 @@
+ tracing-subscriber = { workspace = true }
+ uuid = { workspace = true, features = ["v4"] }
+ 
++[target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
++openssl-sys = { workspace = true, features = ["vendored"], optional = true }
++
+ [dev-dependencies]
+ codex-code-mode = { workspace = true }
+ codex-utils-cargo-bin = { workspace = true }
+--- a/codex-rs/Cargo.lock
++++ b/codex-rs/Cargo.lock
+@@ -2793,6 +2793,7 @@
+  "codex-protocol",
+  "codex-utils-cargo-bin",
+  "futures",
++ "openssl-sys",
+  "pretty_assertions",
+  "prost",
+  "serde_json",

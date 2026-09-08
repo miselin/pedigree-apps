@@ -70,6 +70,9 @@ python3 -m unittest -v \
     scripts.build_codex_test \
     scripts.codex_app_server_probe_test \
     scripts.codex_cli_probe_test \
+    scripts.codex_code_mode_probe_test \
+    scripts.codex_integration_probe_test \
+    scripts.codex_package_test \
     scripts.qualify_language_ports_test \
     scripts.build_v8_test
 python3 -m compileall -q \

@@ -1,0 +1,21 @@
+{
+  "crate_version": "150.4.0",
+  "engine_version": "15.0.245.2",
+  "sandbox": true,
+  "pointer_compression": true,
+  "archive": {
+    "url": "https://github.com/openai/codex/releases/download/rusty-v8-v150.4.0/librusty_v8_ptrcomp_sandbox_release_x86_64-unknown-linux-musl.a.gz",
+    "sha256": "d06e08bcbf45a90cfeac8a4d322c7288775cb5e3609ca703ea312b155174e46a"
+  },
+  "binding": {
+    "url": "https://github.com/openai/codex/releases/download/rusty-v8-v150.4.0/src_binding_ptrcomp_sandbox_release_x86_64-unknown-linux-musl.rs",
+    "sha256": "7727826ae479bdb645e807239fb12d1f8e2e23de7a6cf16f5ee592690d1d8506"
+  },
+  "v8_source": {
+    "url": "https://github.com/v8/v8/archive/refs/tags/15.0.245.2.tar.gz",
+    "sha256": "164f3d3e0a8b4c02a386d3a88d1b1133d37e5c20be0239fecdcdde414a4340d5"
+  },
+  "libcxx_revision": "5abc7f839700f0f17338434e1c1c6a8c87c00c11",
+  "libcxxabi_revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+  "llvm_libc_revision": "9309c117ebae84dd2f9df1ef99de4782162527d5"
+}

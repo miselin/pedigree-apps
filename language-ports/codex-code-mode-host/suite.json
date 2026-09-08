@@ -1,0 +1,27 @@
+{
+  "trees": [
+    {"source": "../../newpacks/x86_64/ncurses/6.6/root", "destination": "/"},
+    {"source": "../../newpacks/x86_64/readline/8.3.3/root", "destination": "/"},
+    {"source": "../../newpacks/x86_64/bash/5.3.15/root", "destination": "/"},
+    {"source": "../../newpacks/x86_64/codex-code-mode-host/0.0.0.20260907/root", "destination": "/"}
+  ],
+  "files": [
+    {"source": "../../.build/codex-code-mode-host/artifacts/codex-code-mode-qualify", "destination": "/usr/bin/codex-code-mode-qualify", "mode": "0755"}
+  ],
+  "cases": [{
+    "name": "codex-code-mode-host",
+    "command": "CODEX_CODE_MODE_QUALIFY_TIMEOUT_MS=600000 /usr/bin/codex-code-mode-qualify",
+    "markers": [
+      "CODEX-CODE-MODE: PASS handshake",
+      "CODEX-CODE-MODE: PASS session-open",
+      "CODEX-CODE-MODE: PASS arithmetic",
+      "CODEX-CODE-MODE: PASS promises-tool",
+      "CODEX-CODE-MODE: PASS exception",
+      "CODEX-CODE-MODE: PASS recovery",
+      "CODEX-CODE-MODE: PASS yield-terminate",
+      "CODEX-CODE-MODE: PASS termination-recovery",
+      "CODEX-CODE-MODE: PASS shutdown",
+      "CODEX-CODE-MODE: PASS all (9 checks)"
+    ]
+  }]
+}

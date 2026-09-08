@@ -3,12 +3,17 @@
 The `codex-cli` package provides `/usr/bin/codex`, including the terminal
 interface, noninteractive commands, and the embedded App Server. It uses the
 same pinned Codex revision and Rust Linux-musl target as the standalone
-[`codex-app-server` package](codex-app-server.md). Neither package includes
-the separate V8 Code Mode host.
+[`codex-app-server` package](codex-app-server.md). These component packages
+omit the separately packaged [Code Mode host](codex-code-mode-host.md).
+The combined [`codex` PUP](codex.md) includes the CLI and that host and has
+passed the package audit.
 
-This is an experimental port. Basic commands pass in Pedigree, but terminal
-startup and the final executable's embedded RPC suite remain blocked by
-kernel failures. It does not yet establish working coding sessions.
+This is an experimental port. Basic commands pass in Pedigree, while earlier
+terminal-startup and embedded-RPC runs failed in the kernel. The Code Mode host
+now passes its direct checks on one and four CPUs; full CLI integration on
+Pedigree remains unqualified because the [integration fixture](codex.md) stopped
+before launching the CLI. Working authenticated coding sessions are not yet
+established.
 
 ## Build and install
 
@@ -59,7 +64,14 @@ explicit full-access configuration. Full access does not supply Code Mode.
 The bundled model catalog requires Code Mode for GPT-6 Astra and GPT-5.6
 Sol/Terra/Luna. GPT-5.5 supports the ordinary tool path in this snapshot;
 actual model availability and requirements come from the account's live
-catalog. A compatible Code Mode host remains a separate porting milestone.
+catalog. The matching V8 15.0 Code Mode host now passes all nine direct
+protocol/runtime checks on one and four CPUs with Pedigree's absolute-futex
+and RAW-clock extensions. It is included in the combined `codex` PUP and
+can also be built as the `codex-code-mode-host` component. Its V8 sandbox
+remains enabled. The [combined integration check](codex.md) passes against a local
+scripted provider on Linux; the native CLI workflow remains unqualified after
+the documented prerequisite failures. Direct host
+qualification alone does not qualify a CLI agent turn.
 
 Authentication, model requests, agent-driven editing, sandbox enforcement,
 and persistent session recovery require their own runtime qualification.
