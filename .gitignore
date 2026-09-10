@@ -1,6 +1,7 @@
 downloads/*
 newpacks/*
 .build/
+.worktrees/
 .DS_Store
 status.log
 environment.sh
