@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 import argparse
 import os
@@ -11,8 +11,8 @@ DEFINE_RE = re.compile(r'\#define\s+?(?P<name>.*?)\s+(?P<value>.*)')
 
 
 def main():
-    include_dir = os.path.join('/include', 'SDL')
-    libs_dir = os.path.join('/libraries')
+    include_dir = os.path.join('/usr/include', 'SDL')
+    libs_dir = os.path.join('/usr/lib')
 
     # Parse header file, extract version
     sdl_version_header = os.path.join(include_dir, 'SDL_version.h')
@@ -64,10 +64,10 @@ def main():
             '-liconv -lstdc++' % (libs_dir,)),
     }
 
-    for k, v in pedigree_sdl_config.iteritems():
+    for k, v in pedigree_sdl_config.items():
         if hasattr(args, k) and getattr(args, k):
-            print v,
-    print
+            print(v, end=' ')
+    print()
 
 
 if __name__ == '__main__':

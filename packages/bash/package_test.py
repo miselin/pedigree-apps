@@ -21,6 +21,12 @@ class BashPackageTest(unittest.TestCase):
         self.assertIn("+      return (EXECUTION_FAILURE);", patch)
         self.assertNotIn("fsync", patch)
 
+    def test_legacy_absolute_path_patch_is_not_applied(self):
+        self.assertNotIn(
+            "pedigree-bash.diff",
+            BashPackage(__file__).patches({}, "/source"),
+        )
+
     @mock.patch('packages.bash.package.steps.run_configure')
     def test_configure_links_split_terminfo_library(self, run_configure):
         env = {}

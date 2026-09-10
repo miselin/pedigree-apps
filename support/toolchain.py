@@ -79,9 +79,9 @@ def prepare_compiler(env):
         ('$PEDIGREE_BASE/build/musl/lib/crtn.o',
             '$CROSS_BASE//lib/gcc/$CROSS_TARGET/%s/crtn.o' % vers),
 
-        # NO $CROSS_TARGET include directory - use /include!!
+        # Headers are installed below the target's FHS /usr prefix.
         (None,
-            '$CROSS_BASE/$CROSS_TARGET/include'),
+            '$CROSS_BASE/$CROSS_TARGET/usr/include'),
     )
 
     # Clean up the base tree of the cross-compiler.
@@ -125,17 +125,17 @@ def pedigree_into_chroot(env, chroot_dir):
     """
 
     copy_paths = (
-        ('$PEDIGREE_BASE/build/musl/include', 'include/'),
-        ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include', 'include/SDL'),
-        ('$PEDIGREE_BASE/build/libSDL.so', 'libraries/'),
-        ('$PEDIGREE_BASE/build/libpedigree.so', 'libraries/'),
-        ('$PEDIGREE_BASE/build/libpedigree-c.so', 'libraries/'),
-        ('$PEDIGREE_BASE/build/libs/libui.so', 'libraries/'),
-        ('$PEDIGREE_BASE/images/local/support/gcc/include/c++', 'include/c++'),
-        ('$PEDIGREE_BASE/images/local/libraries/libstdc++.so', 'libraries/'),
-        ('$PEDIGREE_BASE/images/local/libraries/libstdc++.a', 'libraries/'),
-        ('$PEDIGREE_BASE/images/local/libraries/libsupc++.a', 'libraries/'),
-        ('$APPS_BASE/bin/sdl-config', 'applications/'),
+        ('$PEDIGREE_BASE/build/musl/usr/include', 'usr/include/'),
+        ('$PEDIGREE_BASE/src/lgpl/SDL-1.2.14/include', 'usr/include/SDL'),
+        ('$PEDIGREE_BASE/build/libSDL.so', 'usr/lib/'),
+        ('$PEDIGREE_BASE/build/libpedigree.so', 'usr/lib/'),
+        ('$PEDIGREE_BASE/build/libpedigree-c.so', 'usr/lib/'),
+        ('$PEDIGREE_BASE/build/libs/libui.so', 'usr/lib/'),
+        ('$PEDIGREE_BASE/images/local/support/gcc/include/c++', 'usr/include/c++'),
+        ('$PEDIGREE_BASE/images/local/libraries/libstdc++.so', 'usr/lib/'),
+        ('$PEDIGREE_BASE/images/local/libraries/libstdc++.a', 'usr/lib/'),
+        ('$PEDIGREE_BASE/images/local/libraries/libsupc++.a', 'usr/lib/'),
+        ('$APPS_BASE/bin/sdl-config', 'usr/bin/'),
     )
 
     for source, target in copy_paths:
@@ -192,10 +192,10 @@ def chroot_spec(env):
     new_specs = subprocess.check_output([cc, '-dumpspecs']).decode('utf-8')
 
     replacements = {
-        '%D': '-L/libraries -rpath-link /libraries %D',
-        '*cpp:\n': ('*cpp:\n-D__PEDIGREE__ -I/include -isystem '
-                    '/include/c++/%%(version) -isystem '
-                    '/include/c++/%%(version)/%s ' % env['CROSS_TARGET'])
+        '%D': '-L/usr/lib -rpath-link /usr/lib %D',
+        '*cpp:\n': ('*cpp:\n-D__PEDIGREE__ -I/usr/include -isystem '
+                    '/usr/include/c++/%%(version) -isystem '
+                    '/usr/include/c++/%%(version)/%s ' % env['CROSS_TARGET'])
     }
 
     additions = ''
@@ -235,8 +235,8 @@ def chroot_spec(env):
     # packages actually declare libtool as a build-requires.
     libtool_link = os.path.join(bin2, 'libtool')
     if not (os.path.exists(libtool_link) or os.path.islink(libtool_link)):
-        os.symlink('/applications/libtool', libtool_link)
+        os.symlink('/usr/bin/libtool', libtool_link)
     libtoolize_link = os.path.join(bin2, 'libtoolize')
     if not (os.path.exists(libtoolize_link) or
             os.path.islink(libtoolize_link)):
-        os.symlink('/applications/libtoolize', libtoolize_link)
+        os.symlink('/usr/bin/libtoolize', libtoolize_link)

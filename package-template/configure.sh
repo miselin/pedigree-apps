@@ -16,7 +16,6 @@ cd "$2"
 mkdir -p build && cd build
 
 ../configure --host=$ARCH_TARGET-pedigree --target=$ARCH_TARGET-pedigree \
-             --bindir=/applications --sysconfdir=/config/$package \
-             --prefix=/support/$package --libdir=/libraries --includedir=/include \
+             --bindir=/usr/bin --sysconfdir=/etc/$package \
+             --prefix=/usr --libdir=/usr/lib --includedir=/usr/include \
              > /dev/null 2>&1
-
