@@ -117,6 +117,19 @@ ELF Header:
             env, _, _, _ = self.complete_artifacts(temporary)
             audit.audit_package("example", self.FakePackage(__file__), env)
 
+    def test_accepts_conventional_static_archive(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            env, root, _, archive = self.complete_artifacts(temporary)
+            libdir = os.path.join(root, "usr", "lib")
+            os.makedirs(libdir)
+            with open(os.path.join(libdir, "libexample.a"), "wb") as output:
+                output.write(b"!<arch>\n")
+            self.create_archive(root, archive)
+
+            result = subprocess.CompletedProcess([], 0, "", "")
+            with mock.patch("support.audit.subprocess.run", return_value=result):
+                audit.audit_package("example", self.FakePackage(__file__), env)
+
     def test_rejects_executable_script_without_runtime_provider(self):
         with tempfile.TemporaryDirectory() as temporary:
             env, root, _, archive = self.complete_artifacts(temporary)

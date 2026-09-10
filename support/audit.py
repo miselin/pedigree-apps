@@ -374,12 +374,14 @@ def _readelf(env, path, *arguments):
     return result.stdout
 
 
-def _check_elf_headers(env, path, relative):
+def _check_elf_headers(env, path, relative, allow_empty=False):
     output = _readelf(env, path, "-hW")
     classes = re.findall(r"^\s*Class:\s*(.+?)\s*$", output, re.MULTILINE)
     data = re.findall(r"^\s*Data:\s*(.+?)\s*$", output, re.MULTILINE)
     machines = re.findall(r"^\s*Machine:\s*(.+?)\s*$", output, re.MULTILINE)
     types = re.findall(r"^\s*Type:\s*(\S+)", output, re.MULTILINE)
+    if not classes and allow_empty:
+        return []
     if not classes or not (len(classes) == len(data) == len(machines) == len(types)):
         raise AuditError("target readelf returned incomplete headers for %s" % relative)
 
@@ -652,7 +654,10 @@ def _check_artifact_formats(root, payload, env):
         if prefix == b"!<thin>\n":
             raise AuditError("thin archive is not self-contained: %s" % relative)
         if prefix == b"!<arch>\n":
-            _check_elf_headers(env, path, relative)
+            # readelf reports members of an ar archive rather than one ELF
+            # header. Empty musl interface archives have no members, while
+            # populated archives still need target-machine validation.
+            _check_elf_headers(env, path, relative, allow_empty=True)
             continue
         if prefix.startswith(b"\x7fELF"):
             elf_types = _check_elf_headers(env, path, relative)
