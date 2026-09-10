@@ -134,6 +134,7 @@ class GccPackage(buildsystem.Package):
                 "--with-ld=/usr/bin/ld",
                 "--enable-languages=c,c++",
                 "--enable-threads=posix",
+                "--enable-version-specific-runtime-libs",
                 "--enable-lto",
                 "--disable-multilib",
                 "--disable-nls",
@@ -151,9 +152,8 @@ class GccPackage(buildsystem.Package):
         ).strip()
         builddir = steps.get_builddir(srcdir, env, False)
         dependency_prefix = os.path.join(env["PORTS_SYSROOT"], "usr")
-        # GCC's explicit C++ include option strips the '/' sysroot and makes
-        # the search path relative. Its native default preserves the prefix
-        # and matches libstdc++'s /usr/include/c++/<version> installation.
+        # GCC's native default keeps the versioned headers and runtime together.
+        # An explicit C++ include path becomes relative with the '/' sysroot.
         steps.cmd(
             [
                 os.path.join(srcdir, "configure"),
@@ -181,6 +181,7 @@ class GccPackage(buildsystem.Package):
                 "--with-system-zlib",
                 "--enable-languages=c,c++",
                 "--enable-threads=posix",
+                "--enable-version-specific-runtime-libs",
                 "--enable-lto",
                 "--disable-bootstrap",
                 "--disable-libstdcxx-pch",
@@ -224,54 +225,25 @@ class GccPackage(buildsystem.Package):
                 if filename.endswith(".la"):
                     os.unlink(os.path.join(root, filename))
 
+        runtime = os.path.join(
+            "usr", "lib", "gcc", env["CROSS_TARGET"], SOURCE_VERSION
+        )
+        include = os.path.join(runtime, "include", "c++")
         required = (
             os.path.join("usr", "bin", "gcc"),
             os.path.join("usr", "bin", "g++"),
-            os.path.join("usr", "include", "c++", SOURCE_VERSION, "algorithm"),
-            os.path.join("usr", "include", "c++", SOURCE_VERSION, "cstdlib"),
-            os.path.join(
-                "usr",
-                "include",
-                "c++",
-                SOURCE_VERSION,
-                env["CROSS_TARGET"],
-                "bits",
-                "c++config.h",
-            ),
-            os.path.join(
-                "usr",
-                "lib",
-                "gcc",
-                env["CROSS_TARGET"],
-                SOURCE_VERSION,
-                "cc1",
-            ),
-            os.path.join(
-                "usr",
-                "lib",
-                "gcc",
-                env["CROSS_TARGET"],
-                SOURCE_VERSION,
-                "cc1plus",
-            ),
-            os.path.join(
-                "usr",
-                "lib",
-                "gcc",
-                env["CROSS_TARGET"],
-                SOURCE_VERSION,
-                "liblto_plugin.so",
-            ),
-            os.path.join(
-                "usr",
-                "lib",
-                "gcc",
-                env["CROSS_TARGET"],
-                SOURCE_VERSION,
-                "plugin",
-                "include",
-                "configargs.h",
-            ),
+            os.path.join(include, "algorithm"),
+            os.path.join(include, "cstdlib"),
+            os.path.join(include, env["CROSS_TARGET"], "bits", "c++config.h"),
+            os.path.join(runtime, "cc1"),
+            os.path.join(runtime, "cc1plus"),
+            os.path.join(runtime, "liblto_plugin.so"),
+            os.path.join(runtime, "libstdc++.a"),
+            os.path.join(runtime, "libstdc++exp.a"),
+            os.path.join(runtime, "libsupc++.a"),
+            os.path.join(runtime, "libstdc++.a-gdb.py"),
+            os.path.join(runtime, "libstdc++.modules.json"),
+            os.path.join(runtime, "plugin", "include", "configargs.h"),
         )
         missing = [
             relative

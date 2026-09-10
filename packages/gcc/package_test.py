@@ -106,6 +106,7 @@ class GccPackageTest(unittest.TestCase):
             )
         self.assertIn("--disable-bootstrap", command)
         self.assertIn("--disable-shared", command)
+        self.assertIn("--enable-version-specific-runtime-libs", command)
         self.assertNotIn("--with-headers", command)
         self.assertEqual(command_env["CC_FOR_BUILD"], "/usr/bin/cc")
         self.assertEqual(command_env["CFLAGS_FOR_BUILD"], "-O2")
@@ -134,6 +135,7 @@ class GccPackageTest(unittest.TestCase):
         self.assertTrue(options[0].startswith("TOPLEVEL_CONFIGURE_ARGUMENTS="))
         self.assertIn("--host=x86_64-pedigree", options[0])
         self.assertIn("--with-sysroot=/", options[0])
+        self.assertIn("--enable-version-specific-runtime-libs", options[0])
         self.assertNotIn("--with-gxx-include-dir", options[0])
         self.assertIn("--with-as=/usr/bin/as", options[0])
         self.assertNotIn(self.env["PORTS_SYSROOT"], options[0])
@@ -202,11 +204,16 @@ class GccPackageTest(unittest.TestCase):
             os.makedirs(internal)
             for name in ("gcc", "g++"):
                 open(os.path.join(bindir, name), "wb").close()
-            for name in ("cc1", "cc1plus", "liblto_plugin.so"):
-                open(os.path.join(internal, name), "wb").close()
-            include = os.path.join(
-                deploydir, "usr", "include", "c++", SOURCE_VERSION
+            runtimes = (
+                "libstdc++.a",
+                "libstdc++exp.a",
+                "libsupc++.a",
+                "libstdc++.a-gdb.py",
+                "libstdc++.modules.json",
             )
+            for name in ("cc1", "cc1plus", "liblto_plugin.so") + runtimes:
+                open(os.path.join(internal, name), "wb").close()
+            include = os.path.join(internal, "include", "c++")
             headers = (
                 "algorithm",
                 "cstdlib",
@@ -244,6 +251,18 @@ class GccPackageTest(unittest.TestCase):
                         os.path.relpath(header, deploydir), str(failure.exception)
                     )
                     open(header, "wb").close()
+
+            for name in runtimes:
+                with self.subTest(unversioned_runtime=name):
+                    private = os.path.join(internal, name)
+                    public = os.path.join(deploydir, "usr", "lib", name)
+                    os.rename(private, public)
+                    with self.assertRaises(RuntimeError) as failure:
+                        self.package.postdeploy(self.env, "/source", deploydir)
+                    self.assertIn(
+                        os.path.relpath(private, deploydir), str(failure.exception)
+                    )
+                    os.rename(public, private)
 
             with open(
                 os.path.join(plugin_include, "configargs.h"),
