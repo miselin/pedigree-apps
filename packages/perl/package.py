@@ -25,6 +25,11 @@ class PerlPackage(buildsystem.Package):
     def version(self):
         return "5.44.0"
 
+    def release_version(self):
+        # PUP releases are immutable; this numeric revision avoids replacing
+        # the older package while remaining newer under PUP's version order.
+        return self.version() + ".1"
+
     def patches(self, env, srcdir):
         return [
             "errno-cross.diff",

@@ -1,6 +1,8 @@
 import os
 import shutil
 
+from . import buildsystem
+
 
 def collect_dependencies(known_packages, package):
     result = []
@@ -68,7 +70,10 @@ def prepare_sysroot(known_packages, package, env):
 
     for dependency in collect_dependencies(known_packages, package):
         package_root = os.path.join(
-            env["OUTPUT_BASE"], dependency.name(), dependency.version(), "root"
+            env["OUTPUT_BASE"],
+            dependency.name(),
+            buildsystem.package_version(dependency),
+            "root",
         )
         completion_marker = os.path.join(
             os.path.dirname(package_root), ".complete"

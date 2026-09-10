@@ -13,6 +13,12 @@ each package under `newpacks/x86_64/<package>/<version>/root`, and enforces the
 target FHS layout, primarily under `/usr`, `/etc`, and `/var`. Builds are local
 by default and do not upload unless an upload option is explicitly selected.
 
+Recipes keep the upstream source version separate from the immutable PUP release
+version. A Pedigree-specific payload revision is numeric and appended as an
+extra component, such as `5.3.15.1`; this remains newer under PUP ordering and
+also gives changed archives a new CDN cache identity. Existing completed roots
+can be republished without recompilation with `--repackage-only`.
+
 List the active catalog or inspect a dependency closure without building:
 
 ```sh
@@ -25,7 +31,7 @@ List the active catalog or inspect a dependency closure without building:
 | Port | Version | Port | Version | Port | Version |
 | --- | --- | --- | --- | --- | --- |
 | apache2 | 2.4.68 | apr | 1.7.6 | apr-util | 1.6.5 |
-| atk | 2.38.0 | autoconf | 2.73 | bash | 5.3.15 |
+| atk | 2.38.0 | autoconf | 2.73 | bash | 5.3.15.1 |
 | bind | 9.11.37 | binutils | 2.46.1 | bsdtar | 3.8.9 |
 | ca-certificates | 2026.08.13 | cairo | 1.18.4 | cmake | 4.4.3 |
 | coreutils | 9.11 | curl | 8.22.0 | dialog | 1.3.20260721 |
@@ -42,7 +48,7 @@ List the active catalog or inspect a dependency closure without building:
 | lynx | 2.9.3 | m4 | 1.4.21 | man-db | 2.13.1 |
 | mandoc | 1.14.6 | mesa | 25.0.7 | mtools | 4.0.49 |
 | nano | 9.2 | nasm | 3.02 | ncurses | 6.6 |
-| openssl | 3.5.8 | pango | 1.58.2 | perl | 5.44.0 |
+| openssl | 3.5.8 | pango | 1.58.2 | perl | 5.44.0.1 |
 | pixman | 0.46.4 | pup | 1.2 | python3 | 3.14.7 |
 | readline | 8.3.3 | sdl2 | 2.32.10 | sed | 4.10 |
 | slang | 2.3.3 | sqlite | 3.53.4 | vim | 9.2.1031 |

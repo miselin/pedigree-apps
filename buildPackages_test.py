@@ -34,6 +34,16 @@ class BuildPackagesTest(unittest.TestCase):
         def version(self):
             return "1.0"
 
+    class RevisedPackage(buildsystem.Package):
+        def name(self):
+            return "revised"
+
+        def version(self):
+            return "1.0"
+
+        def release_version(self):
+            return "1.0.1"
+
     def test_wrapper_accepts_no_package_arguments(self):
         repository = os.path.dirname(__file__)
         with tempfile.TemporaryDirectory() as temporary:
@@ -163,6 +173,44 @@ class BuildPackagesTest(unittest.TestCase):
         ordered = buildPackages.order_uploads(packages)
 
         self.assertEqual([name for name, _ in ordered], ["runtime", "dependent"])
+
+    def test_repackage_only_reuses_completed_root(self):
+        package = self.RevisedPackage(__file__)
+        with tempfile.TemporaryDirectory() as temporary:
+            env = {
+                "OUTPUT_BASE": os.path.join(temporary, "output"),
+                "PACKMAN_REPO": os.path.join(temporary, "repo"),
+            }
+            old_base = os.path.join(
+                env["OUTPUT_BASE"], package.name(), package.version()
+            )
+            old_root = os.path.join(old_base, "root")
+            os.makedirs(old_root)
+            with open(os.path.join(old_root, "payload"), "w") as payload:
+                payload.write("unchanged")
+            with open(os.path.join(old_base, ".complete"), "w") as marker:
+                marker.write("revised-1.0\n")
+
+            with mock.patch("buildPackages.steps.create_package") as create, mock.patch(
+                "buildPackages.audit.audit_packages", return_value=0
+            ) as audit:
+                result = buildPackages.repackage_all(
+                    [(package.name(), package)], env
+                )
+                self.assertEqual(result, 0)
+                new_base = os.path.join(
+                    env["OUTPUT_BASE"],
+                    package.name(),
+                    package.release_version(),
+                )
+                with open(os.path.join(new_base, "root", "payload")) as payload:
+                    self.assertEqual(payload.read(), "unchanged")
+                with open(os.path.join(new_base, ".complete")) as marker:
+                    self.assertEqual(marker.read(), "revised-1.0.1\n")
+                create.assert_called_once_with(
+                    package, os.path.join(new_base, "root"), env
+                )
+                audit.assert_called_once()
 
     def test_upload_only_registers_in_runtime_dependency_order(self):
         package = self.RuntimeDependentPackage(__file__)

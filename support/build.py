@@ -44,7 +44,9 @@ def _run_optional(package, method_name, *args):
 
 
 def build_package(package, env):
-    package_id = "%s-%s" % (package.name(), package.version())
+    package_id = "%s-%s" % (
+        package.name(), buildsystem.package_version(package)
+    )
     env = env.copy()
     os.makedirs(env["DOWNLOAD_TEMP"], exist_ok=True)
     os.makedirs(env["BUILD_BASE"], exist_ok=True)
@@ -54,7 +56,9 @@ def build_package(package, env):
     build_root = os.path.join(env["BUILD_BASE"], "work", package_id)
     srcdir = os.path.join(build_root, "src")
     deploy_base = os.path.join(
-        env["OUTPUT_BASE"], package.name(), package.version()
+        env["OUTPUT_BASE"],
+        package.name(),
+        buildsystem.package_version(package),
     )
     deploydir = os.path.join(deploy_base, "root")
     staging_deploydir = os.path.join(deploy_base, "root.incomplete")

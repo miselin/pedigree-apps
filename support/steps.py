@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import urllib.request
 
+from . import buildsystem
 
 log = logging.getLogger(__name__)
 
@@ -458,7 +459,7 @@ def pup_package(package, deploydir, env, upload=False, upload_key=None):
                     "--package",
                     package.name(),
                     "--version",
-                    package.version(),
+                    buildsystem.package_version(package),
                     "--architecture",
                     env["PACKMAN_TARGET_ARCH"],
                 )
@@ -473,7 +474,7 @@ def pup_package(package, deploydir, env, upload=False, upload_key=None):
                     "--package",
                     package.name(),
                     "--version",
-                    package.version(),
+                    buildsystem.package_version(package),
                     "--architecture",
                     env["PACKMAN_TARGET_ARCH"],
                 )

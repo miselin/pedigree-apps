@@ -680,7 +680,7 @@ def _check_artifact_formats(root, payload, env):
 
 
 def _artifact_paths(name, package, env):
-    version = package.version()
+    version = buildsystem.package_version(package)
     deploy_base = os.path.join(env["OUTPUT_BASE"], name, version)
     return (
         os.path.join(deploy_base, "root"),
@@ -706,7 +706,9 @@ def audit_package(name, package, env):
             marker_content = source.read()
     except OSError as error:
         raise AuditError("cannot read completion marker: %s" % error) from error
-    expected_marker = "%s-%s\n" % (name, package.version())
+    expected_marker = "%s-%s\n" % (
+        name, buildsystem.package_version(package)
+    )
     if marker_content != expected_marker:
         raise AuditError(
             "completion marker content differs: %r != %r"

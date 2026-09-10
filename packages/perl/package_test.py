@@ -7,6 +7,12 @@ from .package import PerlPackage
 
 
 class PerlPackageTest(unittest.TestCase):
+    def test_release_version_has_numeric_pedigree_revision(self):
+        package = PerlPackage(__file__)
+
+        self.assertEqual(package.version(), "5.44.0")
+        self.assertEqual(package.release_version(), "5.44.0.1")
+
     def test_errno_patch_uses_target_os_and_toolchain_sysroot(self):
         patch_path = os.path.join(
             os.path.dirname(__file__), "patches", "errno-cross.diff"

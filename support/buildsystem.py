@@ -318,6 +318,15 @@ class Package:
                             % (path, line.strip())
                         )
 
+
+def package_version(package):
+    """Return the immutable PUP release version for a package."""
+    release_method = getattr(type(package), "release_version", None)
+    if release_method is None:
+        return package.version()
+    return release_method(package)
+
+
 def load_packages(env):
     packages = {}
     packages_dir = env["SOURCE_BASE"]

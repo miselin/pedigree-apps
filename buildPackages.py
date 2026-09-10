@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import shutil
 import sys
 
 import environment
@@ -59,14 +60,18 @@ def upload_all(packages, env, upload_key):
     artifacts = []
     for name, package in packages:
         deploy_base = os.path.join(
-            env["OUTPUT_BASE"], name, package.version()
+            env["OUTPUT_BASE"], name, buildsystem.package_version(package)
         )
         deploydir = os.path.join(deploy_base, "root")
         completion_marker = os.path.join(deploy_base, ".complete")
         archive = os.path.join(
             env["PACKMAN_REPO"],
             "%s-%s-%s.pup"
-            % (name, package.version(), env["PACKMAN_TARGET_ARCH"]),
+            % (
+                name,
+                buildsystem.package_version(package),
+                env["PACKMAN_TARGET_ARCH"],
+            ),
         )
         if not (
             os.path.isdir(deploydir)
@@ -124,6 +129,66 @@ def build_all(packages, all_packages, env):
     return 0
 
 
+def repackage_all(packages, env):
+    for name, package in packages:
+        upstream_version = package.version()
+        release_version = buildsystem.package_version(package)
+        if upstream_version == release_version:
+            log.error(
+                'repackage-only requires a release suffix for "%s"', name
+            )
+            return 2
+
+        old_base = os.path.join(env["OUTPUT_BASE"], name, upstream_version)
+        old_root = os.path.join(old_base, "root")
+        old_marker = os.path.join(old_base, ".complete")
+        expected_marker = "%s-%s\n" % (name, upstream_version)
+        if not os.path.isdir(old_root) or os.path.islink(old_root):
+            log.error(
+                'cannot repackage "%s": old build root is missing', name
+            )
+            return 2
+        try:
+            with open(old_marker, encoding="utf-8") as marker:
+                marker_content = marker.read()
+        except OSError:
+            log.error(
+                'cannot repackage "%s": old completion marker is missing',
+                name,
+            )
+            return 2
+        if marker_content != expected_marker:
+            log.error(
+                'cannot repackage "%s": old completion marker is %r, expected %r',
+                name,
+                marker_content,
+                expected_marker,
+            )
+            return 2
+
+        new_base = os.path.join(env["OUTPUT_BASE"], name, release_version)
+        if os.path.exists(new_base):
+            log.error(
+                'cannot repackage "%s": target release already exists', name
+            )
+            return 2
+        new_root = os.path.join(new_base, "root")
+        os.makedirs(new_base)
+        try:
+            shutil.copytree(old_root, new_root, symlinks=True)
+            marker_temporary = os.path.join(new_base, ".complete.tmp")
+            with open(marker_temporary, "w", encoding="utf-8") as marker:
+                marker.write("%s-%s\n" % (name, release_version))
+            os.replace(marker_temporary, os.path.join(new_base, ".complete"))
+            steps.create_package(package, new_root, env)
+        except BaseException:
+            shutil.rmtree(new_base, ignore_errors=True)
+            raise
+        log.info('repackaged "%s" as %s', name, release_version)
+
+    return audit.audit_packages(packages, env)
+
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="Build Pedigree ports locally.")
     parser.add_argument("--target", choices=VALID_ARCH_TARGETS, default="amd64")
@@ -142,6 +207,11 @@ def parse_args(argv):
         "--audit-only",
         action="store_true",
         help="audit existing completed artifacts without rebuilding",
+    )
+    operation_group.add_argument(
+        "--repackage-only",
+        action="store_true",
+        help="recreate suffixed PUPs from existing completed build roots",
     )
     parser.add_argument("--debug", action="store_true")
     return parser.parse_args(argv[1:])
@@ -169,7 +239,7 @@ def main(argv=None):
 
     if args.list:
         for name, package in ordered:
-            print("%s %s" % (name, package.version()))
+            print("%s %s" % (name, buildsystem.package_version(package)))
         return 0
 
     if args.only_depends:
@@ -184,7 +254,7 @@ def main(argv=None):
 
     if args.dry_run:
         for name, package in ordered:
-            print("%s %s" % (name, package.version()))
+            print("%s %s" % (name, buildsystem.package_version(package)))
         return 0
 
     if args.upload_only and not upload_key:
@@ -195,6 +265,9 @@ def main(argv=None):
         return audit.audit_packages(ordered, env)
 
     steps.prepare_package_manager(env)
+
+    if args.repackage_only:
+        return repackage_all(ordered, env)
 
     if args.upload_only:
         return upload_all(ordered, env, upload_key)

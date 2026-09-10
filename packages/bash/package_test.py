@@ -7,6 +7,12 @@ from .package import BashPackage
 
 
 class BashPackageTest(unittest.TestCase):
+    def test_release_version_has_numeric_pedigree_revision(self):
+        package = BashPackage(__file__)
+
+        self.assertEqual(package.version(), "5.3.15")
+        self.assertEqual(package.release_version(), "5.3.15.1")
+
     def test_global_sync_loadable_fails_without_removing_file_sync(self):
         patch_path = os.path.join(
             os.path.dirname(__file__),
