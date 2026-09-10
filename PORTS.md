@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 77 active Pedigree ports and 15 explicit disabled
+The current catalog contains 80 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -48,6 +48,7 @@ List the active catalog or inspect a dependency closure without building:
 | slang | 2.3.3 | sqlite | 3.53.4 | vim | 9.2.1031 |
 | vttest | 20251205 | wget | 1.25.0 | zlib | 1.3.2 |
 | go | 1.26.5 | ripgrep | 15.2.0 | rust | 1.85.1 |
+| patch | 2.8 | | | |
 | codex-app-server | 0.0.0.20260907 | codex-cli | 0.0.0.20260907 | codex | 0.0.0.20260907 |
 | v8 | 13.6.233.17 | codex-code-mode-host | 0.0.0.20260907 | | |
 

@@ -9,7 +9,7 @@
 This repository contains application ports and the Pedigree UPdater (`pup`)
 package tooling for [Pedigree](https://www.pedigree-project.org/).
 
-The modernization catalog currently contains 77 active ports and 15 explicit
+The modernization catalog currently contains 80 active ports and 15 explicit
 disabled or deferred entries. See [`PORTS.md`](PORTS.md) for the complete
 version list, compatibility ceilings, deferrals, and the current verification
 boundary.
