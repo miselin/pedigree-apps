@@ -40,6 +40,7 @@ class GccPackageTest(unittest.TestCase):
 
     def test_matches_mainline_r2_manifest_and_patch(self):
         self.assertEqual(self.package.version(), "15.3.0")
+        self.assertEqual(self.package.release_version(), "15.3.0.1")
         self.assertEqual(SOURCE_VERSION, "15.3.0")
         self.assertEqual(TOOLCHAIN_RECIPE, 2)
         patch_path = os.path.join(
@@ -92,8 +93,9 @@ class GccPackageTest(unittest.TestCase):
         self.assertIn("--target=x86_64-pedigree", command)
         self.assertIn("--with-sysroot=/", command)
         self.assertIn("--with-native-system-header-dir=/usr/include", command)
-        self.assertIn(
-            "--with-gxx-include-dir=/usr/include/c++/15.3.0", command
+        self.assertIn("--prefix=/usr", command)
+        self.assertFalse(
+            any(arg.startswith("--with-gxx-include-dir=") for arg in command)
         )
         self.assertIn("--with-as=/usr/bin/as", command)
         self.assertIn("--with-ld=/usr/bin/ld", command)
@@ -132,6 +134,7 @@ class GccPackageTest(unittest.TestCase):
         self.assertTrue(options[0].startswith("TOPLEVEL_CONFIGURE_ARGUMENTS="))
         self.assertIn("--host=x86_64-pedigree", options[0])
         self.assertIn("--with-sysroot=/", options[0])
+        self.assertNotIn("--with-gxx-include-dir", options[0])
         self.assertIn("--with-as=/usr/bin/as", options[0])
         self.assertNotIn(self.env["PORTS_SYSROOT"], options[0])
         self.assertNotIn(self.env["CROSS_BASE"], options[0])
@@ -201,6 +204,18 @@ class GccPackageTest(unittest.TestCase):
                 open(os.path.join(bindir, name), "wb").close()
             for name in ("cc1", "cc1plus", "liblto_plugin.so"):
                 open(os.path.join(internal, name), "wb").close()
+            include = os.path.join(
+                deploydir, "usr", "include", "c++", SOURCE_VERSION
+            )
+            headers = (
+                "algorithm",
+                "cstdlib",
+                os.path.join(self.env["CROSS_TARGET"], "bits", "c++config.h"),
+            )
+            for name in headers:
+                header = os.path.join(include, name)
+                os.makedirs(os.path.dirname(header), exist_ok=True)
+                open(header, "wb").close()
             plugin_include = os.path.join(internal, "plugin", "include")
             os.makedirs(plugin_include)
             with open(
@@ -218,6 +233,17 @@ class GccPackageTest(unittest.TestCase):
             self.package.postdeploy(self.env, "/source", deploydir)
 
             self.assertFalse(os.path.exists(archive))
+
+            for name in headers:
+                with self.subTest(missing_header=name):
+                    header = os.path.join(include, name)
+                    os.unlink(header)
+                    with self.assertRaises(RuntimeError) as failure:
+                        self.package.postdeploy(self.env, "/source", deploydir)
+                    self.assertIn(
+                        os.path.relpath(header, deploydir), str(failure.exception)
+                    )
+                    open(header, "wb").close()
 
             with open(
                 os.path.join(plugin_include, "configargs.h"),

@@ -37,6 +37,10 @@ class GccPackage(buildsystem.Package):
     def version(self):
         return SOURCE_VERSION
 
+    def release_version(self):
+        # Preserve the immutable release containing the relative header paths.
+        return self.version() + ".1"
+
     def build_requires(self):
         return ["binutils", "libgmp", "libmpfr", "libmpc", "zlib"]
 
@@ -126,8 +130,6 @@ class GccPackage(buildsystem.Package):
                 "--prefix=/usr",
                 "--with-sysroot=/",
                 "--with-native-system-header-dir=/usr/include",
-                "--with-gxx-include-dir=/usr/include/c++/%s"
-                % SOURCE_VERSION,
                 "--with-as=/usr/bin/as",
                 "--with-ld=/usr/bin/ld",
                 "--enable-languages=c,c++",
@@ -149,6 +151,9 @@ class GccPackage(buildsystem.Package):
         ).strip()
         builddir = steps.get_builddir(srcdir, env, False)
         dependency_prefix = os.path.join(env["PORTS_SYSROOT"], "usr")
+        # GCC's explicit C++ include option strips the '/' sysroot and makes
+        # the search path relative. Its native default preserves the prefix
+        # and matches libstdc++'s /usr/include/c++/<version> installation.
         steps.cmd(
             [
                 os.path.join(srcdir, "configure"),
@@ -168,8 +173,6 @@ class GccPackage(buildsystem.Package):
                 # Build-only dependencies still come from PORTS_SYSROOT.
                 "--with-sysroot=/",
                 "--with-native-system-header-dir=/usr/include",
-                "--with-gxx-include-dir=/usr/include/c++/%s"
-                % SOURCE_VERSION,
                 "--with-as=/usr/bin/as",
                 "--with-ld=/usr/bin/ld",
                 "--with-gmp=%s" % dependency_prefix,
@@ -224,6 +227,17 @@ class GccPackage(buildsystem.Package):
         required = (
             os.path.join("usr", "bin", "gcc"),
             os.path.join("usr", "bin", "g++"),
+            os.path.join("usr", "include", "c++", SOURCE_VERSION, "algorithm"),
+            os.path.join("usr", "include", "c++", SOURCE_VERSION, "cstdlib"),
+            os.path.join(
+                "usr",
+                "include",
+                "c++",
+                SOURCE_VERSION,
+                env["CROSS_TARGET"],
+                "bits",
+                "c++config.h",
+            ),
             os.path.join(
                 "usr",
                 "lib",
