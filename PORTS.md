@@ -49,6 +49,7 @@ List the active catalog or inspect a dependency closure without building:
 | vttest | 20251205 | wget | 1.25.0 | zlib | 1.3.2 |
 | go | 1.26.5 | ripgrep | 15.2.0 | rust | 1.85.1 |
 | patch | 2.8 | | | |
+| abseil-cpp | 20250512.1 | protobuf | 35.0 | | |
 | codex-app-server | 0.0.0.20260907 | codex-cli | 0.0.0.20260907 | codex | 0.0.0.20260907 |
 | v8 | 13.6.233.17 | codex-code-mode-host | 0.0.0.20260907 | | |
 
@@ -91,6 +92,11 @@ Build and qualification details are in
 
 Python 3.14.7 replaces the disabled Python 2 recipe and also provides
 `/usr/bin/python` as a compatibility link.
+
+The `abseil-cpp` 20250512.1 and protobuf 35.0 ports provide the shared C++
+runtime libraries, headers, CMake/pkg-config metadata, and target-native
+`protoc` compiler needed to build and run protobuf-based Pedigree software.
+Protobuf declares Abseil as its runtime dependency.
 
 PUP 1.2 installs its Python 3 client at `/usr/bin/pup`, its configuration at
 `/etc/pup/pup.conf`, and its local package database and cache under

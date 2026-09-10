@@ -1,0 +1,6 @@
+--- a/absl/base/config.h
++++ b/absl/base/config.h
+@@ -380,1 +380,2 @@
+-    defined(__VXWORKS__) || defined(__hexagon__) || defined(__XTENSA__)
++    defined(__VXWORKS__) || defined(__hexagon__) || defined(__XTENSA__) ||    \
++    defined(__PEDIGREE__)
