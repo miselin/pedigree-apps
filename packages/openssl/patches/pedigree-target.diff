@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/Configurations/50-pedigree.conf
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,28 @@
 +## -*- mode: perl; -*-
 +
 +my %targets = (
@@ -16,9 +16,7 @@
 +                                   release => "-O3"),
 +        cflags           => threads("-pthread"),
 +        cxxflags         => combine("-std=c++11", threads("-pthread")),
-+        # musl exposes the batching APIs, but Pedigree does not implement
-+        # their syscalls yet. OpenSSL falls back to sendmsg()/recvmsg().
-+        lib_cppflags     => add("-DL_ENDIAN -DNO_RECVMMSG"),
++        lib_cppflags     => add("-DL_ENDIAN"),
 +        ex_libs          => add("-ldl", threads("-pthread")),
 +        bn_ops           => "SIXTY_FOUR_BIT_LONG",
 +        thread_scheme    => "pthreads",

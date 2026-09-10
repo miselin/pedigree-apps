@@ -22,7 +22,6 @@ class GrepPackage(buildsystem.Package):
     def patches(self, env, srcdir):
         return [
             'pselect-null.diff',
-            'pedigree-no-splice.diff',
             'pedigree-musl-locale.diff',
         ]
 

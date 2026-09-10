@@ -8,29 +8,14 @@ from .package import Python3Package
 
 
 class Python3PackageTest(unittest.TestCase):
-    def test_config_site_disables_untranslated_python_syscalls(self):
+    def test_config_site_does_not_disable_supported_python_syscalls(self):
         config_site = os.path.join(
             os.path.dirname(__file__), "..", "..", "config.site"
         )
         with open(config_site, encoding="utf-8") as config_file:
             answers = set(config_file.read().splitlines())
 
-        self.assertTrue(
-            {
-                "ac_cv_func_fexecve=no",
-                "ac_cv_func_lchmod=no",
-                "ac_cv_func_lutimes=no",
-                "ac_cv_func_mkfifoat=no",
-                "ac_cv_func_mknodat=no",
-                "ac_cv_func_pthread_getattr_np=no",
-                "ac_cv_func_pthread_kill=no",
-                "ac_cv_func_sigpending=no",
-                "ac_cv_func_sigtimedwait=no",
-                "ac_cv_func_sigwait=no",
-                "ac_cv_func_sigwaitinfo=no",
-                "ac_cv_func_truncate=no",
-            }.issubset(answers)
-        )
+        self.assertNotIn("ac_cv_func_pthread_getattr_np=no", answers)
 
     @mock.patch("packages.python3.package.steps.cmd")
     def test_prebuild_uses_case_distinct_host_python(self, cmd):

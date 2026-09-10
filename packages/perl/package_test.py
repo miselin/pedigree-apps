@@ -37,20 +37,6 @@ class PerlPackageTest(unittest.TestCase):
         self.assertIn("$Config{osname} eq 'pedigree'", patch)
         self.assertIn("-d $dir", patch)
 
-    def test_pedigree_path_truncate_uses_ftruncate_fallback(self):
-        patch_path = os.path.join(
-            os.path.dirname(__file__),
-            "patches",
-            "pedigree-truncate.diff",
-        )
-        with open(patch_path, encoding="utf-8") as patch_file:
-            patch = patch_file.read()
-
-        self.assertIn(
-            "defined(HAS_TRUNCATE) && !defined(__pedigree__)", patch
-        )
-        self.assertIn("int mode = O_WRONLY", patch)
-
     def test_pedigree_redirects_signals_to_the_primary_thread(self):
         patch_path = os.path.join(
             os.path.dirname(__file__),
@@ -64,26 +50,6 @@ class PerlPackageTest(unittest.TestCase):
         pedigree_branch = pedigree_branch.split("+#else", 1)[0]
         self.assertIn("kill(getpid(), sig)", pedigree_branch)
         self.assertNotIn("pthread_kill", pedigree_branch)
-
-    def test_extension_probes_respect_missing_pedigree_syscalls(self):
-        package_dir = os.path.dirname(__file__)
-        patch_path = os.path.join(
-            package_dir,
-            "patches",
-            "pedigree-missing-syscalls.diff",
-        )
-        with open(patch_path, encoding="utf-8") as patch_file:
-            patch = patch_file.read()
-        with open(
-            os.path.join(package_dir, "pedigree.hint"), encoding="utf-8"
-        ) as hint_file:
-            hint = hint_file.read()
-
-        self.assertIn("defined(__pedigree__)", patch)
-        self.assertIn("$Config{d_futimens}", patch)
-        self.assertIn("$Config{d_utimensat}", patch)
-        self.assertIn("d_futimens='undef'", hint)
-        self.assertIn("d_utimensat='undef'", hint)
 
     @mock.patch("packages.perl.package.steps.cmd")
     @mock.patch(

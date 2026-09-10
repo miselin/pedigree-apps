@@ -166,52 +166,6 @@ diff --git a/Modules/timemodule.c b/Modules/timemodule.c
  #define HAVE_THREAD_TIME
  
  #if defined(__APPLE__) && _Py__has_attribute(availability)
-diff --git a/Modules/signalmodule.c b/Modules/signalmodule.c
---- a/Modules/signalmodule.c
-+++ b/Modules/signalmodule.c
-@@ -44,6 +44,11 @@
- #  include <sys/time.h>           // setitimer()
- #endif
- 
-+#ifdef __PEDIGREE__
-+/* musl implements raise() with tkill(), which Pedigree does not translate. */
-+#  define raise(signum) kill(getpid(), (signum))
-+#endif
-+
- #if defined(HAVE_PTHREAD_SIGMASK) && !defined(HAVE_BROKEN_PTHREAD_SIGMASK)
- #  define PYPTHREAD_SIGMASK
- #endif
-diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
---- a/Modules/faulthandler.c
-+++ b/Modules/faulthandler.c
-@@ -25,6 +25,11 @@
- #  include <sys/resource.h>       // setrlimit()
- #endif
- 
-+#ifdef __PEDIGREE__
-+/* musl implements raise() with tkill(), which Pedigree does not translate. */
-+#  define raise(signum) kill(getpid(), (signum))
-+#endif
-+
- #if defined(FAULTHANDLER_USE_ALT_STACK) && defined(HAVE_LINUX_AUXVEC_H) && defined(HAVE_SYS_AUXV_H)
- #  include <linux/auxvec.h>       // AT_MINSIGSTKSZ
- #  include <sys/auxv.h>           // getauxval()
-diff --git a/Modules/_decimal/libmpdec/context.c b/Modules/_decimal/libmpdec/context.c
---- a/Modules/_decimal/libmpdec/context.c
-+++ b/Modules/_decimal/libmpdec/context.c
-@@ -32,6 +32,12 @@
- #include <stdio.h>
- #include <string.h>
- 
-+#ifdef __PEDIGREE__
-+#include <unistd.h>
-+/* musl implements raise() with tkill(), which Pedigree does not translate. */
-+#define raise(signum) kill(getpid(), (signum))
-+#endif
-+
- 
- void
- mpd_dflt_traphandler(mpd_context_t *ctx)
 diff --git a/Python/pytime.c b/Python/pytime.c
 --- a/Python/pytime.c
 +++ b/Python/pytime.c

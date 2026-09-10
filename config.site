@@ -1,8 +1,6 @@
-# The Pedigree musl sysroot exposes several Linux compatibility wrappers whose
-# backing syscalls are not translated by the kernel yet.  Link-only Autoconf
-# checks otherwise enable interfaces that deterministically return ENOSYS at
-# runtime.  Keep this list aligned with the pinned builder's
-# src/modules/subsys/posix/syscalls/translate.h.
+# Keep this list limited to APIs that remain unavailable on the target.  The
+# musl sysroot exposes many Linux compatibility wrappers, and current
+# mainline Pedigree translates the corresponding syscalls directly.
 
 # This value is compiled into libltdl users as the target's default module
 # search path. Dependency discovery is already handled by LDFLAGS and the
@@ -12,110 +10,19 @@ if test -z "${lt_cv_sys_lib_dlsearch_path_spec+set}"; then
 fi
 
 ac_cv_func_close_range=no
-ac_cv_func_clock_getres=no
-ac_cv_func_clock_nanosleep=no
-ac_cv_func_clock_settime=no
-ac_cv_func_copy_file_range=no
-ac_cv_func_dup3=no
-ac_cv_func_epoll_create=no
-ac_cv_func_epoll_create1=no
-ac_cv_func_eventfd=no
-ac_cv_func_fallocate=no
-ac_cv_func_fallocate64=no
-ac_cv_func_fanotify_init=no
-ac_cv_func_fanotify_mark=no
-ac_cv_func_fdatasync=no
-ac_cv_func_fexecve=no
-ac_cv_func_futimens=no
-ac_cv_func_getloadavg=no
-ac_cv_func_getrusage=no
-ac_cv_func_getsid=no
-ac_cv_func_inotify_add_watch=no
-ac_cv_func_inotify_init=no
-ac_cv_func_inotify_init1=no
-ac_cv_func_inotify_rm_watch=no
-ac_cv_func_lchown=no
-ac_cv_func_lchmod=no
-ac_cv_func_lutimes=no
-ac_cv_func_madvise=no
-ac_cv_func_memfd_create=no
-ac_cv_func_mkfifoat=no
-ac_cv_func_mknodat=no
-ac_cv_func_mremap=no
 ac_cv_func_pidfd_getfd=no
 ac_cv_func_pidfd_open=no
 ac_cv_func_pidfd_send_signal=no
-ac_cv_func_prlimit=no
-ac_cv_func_process_vm_readv=no
-ac_cv_func_process_vm_writev=no
-ac_cv_func_ppoll=no
-ac_cv_func_posix_fadvise=no
-ac_cv_func_posix_fadvise64=no
-ac_cv_func_posix_fallocate=no
-ac_cv_func_posix_fallocate64=no
-ac_cv_func_posix_madvise=no
-ac_cv_func_pread=no
-ac_cv_func_pread64=no
-ac_cv_func_preadv=no
-ac_cv_func_preadv64=no
-ac_cv_func_preadv2=no
-ac_cv_func_pselect=no
-ac_cv_func_pthread_getattr_np=no
-ac_cv_func_pthread_kill=no
-ac_cv_func_pwrite=no
-ac_cv_func_pwrite64=no
-ac_cv_func_pwritev=no
-ac_cv_func_pwritev64=no
-ac_cv_func_pwritev2=no
-ac_cv_func_recvmmsg=no
-ac_cv_func_readahead=no
-ac_cv_func_raise=no
-ac_cv_func_renameat2=no
-ac_cv_func_sched_get_priority_max=no
-ac_cv_func_sched_rr_get_interval=no
-ac_cv_func_sched_setaffinity=no
-ac_cv_func_sched_setparam=no
-ac_cv_func_sched_setscheduler=no
 ac_cv_func_sem_open=no
 ac_cv_func_sem_unlink=no
 ac_cv_func_sendmmsg=no
-ac_cv_func_sendfile=no
-ac_cv_func_setns=no
 ac_cv_func_shm_open=no
 ac_cv_func_shm_unlink=no
-ac_cv_func_sigpause=no
-ac_cv_func_sigpending=no
-ac_cv_func_sigtimedwait=no
-ac_cv_func_sigwait=no
-ac_cv_func_sigwaitinfo=no
-ac_cv_func_sigsuspend=no
-ac_cv_func_signalfd=no
-ac_cv_func_splice=no
-ac_cv_func_statx=no
-ac_cv_func_sync=no
-ac_cv_func_sync_file_range=no
-ac_cv_func_syncfs=no
-ac_cv_func_sysinfo=no
-ac_cv_func_tee=no
-ac_cv_func_timerfd_create=no
-ac_cv_func_timerfd_gettime=no
-ac_cv_func_timerfd_settime=no
-ac_cv_func_truncate=no
-ac_cv_func_unshare=no
-ac_cv_func_utimensat=no
-ac_cv_func_waitid=no
-ac_cv_func_vmsplice=no
 
 # Gnulib's conservative cross mode does not accept its own prepared default
 # for this locale-sensitive run test. Pedigree uses musl's conforming
 # strcasecmp implementation.
 gl_cv_func_strcasecmp_works="guessing yes"
-
-# CPython retries these probes against musl's compatibility librt after the
-# direct function checks. The wrappers still reach untranslated syscalls.
-ac_cv_lib_rt_clock_getres=no
-ac_cv_lib_rt_clock_nanosleep=no
-ac_cv_lib_rt_clock_settime=no
 
 # Curl uses a project-specific switch rather than the Autoconf cache variable.
 curl_disallow_fsetxattr=yes

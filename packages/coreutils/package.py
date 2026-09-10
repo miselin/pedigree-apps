@@ -22,9 +22,7 @@ class CoreutilsPackage(buildsystem.Package):
     def patches(self, env, srcdir):
         return [
             'pselect-null.diff',
-            'sync-unsupported.diff',
             'pedigree-musl-locale.diff',
-            'lchown-availability.diff',
         ]
 
     def options(self):

@@ -23,7 +23,7 @@ class e2fsprogsPackage(buildsystem.Package):
         return []
 
     def patches(self, env, srcdir):
-        return ['pedigree-io.diff']
+        return []
 
     def options(self):
         return self._options

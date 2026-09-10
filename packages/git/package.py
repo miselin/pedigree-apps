@@ -10,7 +10,6 @@ MAKE_OPTIONS = (
     'FSMONITOR_OS_SETTINGS=',
     'NO_GETTEXT=YesPlease',
     'NO_PERL=YesPlease',
-    'NO_PREAD=YesPlease',
     'NO_PYTHON=YesPlease',
     'NO_RUST=YesPlease',
     'NO_TCLTK=YesPlease',
@@ -44,7 +43,7 @@ class GitPackage(buildsystem.Package):
         return self.build_requires()
 
     def patches(self, env, srcdir):
-        return ['pedigree-raise.diff']
+        return []
 
     def options(self):
         return self._options

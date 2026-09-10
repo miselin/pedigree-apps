@@ -49,16 +49,6 @@ class Sdl2PackageTest(unittest.TestCase):
             "-DSDL_FILESYSTEM=ON",
         ):
             self.assertIn(option, options)
-        for option in (
-            "-DHAVE_MEMFD_CREATE=OFF",
-            "-DHAVE_POSIX_FALLOCATE=OFF",
-            "-DHAVE_SIGTIMEDWAIT=OFF",
-            "-DHAVE_INOTIFY_INIT=OFF",
-            "-DHAVE_INOTIFY_INIT1=OFF",
-            "-DHAVE_INOTIFY=OFF",
-            "-DHAVE_PTHREAD_SETNAME_NP=OFF",
-        ):
-            self.assertIn(option, options)
         self.assertNotIn("-DHAVE_SYS_INOTIFY_H=OFF", options)
         for option in (
             "-DSDL_X11=OFF",
@@ -146,44 +136,6 @@ class Sdl2PackageTest(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 RuntimeError, "unsupported host drivers"
-            ):
-                self.package.postdeploy({}, "/source", deploydir)
-
-    def test_postdeploy_rejects_unavailable_target_api(self):
-        with tempfile.TemporaryDirectory() as deploydir:
-            paths = (
-                os.path.join("usr", "bin", "sdl2-config"),
-                os.path.join("usr", "lib", "libSDL2.a"),
-                os.path.join("usr", "lib", "pkgconfig", "sdl2.pc"),
-            )
-            for relative in paths:
-                path = os.path.join(deploydir, relative)
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-                with open(path, "wb"):
-                    pass
-
-            config_path = os.path.join(
-                deploydir, "usr", "include", "SDL2", "SDL_config.h"
-            )
-            os.makedirs(os.path.dirname(config_path), exist_ok=True)
-            with open(config_path, "w", encoding="utf-8") as config:
-                config.write(
-                    "\n".join(
-                        (
-                            "#define SDL_AUDIO_DRIVER_DUMMY 1",
-                            "#define SDL_VIDEO_DRIVER_DUMMY 1",
-                            "#define SDL_VIDEO_DRIVER_OFFSCREEN 1",
-                            "#define SDL_THREAD_PTHREAD 1",
-                            "#define SDL_TIMER_UNIX 1",
-                            "#define SDL_LOADSO_DLOPEN 1",
-                            "#define SDL_FILESYSTEM_UNIX 1",
-                            "#define HAVE_POSIX_FALLOCATE 1",
-                        )
-                    )
-                )
-
-            with self.assertRaisesRegex(
-                RuntimeError, "unavailable target APIs"
             ):
                 self.package.postdeploy({}, "/source", deploydir)
 

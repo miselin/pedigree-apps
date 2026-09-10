@@ -6,13 +6,13 @@ from .package import GnumakePackage
 
 class GnumakePackageTest(unittest.TestCase):
     @mock.patch("packages.gnumake.package.steps.run_configure")
-    def test_configure_selects_bundled_getloadavg_fallback(self, configure):
+    def test_configure_does_not_mask_getloadavg(self, configure):
         env = {}
 
         GnumakePackage(__file__).configure(env, "/source")
 
-        self.assertEqual(env["ac_cv_func_getloadavg"], "no")
-        self.assertEqual(env["ac_cv_lib_util_getloadavg"], "no")
+        self.assertNotIn("ac_cv_func_getloadavg", env)
+        self.assertNotIn("ac_cv_lib_util_getloadavg", env)
         configure.assert_called_once()
 
 

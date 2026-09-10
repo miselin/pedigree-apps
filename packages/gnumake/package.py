@@ -36,11 +36,6 @@ class GnumakePackage(buildsystem.Package):
         pass
 
     def configure(self, env, srcdir):
-        # libutil is a compatibility archive on Pedigree, so a link check can
-        # find libc's unusable getloadavg wrapper through it. Use Make's
-        # bundled ENOSYS fallback, which its load-limit path handles cleanly.
-        env['ac_cv_func_getloadavg'] = 'no'
-        env['ac_cv_lib_util_getloadavg'] = 'no'
         steps.run_configure(self, srcdir, env)
 
     def build(self, env, srcdir):

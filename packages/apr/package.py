@@ -45,14 +45,8 @@ class AprPackage(buildsystem.Package):
         env['CC_FOR_BUILD'] = '/usr/bin/cc'
         env['CFLAGS_FOR_BUILD'] = '-O2'
 
-        # Pedigree provides mmap-backed shared memory, but its process-shared
-        # pthread mutexes are not implemented and file locks are currently
-        # compatibility stubs.  Select the only compiling Unix backend; APR
-        # consumers must avoid inter-process contention until target locking
-        # is real.  The Apache port documents its supported `httpd -X` mode.
-        env['apr_lock_method'] = 'USE_FCNTL_SERIALIZE'
-        env['apr_cv_process_shared_works'] = 'no'
-        env['apr_cv_mutex_robust_shared'] = 'no'
+        # Keep APR on its portable cross-build paths; target-only probes cannot
+        # run while configuring for Pedigree.
         env['apr_cv_tcp_nodelay_with_cork'] = 'no'
         env['ac_cv_o_nonblock_inherited'] = 'no'
         env['ac_cv_tcp_nodelay_inherited'] = 'no'
@@ -60,21 +54,11 @@ class AprPackage(buildsystem.Package):
         env['ac_cv_mmap__dev_zero'] = 'yes'
         env['ac_cv_strerror_r_rc_int'] = 'yes'
 
-        # APR 1.7 treats the presence of --disable-{posix,sysv}-shm as an
-        # enable override.  Cache unavailable shared-memory and locking APIs
-        # instead so APR only advertises the mmap and fcntl compatibility
-        # paths selected here.
+        # POSIX named shared memory still depends on the target's unestablished
+        # /dev/shm contract. SysV IPC is implemented, so leave APR free to
+        # detect and use those APIs.
         env['ac_cv_func_shm_open'] = 'no'
         env['ac_cv_func_shm_unlink'] = 'no'
-        env['ac_cv_func_shmget'] = 'no'
-        env['ac_cv_func_shmat'] = 'no'
-        env['ac_cv_func_shmdt'] = 'no'
-        env['ac_cv_func_shmctl'] = 'no'
-        env['ac_cv_func_flock'] = 'no'
-        env['ac_cv_func_semget'] = 'no'
-        env['ac_cv_func_semctl'] = 'no'
-        env['ac_cv_func_semop'] = 'no'
-        env['ac_cv_func_semtimedop'] = 'no'
 
         steps.run_configure(
             self,

@@ -67,7 +67,7 @@ class OpensslPackageTest(unittest.TestCase):
             )
             with open(target, encoding="utf-8") as source:
                 configuration = source.read()
-            self.assertIn("-DNO_RECVMMSG", configuration)
+            self.assertNotIn("NO_RECVMMSG", configuration)
 
     def test_postdeploy_accepts_target_safe_compiler_diagnostic(self):
         with tempfile.TemporaryDirectory() as deploydir:

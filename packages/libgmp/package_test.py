@@ -21,18 +21,8 @@ class LibgmpPackageTest(unittest.TestCase):
             metadata.write(contents)
         return header
 
-    def test_exception_fallback_is_registered(self):
-        package = LibgmpPackage(__file__)
-        self.assertEqual(package.patches({}, ""), ["pedigree-raise.diff"])
-
-        patch_path = os.path.join(
-            os.path.dirname(__file__), "patches", "pedigree-raise.diff"
-        )
-        with open(patch_path, encoding="utf-8") as patch_file:
-            patch = patch_file.read()
-
-        self.assertIn("#if ! HAVE_RAISE", patch)
-        self.assertIn("kill (getpid(), sig)", patch)
+    def test_no_legacy_raise_workaround_is_applied(self):
+        self.assertEqual(LibgmpPackage(__file__).patches({}, ""), [])
 
     def test_postdeploy_rewrites_only_compiler_descriptor(self):
         with tempfile.TemporaryDirectory() as deploydir:

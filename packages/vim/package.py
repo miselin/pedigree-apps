@@ -24,7 +24,7 @@ class VimPackage(buildsystem.Package):
         return ["ncurses", "perl"]
 
     def patches(self, env, srcdir):
-        return ["pedigree-no-sigpending.diff"]
+        return []
 
     def options(self):
         return self._options

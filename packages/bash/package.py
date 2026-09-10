@@ -32,7 +32,6 @@ class BashPackage(buildsystem.Package):
     def patches(self, env, srcdir):
         return (
             ['bash53-%03d' % patchlevel for patchlevel in range(1, 16)]
-            + ['pedigree-sync-loadable.diff']
         )
 
     def patch(self, env, srcdir):

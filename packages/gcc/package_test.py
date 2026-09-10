@@ -165,25 +165,6 @@ class GccPackageTest(unittest.TestCase):
         self.assertIn('CXXFLAGS="$(CXXFLAGS_FOR_BUILD)"', patch)
         self.assertNotIn("CXXFLAGS_FOR_TARGET", patch)
 
-    def test_filesystem_patch_uses_translated_pedigree_interfaces(self):
-        self.assertIn(
-            "pedigree-filesystem.diff", self.package.patches({}, "/source")
-        )
-        patch_path = os.path.join(
-            os.path.dirname(__file__),
-            "patches",
-            "pedigree-filesystem.diff",
-        )
-        with open(patch_path, encoding="utf-8") as patch_file:
-            patch = patch_file.read()
-
-        self.assertIn("+#ifdef __pedigree__", patch)
-        self.assertIn("+  if (::utimes(p.c_str(), times))", patch)
-        self.assertIn("+      const int fd = posix::open", patch)
-        self.assertIn("+\t  const int result = ::ftruncate", patch)
-        self.assertNotIn("+  if (::utimensat", patch)
-        self.assertNotIn("+  else if (posix::truncate", patch)
-
     def test_module_reader_honours_unavailable_madvise_probe(self):
         self.assertIn(
             "modules-madvise.diff", self.package.patches({}, "/source")

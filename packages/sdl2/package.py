@@ -48,8 +48,7 @@ class Sdl2Package(buildsystem.Package):
         # Pedigree does not yet export a packaged display or audio frontend.
         # Keep the portable SDL core usable without claiming Linux devices.
         # CMake does not read config.site, so cache libc symbols whose backing
-        # syscalls are untranslated. pthread_setname_np is also unusable: its
-        # current-thread path reaches Pedigree's no-op prctl implementation.
+        # functionality is unavailable.
         steps.cmake_configure(
             self,
             srcdir,
@@ -62,13 +61,6 @@ class Sdl2Package(buildsystem.Package):
                 "-DSDL_TESTS=OFF",
                 "-DSDL_INSTALL_TESTS=OFF",
                 "-DSDL2_DISABLE_SDL2MAIN=ON",
-                "-DHAVE_MEMFD_CREATE=OFF",
-                "-DHAVE_POSIX_FALLOCATE=OFF",
-                "-DHAVE_SIGTIMEDWAIT=OFF",
-                "-DHAVE_INOTIFY_INIT=OFF",
-                "-DHAVE_INOTIFY_INIT1=OFF",
-                "-DHAVE_INOTIFY=OFF",
-                "-DHAVE_PTHREAD_SETNAME_NP=OFF",
                 "-DSDL_ASSEMBLY=OFF",
                 "-DSDL_RPATH=OFF",
                 "-DSDL_DISKAUDIO=OFF",
@@ -176,24 +168,4 @@ class Sdl2Package(buildsystem.Package):
             raise RuntimeError(
                 "SDL2 compatibility profile enabled unsupported host drivers: %s"
                 % ", ".join(enabled_host_features)
-            )
-
-        unavailable_target_features = (
-            "#define HAVE_MEMFD_CREATE 1",
-            "#define HAVE_POSIX_FALLOCATE 1",
-            "#define HAVE_SIGTIMEDWAIT 1",
-            "#define HAVE_INOTIFY_INIT 1",
-            "#define HAVE_INOTIFY_INIT1 1",
-            "#define HAVE_INOTIFY 1",
-            "#define HAVE_PTHREAD_SETNAME_NP 1",
-        )
-        enabled_target_features = [
-            feature
-            for feature in unavailable_target_features
-            if feature in config
-        ]
-        if enabled_target_features:
-            raise RuntimeError(
-                "SDL2 compatibility profile enabled unavailable target APIs: %s"
-                % ", ".join(enabled_target_features)
             )

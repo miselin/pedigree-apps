@@ -18,7 +18,7 @@ class SlangPackageTest(unittest.TestCase):
         )
 
     @mock.patch("packages.slang.package.steps.run_configure")
-    def test_configure_avoids_host_tools_and_stubbed_signals(
+    def test_configure_avoids_host_tools(
         self, run_configure
     ):
         env = {"TARGET_CONFIG_SITE": "/workspace/config.site"}
@@ -27,14 +27,8 @@ class SlangPackageTest(unittest.TestCase):
 
         for function in (
             "cfgetospeed",
-            "getitimer",
             "issetugid",
-            "mkfifo",
             "pathconf",
-            "pause",
-            "setitimer",
-            "sigsuspend",
-            "socketpair",
         ):
             with self.subTest(function=function):
                 self.assertEqual(env["ac_cv_func_%s" % function], "no")
@@ -55,7 +49,7 @@ class SlangPackageTest(unittest.TestCase):
             with self.subTest(option=option):
                 self.assertIn(option, options)
 
-    def test_patch_selects_elf_terminfo_and_safe_signal_fallback(self):
+    def test_patch_selects_elf_terminfo_and_target_apis(self):
         patch_path = os.path.join(
             os.path.dirname(__file__), "patches", "pedigree-target.diff"
         )
@@ -66,9 +60,7 @@ class SlangPackageTest(unittest.TestCase):
         self.assertIn(
             '+    MISC_TERMINFO_DIRS="/usr/share/terminfo"', patch
         )
-        self.assertIn("SL_NotImplemented_Error", patch)
         self.assertIn("!defined(__PEDIGREE__)", patch)
-        self.assertIn("defined(__PEDIGREE__)", patch)
         self.assertNotIn(
             '+   MAKE_INTRINSIC_0("setsockopt", setsockopt_intrin, V),',
             patch,

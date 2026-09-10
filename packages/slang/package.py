@@ -40,19 +40,11 @@ class SlangPackage(buildsystem.Package):
         )
 
     def configure(self, env, srcdir):
-        # pause() and sigsuspend() are linkable compatibility stubs on the
-        # target. The source patch exposes an honest NotImplemented result.
         env["ac_cv_func_cfgetospeed"] = "no"
-        env["ac_cv_func_getitimer"] = "no"
         env["ac_cv_func_isinf"] = "yes"
         env["ac_cv_func_isnan"] = "yes"
         env["ac_cv_func_issetugid"] = "no"
-        env["ac_cv_func_mkfifo"] = "no"
         env["ac_cv_func_pathconf"] = "no"
-        env["ac_cv_func_pause"] = "no"
-        env["ac_cv_func_sigsuspend"] = "no"
-        env["ac_cv_func_setitimer"] = "no"
-        env["ac_cv_func_socketpair"] = "no"
         env["ac_cv_path_nc5config"] = "no"
         steps.run_configure(
             self,

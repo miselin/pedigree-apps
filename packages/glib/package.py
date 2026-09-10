@@ -26,7 +26,6 @@ class GlibPackage(buildsystem.Package):
     def patches(self, env, srcdir):
         return [
             'pedigree-meson-features.diff',
-            'pedigree-signal-fallback.diff',
         ]
 
     def options(self):

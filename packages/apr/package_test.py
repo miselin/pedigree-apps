@@ -29,24 +29,24 @@ class AprPackageTest(unittest.TestCase):
         self.assertNotIn('--disable-sysv-shm', options)
         self.assertIn('--disable-dso', options)
         self.assertIn('--includedir=/usr/include/apr-1', options)
-        self.assertEqual(env['apr_lock_method'], 'USE_FCNTL_SERIALIZE')
-        self.assertEqual(env['apr_cv_process_shared_works'], 'no')
         self.assertEqual(env['ac_cv_file__dev_zero'], 'yes')
         self.assertEqual(env['ac_cv_strerror_r_rc_int'], 'yes')
         for function in (
             'shm_open',
             'shm_unlink',
+        ):
+            self.assertEqual(env['ac_cv_func_%s' % function], 'no')
+        for function in (
             'shmget',
             'shmat',
             'shmdt',
             'shmctl',
-            'flock',
             'semget',
             'semctl',
             'semop',
             'semtimedop',
         ):
-            self.assertEqual(env['ac_cv_func_%s' % function], 'no')
+            self.assertNotIn('ac_cv_func_%s' % function, env)
 
     @mock.patch.object(steps, 'download')
     def test_download_is_official_and_pinned(self, download):

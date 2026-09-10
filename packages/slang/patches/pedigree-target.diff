@@ -23,30 +23,6 @@ index 847f50b..b3241af 100755
  if test "$TERMCAP"; then
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
  $as_echo "no" >&6; }
-diff --git a/src/slsig.c b/src/slsig.c
-index 6d5c3cd..701ad18 100644
---- a/src/slsig.c
-+++ b/src/slsig.c
-@@ -580,7 +580,8 @@ static void sigsuspend_intrinsic (void)
- 
-    if (SLang_Num_Function_Args == 0)
-      {
--#ifdef HAVE_PAUSE
-+#if defined(HAVE_PAUSE) \
-+    && !defined(__pedigree__) && !defined(__PEDIGREE__)
- 	(void) pause ();
- #else
- 	SLang_set_error (SL_NotImplemented_Error);
-@@ -588,7 +589,8 @@ static void sigsuspend_intrinsic (void)
- 	return;
-      }
- 
--#ifndef SLANG_POSIX_SIGNALS
-+#if !defined(SLANG_POSIX_SIGNALS) \
-+    || defined(__pedigree__) || defined(__PEDIGREE__)
-    SLang_set_error (SL_NotImplemented_Error);
- #else
-    if (-1 == pop_signal_mask (&mask))
 diff --git a/modules/socket-module.c b/modules/socket-module.c
 index 2f53fe2..0bb2518 100644
 --- a/modules/socket-module.c

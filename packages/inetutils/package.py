@@ -26,7 +26,7 @@ class InetutilsPackage(buildsystem.Package):
         return ['readline']
 
     def patches(self, env, srcdir):
-        return ['pselect-null.diff', 'pedigree-inetd-pause.diff']
+        return ['pselect-null.diff']
 
     def options(self):
         return self._options

@@ -16,8 +16,7 @@ class GitPackageTest(unittest.TestCase):
             run_configure.call_args.kwargs["extra_config"],
         )
 
-    def test_build_uses_portable_pread_and_omits_rust(self):
-        self.assertIn("NO_PREAD=YesPlease", MAKE_OPTIONS)
+    def test_build_omits_rust(self):
         self.assertIn("NO_RUST=YesPlease", MAKE_OPTIONS)
 
     def test_build_disables_linux_fsmonitor_backend(self):
@@ -34,20 +33,6 @@ class GitPackageTest(unittest.TestCase):
             "CURL_CONFIG=/ports-sysroot/usr/bin/curl-config",
             make.call_args.kwargs["extra_opts"],
         )
-
-    def test_pedigree_raise_uses_translated_kill(self):
-        package = GitPackage(__file__)
-
-        self.assertEqual(package.patches({}, "/source"), ["pedigree-raise.diff"])
-
-        patch_path = pathlib.Path(__file__).parent / "patches" / (
-            "pedigree-raise.diff"
-        )
-        patch = patch_path.read_text(encoding="utf-8")
-
-        self.assertIn("+#ifdef __pedigree__", patch)
-        self.assertIn("+\treturn kill(getpid(), sig);", patch)
-        self.assertIn("+#define raise git_raise", patch)
 
     def test_postdeploy_omits_perl_watchman_sample(self):
         with tempfile.TemporaryDirectory() as deploydir:

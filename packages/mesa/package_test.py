@@ -87,9 +87,9 @@ class MesaPackageTest(unittest.TestCase):
             patch = patch_file.read()
 
         self.assertIn("DETECT_OS_PEDIGREE", patch)
-        self.assertIn("'memfd_create', 'posix_fallocate'", patch)
-        self.assertIn("host_machine.system() != 'pedigree'", patch)
-        self.assertIn("pedigree_unavailable_headers = ['sys/inotify.h']", patch)
+        self.assertNotIn("host_machine.system() != 'pedigree'", patch)
+        self.assertNotIn("pedigree_unavailable_functions", patch)
+        self.assertNotIn("pedigree_unavailable_headers", patch)
 
         blake3_assembly = (
             "blake3_avx2_x86-64_unix.S",

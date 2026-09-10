@@ -27,7 +27,7 @@ class BindPackage(buildsystem.Package):
         return ['zlib']
 
     def patches(self, env, srcdir):
-        return ['pedigree-truncate.diff']
+        return []
 
     def options(self):
         return self._options
@@ -46,23 +46,12 @@ class BindPackage(buildsystem.Package):
         # the normal target feature profile declares it. Select BIND's bundled
         # portable implementation instead.
         env['ac_cv_func_strcasestr'] = 'no'
-        # BIND retries sigwait() through several libraries after the normal
-        # function probe.  Musl exposes wrappers for these signal waits, but
-        # Pedigree cannot translate the backing syscalls yet.
-        env['ac_cv_func_sigwait'] = 'no'
-        env['ac_cv_lib_c_sigwait'] = 'no'
-        env['ac_cv_lib_pthread_sigwait'] = 'no'
-        env['ac_cv_lib_pthread__Psigwait'] = 'no'
-        env['ac_cv_lib_c_r_sigwait'] = 'no'
         steps.run_configure(
             self,
             srcdir,
             env,
             inplace=False,
             extra_config=(
-                # Pedigree does not yet implement sigwait() or sigsuspend().
-                # BIND's supported non-threaded event loop handles signals
-                # without either interface.
                 '--disable-threads',
                 '--disable-atomic',
                 '--disable-linux-caps',

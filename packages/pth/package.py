@@ -4,12 +4,7 @@ from support import steps
 
 UPSTREAM_VERSION = "2.0.7"
 
-DISABLED_REASON = (
-    "GNU Pth 2.0.7 calls sigpending() throughout its scheduler and "
-    "sigsuspend() both there and while bootstrapping signal-stack contexts. "
-    "Pedigree exports both functions only as ENOSYS stubs, and no active port "
-    "depends on Pth; replacing those calls with fake semantics is unsafe."
-)
+DISABLED_REASON = "No active port currently depends on GNU Pth 2.0.7."
 
 
 class PthPackage(buildsystem.Package):

@@ -13,20 +13,6 @@ class BashPackageTest(unittest.TestCase):
         self.assertEqual(package.version(), "5.3.15")
         self.assertEqual(package.release_version(), "5.3.15.1")
 
-    def test_global_sync_loadable_fails_without_removing_file_sync(self):
-        patch_path = os.path.join(
-            os.path.dirname(__file__),
-            "patches",
-            "pedigree-sync-loadable.diff",
-        )
-        with open(patch_path, encoding="utf-8") as patch_file:
-            patch = patch_file.read()
-
-        self.assertIn("+#ifdef __pedigree__", patch)
-        self.assertIn("+      errno = ENOSYS;", patch)
-        self.assertIn("+      return (EXECUTION_FAILURE);", patch)
-        self.assertNotIn("fsync", patch)
-
     def test_legacy_absolute_path_patch_is_not_applied(self):
         self.assertNotIn(
             "pedigree-bash.diff",

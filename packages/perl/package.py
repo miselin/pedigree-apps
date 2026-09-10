@@ -34,9 +34,7 @@ class PerlPackage(buildsystem.Package):
         return [
             "errno-cross.diff",
             "bootstrap-writable-dir.diff",
-            "pedigree-missing-syscalls.diff",
             "pedigree-thread-signal.diff",
-            "pedigree-truncate.diff",
         ]
 
     def options(self):

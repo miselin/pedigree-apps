@@ -26,7 +26,7 @@ class LibgmpPackage(buildsystem.Package):
         return []
 
     def patches(self, env, srcdir):
-        return ['pedigree-raise.diff']
+        return []
 
     def options(self):
         return self._options

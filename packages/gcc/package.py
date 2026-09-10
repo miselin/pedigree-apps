@@ -47,7 +47,6 @@ class GccPackage(buildsystem.Package):
         return [
             "pedigree-gcc.diff",
             "canadian-build-flags.diff",
-            "pedigree-filesystem.diff",
             "modules-madvise.diff",
         ]
 

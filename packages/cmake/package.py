@@ -24,7 +24,7 @@ class CmakePackage(buildsystem.Package):
         return self.build_requires()
 
     def patches(self, env, srcdir):
-        return ['libuv-pedigree.diff', 'pedigree-runtime-apis.diff']
+        return ['libuv-pedigree.diff']
 
     def options(self):
         return self._options
@@ -53,20 +53,7 @@ class CmakePackage(buildsystem.Package):
                 '-DCMAKE_DOC_DIR=share/doc/cmake-4.4',
                 '-DCMAKE_INFO_DIR=share/info',
                 '-DCMAKE_MAN_DIR=share/man',
-                # These libc entry points link but their backing syscalls are
-                # not translated by Pedigree yet.
-                '-DHAVE_EVENTFD=0',
-                '-DHAVE_FSETXATTR=0',
-                '-DHAVE_FSETXATTR_5=0',
-                '-DHAVE_FUTIMENS=0',
-                '-DHAVE_LCHMOD=0',
-                '-DHAVE_LCHOWN=0',
-                '-DHAVE_LUTIMES=0',
                 '-DHAVE_SENDMMSG=0',
-                '-DHAVE_UTIMENSAT=0',
-                # KWSys has separate link-only probes for these APIs.
-                '-DKWSYS_CXX_HAS_GETLOADAVG_COMPILED=0',
-                '-DKWSYS_CXX_HAS_UTIMENSAT_COMPILED=0',
             ),
         )
 

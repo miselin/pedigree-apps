@@ -17,7 +17,7 @@ class GdbmPackage(buildsystem.Package):
         return '1.26'
 
     def patches(self, env, srcdir):
-        return ['pedigree-timing.diff']
+        return []
 
     def options(self):
         return self._options

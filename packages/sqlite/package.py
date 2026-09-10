@@ -23,7 +23,7 @@ class Sqlite(buildsystem.Package):
         return []
 
     def patches(self, env, srcdir):
-        return ['pedigree-cli-syscalls.diff']
+        return []
 
     def options(self):
         return self._options
