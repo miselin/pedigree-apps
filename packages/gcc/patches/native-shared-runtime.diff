@@ -1,0 +1,85 @@
+diff --git a/gcc/config/pedigree.h b/gcc/config/pedigree.h
+--- a/gcc/config/pedigree.h
++++ b/gcc/config/pedigree.h
+@@ -48,0 +49,4 @@
++#if defined(HAVE_LD_EH_FRAME_HDR)
++#define LINK_EH_SPEC "%{!static|static-pie:--eh-frame-hdr} "
++#endif
++
+diff --git a/gcc/config.gcc b/gcc/config.gcc
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -1018,0 +1019 @@
++  tmake_file="$tmake_file t-slibgcc"
+diff --git a/gcc/configure b/gcc/configure
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -33648 +33648 @@
+-  *-linux-musl*)
++  *-linux-musl* | *-*-pedigree*)
+diff --git a/gcc/configure.ac b/gcc/configure.ac
+--- a/gcc/configure.ac
++++ b/gcc/configure.ac
+@@ -7146 +7146 @@
+-  *-linux-musl*)
++  *-linux-musl* | *-*-pedigree*)
+diff --git a/libgcc/config.host b/libgcc/config.host
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -308,0 +309,5 @@
++*-*-pedigree*)
++  tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip"
++  tmake_file="$tmake_file t-slibgcc t-slibgcc-gld t-slibgcc-elf-ver"
++  extra_parts="crtbegin.o crtbeginS.o crtbeginT.o crtend.o crtendS.o"
++  ;;
+@@ -759 +764,4 @@
+-x86_64-*-elf* | x86_64-*-pedigree* | x86_64-*-rtems*)
++x86_64-*-pedigree*)
++	tmake_file="$tmake_file i386/t-crtstuff t-slibgcc-libgcc"
++	;;
++x86_64-*-elf* | x86_64-*-rtems*)
+@@ -762,3 +769,0 @@
+-	  x86_64-*-pedigree*)
+-	    extra_parts="$extra_parts crtbegin.o crtbeginT.o crtend.o crtbeginS.o crtendS.o"
+-	    ;;
+diff --git a/libgcc/crtstuff.c b/libgcc/crtstuff.c
+--- a/libgcc/crtstuff.c
++++ b/libgcc/crtstuff.c
+@@ -101,0 +102,9 @@
++#include <link.h>
++# define USE_PT_GNU_EH_FRAME
++#endif
++
++#if defined(OBJECT_FORMAT_ELF) \
++    && !defined(OBJECT_FORMAT_FLAT) \
++    && defined(HAVE_LD_EH_FRAME_HDR) && defined(TARGET_DL_ITERATE_PHDR) \
++    && !defined(inhibit_libc) && !defined(CRTSTUFFT_O) \
++    && defined(__pedigree__)
+diff --git a/libgcc/unwind-dw2-fde-dip.c b/libgcc/unwind-dw2-fde-dip.c
+--- a/libgcc/unwind-dw2-fde-dip.c
++++ b/libgcc/unwind-dw2-fde-dip.c
+@@ -62 +62 @@
+-    && defined(__linux__)
++    && (defined(__linux__) || defined(__pedigree__))
+diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
+--- a/libstdc++-v3/configure
++++ b/libstdc++-v3/configure
+@@ -15803,0 +15804,7 @@
++# Canadian builds can use a static-only compiler; keep one shared unwinder.
++case "${host}:${enable_shared}" in
++  *-*-pedigree*:yes)
++    postdeps_CXX="-lgcc_s $postdeps_CXX"
++    ;;
++esac
++
+diff --git a/libstdc++-v3/configure.ac b/libstdc++-v3/configure.ac
+--- a/libstdc++-v3/configure.ac
++++ b/libstdc++-v3/configure.ac
+@@ -158,0 +159,7 @@
++
++# Canadian builds can use a static-only compiler; keep one shared unwinder.
++case "${host}:${enable_shared}" in
++  *-*-pedigree*:yes)
++    postdeps_CXX="-lgcc_s $postdeps_CXX"
++    ;;
++esac

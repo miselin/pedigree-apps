@@ -105,7 +105,10 @@ class GccPackageTest(unittest.TestCase):
                 "--with-%s=%s" % (dependency, dependency_prefix), command
             )
         self.assertIn("--disable-bootstrap", command)
-        self.assertIn("--disable-shared", command)
+        self.assertIn("--enable-shared", command)
+        self.assertIn("--enable-static", command)
+        self.assertIn("--enable-symvers=gnu", command)
+        self.assertNotIn("--disable-shared", command)
         self.assertIn("--enable-version-specific-runtime-libs", command)
         self.assertNotIn("--with-headers", command)
         self.assertEqual(command_env["CC_FOR_BUILD"], "/usr/bin/cc")
@@ -115,6 +118,8 @@ class GccPackageTest(unittest.TestCase):
         self.assertEqual(command_env["LDFLAGS_FOR_BUILD"], "")
         self.assertEqual(command_env["CC_FOR_TARGET"], self.env["CROSS_CC"])
         self.assertEqual(command_env["GCC_FOR_TARGET"], self.env["CROSS_CC"])
+        self.assertEqual(command_env["gcc_cv_as"], self.env["CROSS_AS"])
+        self.assertEqual(command_env["gcc_cv_ld"], self.env["CROSS_LD"])
         self.assertTrue(command_env["CFLAGS_FOR_TARGET"].endswith(" -fPIC"))
         self.assertTrue(
             command_env["CXXFLAGS_FOR_TARGET"].endswith(" -fPIC")
@@ -122,6 +127,15 @@ class GccPackageTest(unittest.TestCase):
         self.assertEqual(
             command_env["CONFIG_SITE"], self.env["TARGET_CONFIG_SITE"]
         )
+        runtime_build = os.path.join(
+            srcdir, "pedigree-build", self.env["CROSS_TARGET"], "libgcc"
+        )
+        self.assertEqual(
+            command_env["LDFLAGS_FOR_TARGET"],
+            f"-L{runtime_build} -Wl,-rpath-link,{runtime_build} "
+            f"-Wl,--eh-frame-hdr {self.env['LDFLAGS']}",
+        )
+        self.assertEqual(command_env["LDFLAGS"], self.env["LDFLAGS"])
 
     def test_runtime_contract_includes_native_toolchain_and_math_libraries(self):
         expected = ["binutils", "libgmp", "libmpfr", "libmpc", "zlib"]
@@ -136,12 +150,19 @@ class GccPackageTest(unittest.TestCase):
         self.assertIn("--host=x86_64-pedigree", options[0])
         self.assertIn("--with-sysroot=/", options[0])
         self.assertIn("--enable-version-specific-runtime-libs", options[0])
+        self.assertIn("--enable-shared", options[0])
+        self.assertIn("--enable-static", options[0])
+        self.assertIn("--enable-symvers=gnu", options[0])
         self.assertNotIn("--with-gxx-include-dir", options[0])
         self.assertIn("--with-as=/usr/bin/as", options[0])
         self.assertNotIn(self.env["PORTS_SYSROOT"], options[0])
         self.assertNotIn(self.env["CROSS_BASE"], options[0])
 
     def test_patch_carries_current_musl_and_pedigree_contract(self):
+        self.assertEqual(
+            self.package.patches({}, "/source")[:2],
+            ["pedigree-gcc.diff", "native-shared-runtime.diff"],
+        )
         patch_path = os.path.join(
             os.path.dirname(__file__), "patches", "pedigree-gcc.diff"
         )
@@ -189,7 +210,21 @@ class GccPackageTest(unittest.TestCase):
         self.assertNotIn("ENOSYS", patch)
         self.assertNotIn("__pedigree__", patch)
 
-    def test_postdeploy_removes_libtool_metadata_and_requires_native_compiler(self):
+    @staticmethod
+    def _runtime_metadata(command, **kwargs):
+        soname = os.path.basename(command[-1])
+        prefix = "GLIBCXX_" if soname == "libstdc++.so.6" else "GCC_"
+        return (
+            " (SONAME) Library soname: [" + soname + "]\n"
+            " (NEEDED) Shared library: [libgcc_s.so.1]\n"
+            " Name: " + prefix + "3.4\n"
+        )
+
+    @mock.patch("packages.gcc.package.steps.cmd_output")
+    def test_postdeploy_removes_libtool_metadata_and_requires_native_compiler(
+        self, readelf
+    ):
+        readelf.side_effect = self._runtime_metadata
         with tempfile.TemporaryDirectory() as deploydir:
             bindir = os.path.join(deploydir, "usr", "bin")
             internal = os.path.join(
@@ -208,11 +243,26 @@ class GccPackageTest(unittest.TestCase):
                 "libstdc++.a",
                 "libstdc++exp.a",
                 "libsupc++.a",
-                "libstdc++.a-gdb.py",
+                "libgcc.a",
+                "libgcc_eh.a",
+                "libgcc_s.so.1",
+                "libstdc++.so.6.0.34",
+                "libstdc++.so.6.0.34-gdb.py",
                 "libstdc++.modules.json",
             )
             for name in ("cc1", "cc1plus", "liblto_plugin.so") + runtimes:
                 open(os.path.join(internal, name), "wb").close()
+            for name, target in (
+                ("libstdc++.so", "libstdc++.so.6.0.34"),
+                ("libstdc++.so.6", "libstdc++.so.6.0.34"),
+            ):
+                os.symlink(target, os.path.join(internal, name))
+            linker_script = os.path.join(internal, "libgcc_s.so")
+            with open(linker_script, "w", encoding="utf-8") as script:
+                script.write("/* GNU ld script */\nGROUP ( libgcc_s.so.1 -lgcc )\n")
+            legacy = os.path.join(deploydir, "usr", "lib", "libstdc++.so")
+            with open(legacy, "wb") as old_runtime:
+                old_runtime.write(b"legacy runtime")
             include = os.path.join(internal, "include", "c++")
             headers = (
                 "algorithm",
@@ -240,6 +290,15 @@ class GccPackageTest(unittest.TestCase):
             self.package.postdeploy(self.env, "/source", deploydir)
 
             self.assertFalse(os.path.exists(archive))
+            with open(legacy, "rb") as old_runtime:
+                self.assertEqual(old_runtime.read(), b"legacy runtime")
+            for soname in ("libgcc_s.so.1", "libstdc++.so.6"):
+                public = os.path.join(deploydir, "usr", "lib", soname)
+                self.assertEqual(
+                    os.readlink(public),
+                    "gcc/x86_64-pedigree/15.3.0/" + soname,
+                )
+                self.assertTrue(os.path.isfile(public))
 
             for name in headers:
                 with self.subTest(missing_header=name):
@@ -255,14 +314,53 @@ class GccPackageTest(unittest.TestCase):
             for name in runtimes:
                 with self.subTest(unversioned_runtime=name):
                     private = os.path.join(internal, name)
-                    public = os.path.join(deploydir, "usr", "lib", name)
+                    public = os.path.join(deploydir, name)
                     os.rename(private, public)
                     with self.assertRaises(RuntimeError) as failure:
                         self.package.postdeploy(self.env, "/source", deploydir)
-                    self.assertIn(
-                        os.path.relpath(private, deploydir), str(failure.exception)
-                    )
+                    self.assertIn("not installed", str(failure.exception))
                     os.rename(public, private)
+
+            for description, metadata, expected in (
+                (
+                    "SONAME",
+                    " (SONAME) [libstdc++.so]\n Name: GLIBCXX_3.4\n",
+                    "SONAME",
+                ),
+                (
+                    "symbol versions",
+                    " (SONAME) [libstdc++.so.6]\n",
+                    "symbol versions",
+                ),
+                (
+                    "shared unwinder",
+                    " (SONAME) [libstdc++.so.6]\n Name: GLIBCXX_3.4\n",
+                    "depend on shared",
+                ),
+            ):
+                with self.subTest(missing=description):
+                    readelf.side_effect = lambda command, **kwargs: (
+                        metadata if command[-1].endswith("libstdc++.so.6")
+                        else self._runtime_metadata(command)
+                    )
+                    with self.assertRaisesRegex(RuntimeError, expected):
+                        self.package.postdeploy(self.env, "/source", deploydir)
+            readelf.side_effect = self._runtime_metadata
+
+            with open(linker_script, "w", encoding="utf-8") as script:
+                script.write("GROUP ( -lgcc )\n")
+            with self.assertRaisesRegex(RuntimeError, "libgcc_s.so linker script"):
+                self.package.postdeploy(self.env, "/source", deploydir)
+            with open(linker_script, "w", encoding="utf-8") as script:
+                script.write("GROUP ( libgcc_s.so.1 -lgcc )\n")
+
+            public = os.path.join(deploydir, "usr", "lib", "libgcc_s.so.1")
+            os.unlink(public)
+            with open(public, "wb") as stale_runtime:
+                stale_runtime.write(b"stale runtime")
+            with self.assertRaisesRegex(RuntimeError, "conflicting GCC runtime"):
+                self.package.postdeploy(self.env, "/source", deploydir)
+            os.unlink(public)
 
             with open(
                 os.path.join(plugin_include, "configargs.h"),

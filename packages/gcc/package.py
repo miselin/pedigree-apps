@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 
 from support import buildsystem
@@ -50,6 +51,7 @@ class GccPackage(buildsystem.Package):
     def patches(self, env, srcdir):
         return [
             "pedigree-gcc.diff",
+            "native-shared-runtime.diff",
             "canadian-build-flags.diff",
             "modules-madvise.diff",
         ]
@@ -69,10 +71,8 @@ class GccPackage(buildsystem.Package):
         )
 
     def prebuild(self, env, srcdir):
-        # GCC's LTO plugin is a host shared object even when target libgcc and
-        # libstdc++ remain static. Generated Libtool fragments otherwise treat
-        # Pedigree as a platform without shared-library support and silently
-        # omit liblto_plugin.so.
+        # Generated Libtool fragments otherwise silently omit Pedigree DSOs,
+        # including the LTO plugin and the native C++ runtime.
         steps.patch_libtool_configure(srcdir)
 
     def _native_tool(self, name):
@@ -83,10 +83,13 @@ class GccPackage(buildsystem.Package):
             )
         return path
 
-    def _canadian_environment(self, env):
+    def _canadian_environment(self, env, srcdir):
         # The existing cross compiler builds the Pedigree-hosted compiler and
         # its target libraries. Build generators must stay Linux-native.
         command_env = env.copy()
+        runtime_build = os.path.join(
+            steps.get_builddir(srcdir, env, False), env["CROSS_TARGET"], "libgcc"
+        )
         command_env.update(
             {
                 "AR_FOR_BUILD": self._native_tool("ar"),
@@ -103,17 +106,25 @@ class GccPackage(buildsystem.Package):
                 "CXX_FOR_TARGET": env["CROSS_CXX"],
                 "GCC_FOR_TARGET": env["CROSS_CC"],
                 "LD_FOR_TARGET": env["CROSS_LD"],
+                # Probe the target tools, not Linux's /usr/bin tools named by
+                # the installed compiler's --with-as/--with-ld settings.
+                "gcc_cv_as": env["CROSS_AS"],
+                "gcc_cv_ld": env["CROSS_LD"],
                 "NM_FOR_TARGET": os.path.join(
                     env["CROSS_BASE"],
                     "bin",
                     env["CROSS_TARGET"] + "-nm",
                 ),
                 "RANLIB_FOR_TARGET": env["CROSS_RANLIB"],
-                # libgcc and libstdc++ are intentionally static, but Pedigree
-                # DSOs consume them, so retain the r2 bootstrap's PIC contract.
+                # Static archives can also be consumed by Pedigree DSOs.
                 "CFLAGS_FOR_TARGET": env["CROSS_CFLAGS"] + " -fPIC",
                 "CXXFLAGS_FOR_TARGET": env["CROSS_CXXFLAGS"] + " -fPIC",
-                "LDFLAGS_FOR_TARGET": env["LDFLAGS"],
+                # The bootstrap compiler has no shared libgcc. Both configure
+                # probes and the C++ runtime link must find this build's copy.
+                "LDFLAGS_FOR_TARGET": (
+                    f"-L{runtime_build} -Wl,-rpath-link,{runtime_build} "
+                    f"-Wl,--eh-frame-hdr {env['LDFLAGS']}"
+                ),
                 "CONFIG_SITE": env["TARGET_CONFIG_SITE"],
             }
         )
@@ -135,6 +146,9 @@ class GccPackage(buildsystem.Package):
                 "--enable-languages=c,c++",
                 "--enable-threads=posix",
                 "--enable-version-specific-runtime-libs",
+                "--enable-shared",
+                "--enable-static",
+                "--enable-symvers=gnu",
                 "--enable-lto",
                 "--disable-multilib",
                 "--disable-nls",
@@ -143,7 +157,7 @@ class GccPackage(buildsystem.Package):
         return ("TOPLEVEL_CONFIGURE_ARGUMENTS=" + target_configuration,)
 
     def configure(self, env, srcdir):
-        command_env = self._canadian_environment(env)
+        command_env = self._canadian_environment(env, srcdir)
         build_triplet = steps.cmd_output(
             [os.path.join(srcdir, "config.guess")],
             cwd=srcdir,
@@ -187,8 +201,9 @@ class GccPackage(buildsystem.Package):
                 "--disable-libstdcxx-pch",
                 "--disable-multilib",
                 "--disable-nls",
-                "--disable-shared",
+                "--enable-shared",
                 "--enable-static",
+                "--enable-symvers=gnu",
                 "--disable-werror",
                 "--without-newlib",
             ],
@@ -197,7 +212,7 @@ class GccPackage(buildsystem.Package):
         )
 
     def build(self, env, srcdir):
-        command_env = self._canadian_environment(env)
+        command_env = self._canadian_environment(env, srcdir)
         for target in self.BUILD_TARGETS:
             steps.make(
                 srcdir,
@@ -208,7 +223,7 @@ class GccPackage(buildsystem.Package):
             )
 
     def deploy(self, env, srcdir, deploydir):
-        command_env = self._canadian_environment(env)
+        command_env = self._canadian_environment(env, srcdir)
         command_env["DESTDIR"] = deploydir
         for target in self.INSTALL_TARGETS:
             steps.make(
@@ -229,6 +244,9 @@ class GccPackage(buildsystem.Package):
             "usr", "lib", "gcc", env["CROSS_TARGET"], SOURCE_VERSION
         )
         include = os.path.join(runtime, "include", "c++")
+        cxx_shared = os.path.realpath(
+            os.path.join(deploydir, runtime, "libstdc++.so.6")
+        )
         required = (
             os.path.join("usr", "bin", "gcc"),
             os.path.join("usr", "bin", "g++"),
@@ -241,7 +259,13 @@ class GccPackage(buildsystem.Package):
             os.path.join(runtime, "libstdc++.a"),
             os.path.join(runtime, "libstdc++exp.a"),
             os.path.join(runtime, "libsupc++.a"),
-            os.path.join(runtime, "libstdc++.a-gdb.py"),
+            os.path.join(runtime, "libgcc.a"),
+            os.path.join(runtime, "libgcc_eh.a"),
+            os.path.join(runtime, "libgcc_s.so"),
+            os.path.join(runtime, "libgcc_s.so.1"),
+            os.path.join(runtime, "libstdc++.so"),
+            os.path.join(runtime, "libstdc++.so.6"),
+            os.path.join(runtime, os.path.basename(cxx_shared) + "-gdb.py"),
             os.path.join(runtime, "libstdc++.modules.json"),
             os.path.join(runtime, "plugin", "include", "configargs.h"),
         )
@@ -273,3 +297,56 @@ class GccPackage(buildsystem.Package):
                 "installed GCC configuration contains build paths: %s"
                 % ", ".join(leaked)
             )
+
+        readelf = os.path.join(
+            env["CROSS_BASE"], "bin", env["CROSS_TARGET"] + "-readelf"
+        )
+        private_root = os.path.realpath(os.path.join(deploydir, runtime))
+        for soname, link_name, version_prefix in (
+            ("libgcc_s.so.1", "libgcc_s.so", "GCC_"),
+            ("libstdc++.so.6", "libstdc++.so", "GLIBCXX_"),
+        ):
+            library = os.path.join(deploydir, runtime, soname)
+            resolved = os.path.realpath(library)
+            linker_file = os.path.realpath(
+                os.path.join(deploydir, runtime, link_name)
+            )
+            if any(
+                os.path.dirname(path) != private_root
+                for path in (resolved, linker_file)
+            ):
+                raise RuntimeError("invalid private GCC runtime links: " + soname)
+            if soname == "libgcc_s.so.1":
+                # Some arithmetic helpers exist only in libgcc.a. GCC supplies
+                # a GROUP script so shared links can still pull those helpers.
+                with open(linker_file, encoding="utf-8") as linker_script:
+                    if not re.search(
+                        r"GROUP\s*\(\s*libgcc_s\.so\.1\s+-lgcc\s*\)",
+                        linker_script.read(),
+                    ):
+                        raise RuntimeError("invalid libgcc_s.so linker script")
+            elif resolved != linker_file:
+                raise RuntimeError("invalid private GCC runtime links: " + soname)
+            metadata = steps.cmd_output(
+                [readelf, "-d", "-V", library], env=env, text=True
+            )
+            if not re.search(
+                r"\(SONAME\).*\[" + re.escape(soname) + r"\]", metadata
+            ):
+                raise RuntimeError("incorrect GCC runtime SONAME: " + soname)
+            if not re.search(r"Name: " + version_prefix + r"[0-9]", metadata):
+                raise RuntimeError("missing GCC runtime symbol versions: " + soname)
+            if soname == "libstdc++.so.6" and not re.search(
+                r"\(NEEDED\).*\[libgcc_s\.so\.1\]", metadata
+            ):
+                raise RuntimeError("libstdc++ must depend on shared libgcc_s.so.1")
+
+            # Musl searches /usr/lib; linker aliases and development files stay
+            # private so old unversioned C++ runtimes do not win native links.
+            public = os.path.join(deploydir, "usr", "lib", soname)
+            target = os.path.relpath(library, os.path.dirname(public))
+            if os.path.lexists(public):
+                if not os.path.islink(public) or os.readlink(public) != target:
+                    raise RuntimeError("conflicting GCC runtime: " + public)
+            else:
+                os.symlink(target, public)
