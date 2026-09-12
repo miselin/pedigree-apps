@@ -24,6 +24,7 @@ import logging
 import os
 import sys
 import tarfile
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 
@@ -35,6 +36,23 @@ log = logging.getLogger(__name__)
 
 class PackageResolutionError(Exception):
     pass
+
+
+class InstallTarFile(tarfile.TarFile):
+    def makefile(self, tarinfo, targetpath):
+        # Running programs retain the old inode, including pages faulted later.
+        # Publish only after the replacement has been completely written.
+        fd, temporary = tempfile.mkstemp(prefix=".pup-", dir=os.path.dirname(targetpath))
+        os.close(fd)
+        try:
+            super().makefile(tarinfo, temporary)
+            self.chown(tarinfo, temporary, numeric_owner=False)
+            self.chmod(tarinfo, temporary)
+            self.utime(tarinfo, temporary)
+            os.replace(temporary, targetpath)
+        finally:
+            if os.path.lexists(temporary):
+                os.unlink(temporary)
 
 
 def _resolve_packages(package_names, database, architecture, include_dependencies):
@@ -206,7 +224,7 @@ class InstallCommand(base.PupCommand):
                 return 1
 
             # Install.
-            with tarfile.open(package_file) as t:
+            with InstallTarFile.open(package_file) as t:
                 members = (
                     macos_safe_members(t, log) if sys.platform == "darwin" else None
                 )

@@ -1,5 +1,6 @@
 import hashlib
 import io
+import mmap
 import os
 import tarfile
 import tempfile
@@ -11,6 +12,42 @@ from . import install
 
 
 class InstallPackageCommandTest(unittest.TestCase):
+    def test_upgrade_preserves_open_executable_inode_and_mapping(self):
+        archive_bytes, contents = self.archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            target = os.path.join(temporary, "usr/share/example.txt")
+            os.makedirs(os.path.dirname(target))
+            old_contents = b"previous executable contents\n"
+            with open(target, "wb") as previous:
+                previous.write(old_contents)
+            os.chmod(target, 0o755)
+            with open(target, "rb") as running:
+                with mmap.mmap(running.fileno(), 0, access=mmap.ACCESS_READ) as mapped:
+                    with install.InstallTarFile.open(fileobj=io.BytesIO(archive_bytes)) as archive:
+                        archive.extractall(temporary)
+                    self.assertEqual(running.read(), old_contents)
+                    self.assertEqual(mapped[:], old_contents)
+                    self.assertNotEqual(os.fstat(running.fileno()).st_ino, os.stat(target).st_ino)
+            with open(target, "rb") as installed:
+                self.assertEqual(installed.read(), contents)
+            self.assertEqual(os.stat(target).st_mode & 0o777, 0o644)
+
+    def test_failed_replacement_keeps_previous_file_and_removes_temporary(self):
+        archive_bytes, _ = self.archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            target = os.path.join(temporary, "usr/share/example.txt")
+            parent = os.path.dirname(target)
+            os.makedirs(parent)
+            with open(target, "wb") as previous:
+                previous.write(b"previous contents")
+            with install.InstallTarFile.open(fileobj=io.BytesIO(archive_bytes)) as archive:
+                with mock.patch.object(install.os, "replace", side_effect=OSError("disk error")):
+                    with self.assertRaises(OSError):
+                        archive.extractall(temporary)
+            with open(target, "rb") as previous:
+                self.assertEqual(previous.read(), b"previous contents")
+            self.assertEqual(os.listdir(parent), ["example.txt"])
+
     def archive(self):
         output = io.BytesIO()
         contents = b"installed package\n"
