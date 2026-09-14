@@ -16,6 +16,9 @@ class DropbearPackage(buildsystem.Package):
     def version(self):
         return '2026.94'
 
+    def release_version(self):
+        return self.version() + '.1'
+
     def build_requires(self):
         return ['zlib']
 
@@ -45,7 +48,8 @@ class DropbearPackage(buildsystem.Package):
             extra_config=(
                 '--enable-zlib',
                 '--enable-bundled-libtom',
-                '--disable-openpty',
+                # musl exposes utmp interfaces as no-op compatibility stubs;
+                # keep accounting disabled until Pedigree implements it.
                 '--disable-lastlog',
                 '--disable-utmp',
                 '--disable-utmpx',

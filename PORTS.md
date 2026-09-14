@@ -35,7 +35,7 @@ List the active catalog or inspect a dependency closure without building:
 | bind | 9.11.37 | binutils | 2.46.1 | bsdtar | 3.8.9 |
 | ca-certificates | 2026.08.13 | cairo | 1.18.4 | cmake | 4.4.3 |
 | coreutils | 9.11 | curl | 8.22.0 | dialog | 1.3.20260721 |
-| diffutils | 3.12 | dropbear | 2026.94 | e2fsprogs | 1.47.4 |
+| diffutils | 3.12 | dropbear | 2026.94.1 | e2fsprogs | 1.47.4 |
 | expat | 2.8.4 | fontconfig | 2.18.3 | fribidi | 1.0.16 |
 | gawk | 5.4.1 | gcc | 15.3.0 | gdbm | 1.26 |
 | gettext | 1.0 | git | 2.55.0 | glib | 2.88.3 |
