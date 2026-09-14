@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 80 active Pedigree ports and 15 explicit disabled
+The current catalog contains 81 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -56,6 +56,7 @@ List the active catalog or inspect a dependency closure without building:
 | go | 1.26.5 | ripgrep | 15.2.0 | rust | 1.85.1 |
 | patch | 2.8 | | | |
 | abseil-cpp | 20250512.1 | protobuf | 35.0 | | |
+| git-lfs | 3.8.0 | | | | |
 | codex-app-server | 0.0.0.20260907 | codex-cli | 0.0.0.20260907 | codex | 0.0.0.20260907 |
 | v8 | 13.6.233.17 | codex-code-mode-host | 0.0.0.20260907 | | |
 
@@ -95,6 +96,11 @@ through Rust bindings 150.4.0; it has no Node.js or V8 13.6 runtime dependency.
 Build and qualification details are in
 [`docs/codex.md`](docs/codex.md) and
 [`docs/codex-code-mode-host.md`](docs/codex-code-mode-host.md).
+
+Git LFS 3.8.0 is built from the upstream vendored source release with the
+Pedigree Go toolchain. Its runtime closure includes Git, the system trust
+bundle, and the Dropbear SSH client. The PUP passes the artifact audit; target
+repository transfers remain unqualified.
 
 Python 3.14.7 replaces the disabled Python 2 recipe and also provides
 `/usr/bin/python` as a compatibility link.
