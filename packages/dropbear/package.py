@@ -17,13 +17,13 @@ class DropbearPackage(buildsystem.Package):
         return '2026.94'
 
     def release_version(self):
-        return self.version() + '.1'
+        return self.version() + '.2'
 
     def build_requires(self):
         return ['zlib']
 
     def install_deps(self):
-        return ['zlib']
+        return ['zlib', 'openssh-sftp-server']
 
     def patches(self, env, srcdir):
         return []

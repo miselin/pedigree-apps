@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 81 active Pedigree ports and 15 explicit disabled
+The current catalog contains 82 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -48,6 +48,7 @@ List the active catalog or inspect a dependency closure without building:
 | lynx | 2.9.3 | m4 | 1.4.21 | man-db | 2.13.1 |
 | mandoc | 1.14.6 | mesa | 25.0.7 | mtools | 4.0.49 |
 | nano | 9.2 | nasm | 3.02 | ncurses | 6.6 |
+| openssh-sftp-server | 10.5.1 | | | | |
 | openssl | 3.5.8 | pango | 1.58.2 | perl | 5.44.0.1 |
 | pixman | 0.46.4 | pup | 1.2 | python3 | 3.14.7 |
 | readline | 8.3.3 | sdl2 | 2.32.10 | sed | 4.10 |
