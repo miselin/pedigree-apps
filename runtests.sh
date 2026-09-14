@@ -47,6 +47,8 @@ python3 -m unittest -v \
     packages.mandoc.package_test \
     packages.mesa.package_test \
     packages.ncurses.package_test \
+    packages.openssh_client.package_test \
+    packages.openssh_sftp_server.package_test \
     packages.openssl.package_test \
     packages.perl.package_test \
     packages.pth.package_test \

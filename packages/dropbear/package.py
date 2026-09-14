@@ -3,6 +3,9 @@ from support import buildsystem
 from support import steps
 
 
+PROGRAMS = 'PROGRAMS=dropbear dbclient dropbearkey dropbearconvert'
+
+
 class DropbearPackage(buildsystem.Package):
 
     def __init__(self, *args, **kwargs):
@@ -17,7 +20,7 @@ class DropbearPackage(buildsystem.Package):
         return '2026.94'
 
     def release_version(self):
-        return self.version() + '.2'
+        return self.version() + '.3'
 
     def build_requires(self):
         return ['zlib']
@@ -66,7 +69,7 @@ class DropbearPackage(buildsystem.Package):
             srcdir,
             env,
             inplace=False,
-            extra_opts=('PROGRAMS=dropbear dbclient dropbearkey dropbearconvert scp',),
+            extra_opts=(PROGRAMS,),
         )
 
     def deploy(self, env, srcdir, deploydir):
@@ -76,5 +79,5 @@ class DropbearPackage(buildsystem.Package):
             env,
             target='install',
             inplace=False,
-            extra_opts=('PROGRAMS=dropbear dbclient dropbearkey dropbearconvert scp',),
+            extra_opts=(PROGRAMS,),
         )

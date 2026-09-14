@@ -1,6 +1,6 @@
 # Port status
 
-The current catalog contains 82 active Pedigree ports and 15 explicit disabled
+The current catalog contains 83 active Pedigree ports and 15 explicit disabled
 or deferred entries. An active entry is loadable by the package builder; it
 does not by itself claim a completed integrated build or successful execution
 on Pedigree.
@@ -35,7 +35,7 @@ List the active catalog or inspect a dependency closure without building:
 | bind | 9.11.37 | binutils | 2.46.1 | bsdtar | 3.8.9 |
 | ca-certificates | 2026.08.13 | cairo | 1.18.4 | cmake | 4.4.3 |
 | coreutils | 9.11 | curl | 8.22.0 | dialog | 1.3.20260721 |
-| diffutils | 3.12 | dropbear | 2026.94.1 | e2fsprogs | 1.47.4 |
+| diffutils | 3.12 | dropbear | 2026.94.3 | e2fsprogs | 1.47.4 |
 | expat | 2.8.4 | fontconfig | 2.18.3 | fribidi | 1.0.16 |
 | gawk | 5.4.1 | gcc | 15.3.0 | gdbm | 1.26 |
 | gettext | 1.0 | git | 2.55.0 | glib | 2.88.3 |
@@ -48,6 +48,7 @@ List the active catalog or inspect a dependency closure without building:
 | lynx | 2.9.3 | m4 | 1.4.21 | man-db | 2.13.1 |
 | mandoc | 1.14.6 | mesa | 25.0.7 | mtools | 4.0.49 |
 | nano | 9.2 | nasm | 3.02 | ncurses | 6.6 |
+| openssh-client | 10.5.1 | | | | |
 | openssh-sftp-server | 10.5.1 | | | | |
 | openssl | 3.5.8 | pango | 1.58.2 | perl | 5.44.0.1 |
 | pixman | 0.46.4 | pup | 1.2 | python3 | 3.14.7 |
@@ -126,6 +127,13 @@ only by unimplemented Pedigree libc stubs.
 
 The `ca-certificates` port installs the versioned Mozilla-derived trust bundle
 at `/etc/ssl/cert.pem` for the catalog's HTTPS clients.
+
+OpenSSH 10.5p1 is split at the client/server boundary. `openssh-client`
+provides `ssh`, modern `scp`, `sftp`, key tools, and the client-side agent,
+while `openssh-sftp-server` supplies Dropbear's external SFTP subsystem.
+Dropbear remains the packaged SSH daemon. PKCS#11, FIDO, setuid host-based
+authentication, and the OpenSSH daemon are deferred pending their own runtime
+and privilege-boundary qualification.
 
 Bootable images must install Bash and coreutils as the target script baseline
 before ordinary ports. This supplies `/usr/bin/bash`, `/usr/bin/env`, and the
